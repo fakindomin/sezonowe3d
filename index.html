@@ -404,26 +404,23 @@
 
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI + BILANS KOSZTÓW I ZYSKU) -->
+    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI + BILANS) -->
     <div id="admin-tab-hub" class="space-y-4">
       
       <!-- PEŁNY BILANS FINANSOWY -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <!-- 1. Przychód -->
         <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
           <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-800 block">Przychód (Zrealizowane)</span>
           <div class="text-2xl font-bold mt-1 text-emerald-700" id="stat-revenue">0,00 zł</div>
           <span class="text-[10px] text-stone-400" id="stat-completed-pieces">0 szt. figurek</span>
         </div>
 
-        <!-- 2. Koszty produkcji -->
         <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
           <span class="text-[10px] uppercase font-bold tracking-wider text-rose-800 block">Koszty produkcji</span>
           <div class="text-2xl font-bold mt-1 text-rose-700" id="stat-costs">0,00 zł</div>
           <span class="text-[10px] text-stone-400" id="stat-cost-breakdown">Plastik + Prąd</span>
         </div>
 
-        <!-- 3. Zysk na czysto -->
         <div class="p-4 rounded-3xl bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 shadow-sm border border-stone-700">
           <span class="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">Zysk na czysto</span>
           <div class="text-2xl font-bold mt-1 text-amber-200" id="stat-profit">0,00 zł</div>
@@ -432,7 +429,6 @@
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        <!-- 1. Zamówienia -->
         <button onclick="switchAdminTab('orders')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
             <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-sm">📦</span>
@@ -444,7 +440,6 @@
           </div>
         </button>
 
-        <!-- 2. Planer Stołu -->
         <button onclick="switchAdminTab('batcher')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
             <span class="w-7 h-7 rounded-xl bg-orange-100 text-orange-900 flex items-center justify-center text-sm">🖨️</span>
@@ -456,7 +451,6 @@
           </div>
         </button>
 
-        <!-- 3. Półka z nadwyżkami -->
         <button onclick="switchAdminTab('shelf')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
             <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-sm">🪑</span>
@@ -468,7 +462,6 @@
           </div>
         </button>
 
-        <!-- 4. Szpule AMS -->
         <button onclick="switchAdminTab('spools')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
             <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center text-sm">🧵</span>
@@ -480,7 +473,6 @@
           </div>
         </button>
 
-        <!-- 5. Ustawienia -->
         <button onclick="switchAdminTab('settings')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-800 flex items-center justify-center text-sm">⚙️</span>
           <div>
@@ -492,7 +484,7 @@
     </div>
 
 
-    <!-- WIDOK B: ZAMÓWIENIA -->
+    <!-- WIDOK B: ZAMÓWIENIA (DUŻE PRZYCISKI W PIONIE) -->
     <div id="admin-tab-orders" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <div>
@@ -504,7 +496,7 @@
         </button>
       </div>
 
-      <div id="orders-list-view" class="space-y-3"></div>
+      <div id="orders-list-view" class="space-y-4"></div>
     </div>
 
 
@@ -575,7 +567,7 @@
           <div id="specs-editor" class="space-y-3 divide-y divide-amber-900/10 text-xs"></div>
         </div>
 
-        <button onclick="saveSettingsAll()" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl font-bold text-xs transition">
+        <button onclick="saveSettingsAll()" class="w-full py-3.5 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl font-bold text-xs transition">
           Zapisz wszystkie parametry i koszty
         </button>
       </div>
@@ -625,7 +617,7 @@
       </div>
 
       <div class="flex gap-2 pt-2">
-        <button onclick="saveOrderEdits()" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs">
+        <button onclick="saveOrderEdits()" class="flex-1 py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs">
           Zapisz zmiany w zamówieniu
         </button>
       </div>
@@ -664,8 +656,8 @@
     };
 
     const DEFAULT_COSTS = {
-      filamentKg: 80, // zł / kg
-      energyKwh: 1.15 // zł / kWh
+      filamentKg: 80,
+      energyKwh: 1.15
     };
 
     const DEFAULT_SPOOLS = {
@@ -917,19 +909,19 @@
 
       currentEditingItems.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
+        row.className = "flex items-center justify-between py-1.5 border-b border-stone-200 last:border-0";
         row.innerHTML = `
           <div>
-            <span class="font-bold text-stone-800">${item.title}</span>
-            <span class="text-stone-500">(${item.color})</span>
+            <span class="font-bold text-stone-800 text-xs">${item.title}</span>
+            <span class="text-stone-500 text-[11px]">(${item.color})</span>
           </div>
           <div class="flex items-center gap-2">
-            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
-              <button type="button" onclick="changeEditItemQty(${index}, -1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">-</button>
-              <span class="w-5 text-center font-bold">${item.qty}</span>
-              <button type="button" onclick="changeEditItemQty(${index}, 1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">+</button>
+            <div class="flex items-center border border-stone-300 rounded-xl bg-white px-1">
+              <button type="button" onclick="changeEditItemQty(${index}, -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">-</button>
+              <span class="w-6 text-center font-bold text-xs">${item.qty}</span>
+              <button type="button" onclick="changeEditItemQty(${index}, 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">+</button>
             </div>
-            <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold px-1.5">✕</button>
+            <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold p-1 text-sm">✕</button>
           </div>
         `;
         container.appendChild(row);
@@ -1001,12 +993,10 @@
       });
       document.getElementById('badge-missing-parts').textContent = missingPieces;
 
-      // Półka
       const shelf = getShelf();
       const totalShelfItems = Object.values(shelf).reduce((acc, qty) => acc + qty, 0);
       document.getElementById('badge-shelf-count').textContent = totalShelfItems;
 
-      // Obliczanie Przychodów, Kosztów i Zysku ze ZREALIZOWANYCH
       const specs = getSpecs();
       const costs = getCosts();
 
@@ -1030,9 +1020,7 @@
         }
       });
 
-      // Koszt plastiku: gramy * (cena za kg / 1000)
       const costFilament = totalGramsPrinted * (costs.filamentKg / 1000);
-      // Koszt energii: godziny * 0.11 kWh * cena za 1 kWh
       const costEnergy = totalHoursPrinted * 0.11 * costs.energyKwh;
       const totalCosts = costFilament + costEnergy;
       const netProfit = totalRevenue - totalCosts;
@@ -1045,7 +1033,6 @@
 
       document.getElementById('stat-profit').textContent = `${netProfit.toFixed(2)} zł`;
 
-      // Alert o kończącym się filamencie
       const spools = getSpools();
       const alertContainer = document.getElementById('spool-alert-container');
       alertContainer.innerHTML = '';
@@ -1070,7 +1057,7 @@
     }
 
     // ==========================================
-    // WIDOK ZAMÓWIEŃ
+    // WIDOK ZAMÓWIEŃ (DUŻE, PIONOWE PRZYCISKI)
     // ==========================================
     function renderOrdersView() {
       const container = document.getElementById('orders-list-view');
@@ -1111,98 +1098,114 @@
         }
 
         let itemsHtml = items.map(item => `
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#faf6f0] border border-stone-200 text-xs text-stone-800">
-            <strong>${item.qty}x</strong> ${item.title} (${item.color})
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf6f0] border border-stone-200 text-xs text-stone-800 font-medium">
+            <strong class="font-bold text-amber-900">${item.qty}x</strong> ${item.title} (${item.color})
           </span>
         `).join(" ");
 
         let repeatBadge = isRepeat ? `
-          <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-red-800 border border-red-200 text-[11px] font-bold">
+          <div class="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-red-100 text-red-800 border border-red-200 text-xs font-bold">
             ⚠️ Powracający klient: Zamówienie złożone ${orderCount} raz!
           </div>
         ` : '';
 
         let notesHtml = order.notes && order.notes.trim() !== "" ? `
-          <div class="mt-2 text-xs bg-amber-50 border border-amber-200/80 rounded-xl p-2 text-amber-900">
-            💬 <strong>Info do zamówienia:</strong> ${order.notes}
+          <div class="mt-2 text-xs bg-amber-50 border border-amber-200/80 rounded-2xl p-3 text-amber-900">
+            💬 <strong>Uwagi:</strong> ${order.notes}
           </div>
         ` : '';
 
         let shelfNotice = shelfHints.length > 0 ? `
-          <div class="mt-2 text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-2 flex items-center justify-between">
-            <span>✨ <strong>Półka:</strong> Dostępne na stanie – nie musisz drukować! (${shelfHints.join(", ")})</span>
-            <button onclick="switchAdminTab('shelf')" class="underline font-bold ml-2">Wydaj z półki</button>
+          <div class="mt-2 text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl p-3 flex items-center justify-between">
+            <span>✨ <strong>Półka:</strong> Dostępne na stanie – nie drukuj! (${shelfHints.join(", ")})</span>
+            <button onclick="switchAdminTab('shelf')" class="underline font-bold ml-2">Wydaj</button>
           </div>
         ` : '';
 
         let badgeColor = 'bg-stone-200 text-stone-700';
-        let actionBtns = '';
+        let actionBlock = '';
 
         if (status === "W kolejce") {
           badgeColor = 'bg-amber-100 text-amber-900';
-          actionBtns = `
-            <div class="flex items-center gap-1.5 shrink-0">
-              <button onclick="openEditOrderModal('${order.id}')" class="px-2.5 py-1.5 bg-[#faf6f0] border border-stone-300 hover:bg-stone-200 rounded-xl text-xs font-semibold" title="Edytuj zamówienie">
-                ✏️
+          actionBlock = `
+            <div class="mt-4 pt-3 border-t border-amber-900/10 space-y-2">
+              <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl text-xs font-bold shadow-md shadow-orange-950/15 transition active:scale-[0.99] flex items-center justify-center gap-1.5">
+                <span>Wydrukowane (Przekaż do spakowania) →</span>
               </button>
-              <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold shadow-xs">
-                Wydrukowane →
-              </button>
-              <button onclick="cancelOrderWithLogic('${order.id}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-semibold" title="Anuluj">
-                ✕
-              </button>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 bg-[#faf6f0] hover:bg-stone-200 border border-stone-300 text-stone-800 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
+                  ✏️ Edytuj zamówienie
+                </button>
+                <button onclick="cancelOrderWithLogic('${order.id}')" class="py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
+                  ✕ Anuluj zamówienie
+                </button>
+              </div>
             </div>
           `;
         } else if (isToPack) {
           badgeColor = 'bg-orange-100 text-orange-900 border border-orange-300';
-          actionBtns = `
-            <div class="flex items-center gap-1.5 shrink-0">
-              <button onclick="openEditOrderModal('${order.id}')" class="px-2.5 py-1.5 bg-[#faf6f0] border border-stone-300 hover:bg-stone-200 rounded-xl text-xs font-semibold" title="Edytuj zamówienie">
-                ✏️
+          actionBlock = `
+            <div class="mt-4 pt-3 border-t border-amber-900/10 space-y-2">
+              <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md shadow-emerald-950/15 transition active:scale-[0.99] flex items-center justify-center gap-1.5">
+                <span>✓ Wydane / Odebrane (Zakończ zamówienie)</span>
               </button>
-              <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-xs">
-                ✓ Wydane (Zamknij)
-              </button>
-              <button onclick="cancelOrderWithLogic('${order.id}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-semibold" title="Anuluj">
-                ✕
-              </button>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 bg-[#faf6f0] hover:bg-stone-200 border border-stone-300 text-stone-800 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
+                  ✏️ Edytuj zamówienie
+                </button>
+                <button onclick="cancelOrderWithLogic('${order.id}')" class="py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
+                  ✕ Anuluj zamówienie
+                </button>
+              </div>
             </div>
           `;
         } else if (isCanceled) {
           badgeColor = 'bg-rose-100 text-rose-800 line-through';
-          actionBtns = `
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs text-rose-600 font-bold">Anulowane</span>
-              <button onclick="deleteOrderPermanently('${order.id}')" class="text-xs text-stone-400 hover:text-stone-700 underline" title="Usuń trwale z bazy">
-                Usuń z bazy
+          actionBlock = `
+            <div class="mt-4 pt-3 border-t border-amber-900/10 flex items-center justify-between">
+              <span class="text-xs text-rose-600 font-bold">Zamówienie zostało anulowane</span>
+              <button onclick="deleteOrderPermanently('${order.id}')" class="text-xs font-semibold text-rose-700 hover:text-rose-900 underline">
+                Trwale usuń z bazy
               </button>
             </div>
           `;
         } else {
           badgeColor = 'bg-emerald-100 text-emerald-800';
-          actionBtns = `<span class="text-xs text-emerald-700 font-bold">Zrealizowane ✓</span>`;
+          actionBlock = `
+            <div class="mt-4 pt-3 border-t border-amber-900/10 flex items-center justify-between text-xs">
+              <span class="text-emerald-700 font-bold">Zrealizowane pomyślnie ✓</span>
+              <button onclick="deleteOrderPermanently('${order.id}')" class="text-stone-400 hover:text-stone-700 underline text-[11px]">
+                Usuń wpis z bazy
+              </button>
+            </div>
+          `;
         }
 
         const card = document.createElement("div");
-        card.className = `p-4 rounded-3xl border transition ${isDone || isCanceled ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
+        card.className = `p-5 rounded-3xl border transition ${isDone || isCanceled ? 'bg-stone-100/90 border-stone-200 opacity-65' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
         card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
-                <span class="text-xs font-semibold text-stone-700">${order.customer}</span>
-                <span class="text-xs text-stone-500">(${order.contact})</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${status}</span>
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="font-bold text-stone-900 text-base">#ZAM-${order.id}</span>
+                <h4 class="font-bold text-sm text-stone-800 mt-0.5">${order.customer}</h4>
+                <p class="text-xs text-stone-500">${order.contact}</p>
               </div>
-              ${repeatBadge}
-              ${notesHtml}
-              ${shelfNotice}
+              <span class="text-xs px-3 py-1 rounded-full font-bold ${badgeColor}">${status}</span>
             </div>
-            ${actionBtns}
+            ${repeatBadge}
+            ${notesHtml}
+            ${shelfNotice}
           </div>
-          <div class="mt-3 flex flex-wrap gap-1.5">
-            ${itemsHtml}
+
+          <div class="mt-3.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1.5">Zamówione figurki:</span>
+            <div class="flex flex-wrap gap-1.5">
+              ${itemsHtml}
+            </div>
           </div>
+
+          ${actionBlock}
         `;
         container.appendChild(card);
       });
