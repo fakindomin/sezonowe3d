@@ -406,68 +406,90 @@
     <!-- ALERT O KOŃCZĄCYM SIĘ FILAMENCIE -->
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI) -->
+    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI + PODSUMOWANIE FINANSOWE) -->
     <div id="admin-tab-hub" class="space-y-4">
-      <div class="bg-gradient-to-br from-amber-100/70 to-orange-50 p-4 rounded-3xl border border-amber-900/10">
-        <h3 class="font-bold text-lg text-stone-900">Witaj w pracowni!</h3>
-        <p class="text-xs text-stone-600 mt-0.5">Wspólna baza Supabase aktywna w czasie rzeczywistym.</p>
+      
+      <!-- PODSUMOWANIE FINANSOWE I PRACY -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-4 rounded-3xl bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 shadow-sm border border-stone-700">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">Zrealizowany przychód</span>
+          <div class="text-2xl font-bold mt-1 text-amber-200" id="stat-revenue">0,00 zł</div>
+          <span class="text-[10px] text-stone-400">z odebranych zamówień</span>
+        </div>
+        <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-amber-900/60 block">Wydane figurki</span>
+          <div class="text-2xl font-bold mt-1 text-stone-900" id="stat-completed-pieces">0 szt.</div>
+          <span class="text-[10px] text-stone-400">zakończone realizacje</span>
+        </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <!-- Przycisk Zamówienia -->
-        <button onclick="switchAdminTab('orders')" class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-32">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        <!-- 1. Zamówienia -->
+        <button onclick="switchAdminTab('orders')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-lg">📦</span>
-            <span id="badge-active-orders" class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-600 text-white">0</span>
+            <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-sm">📦</span>
+            <span id="badge-active-orders" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-orange-600 text-white">0</span>
           </div>
           <div>
-            <h4 class="font-bold text-sm text-stone-900">Zamówienia</h4>
-            <p class="text-[10px] text-stone-500">Klienci i uwagi</p>
+            <h4 class="font-bold text-xs text-stone-900">Zamówienia</h4>
+            <p class="text-[9px] text-stone-400">Druk & Pakowanie</p>
           </div>
         </button>
 
-        <!-- Przycisk Planer Stołu -->
-        <button onclick="switchAdminTab('batcher')" class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-32">
+        <!-- 2. Planer Stołu -->
+        <button onclick="switchAdminTab('batcher')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-orange-100 text-orange-900 flex items-center justify-center text-lg">🖨️</span>
-            <span id="badge-missing-parts" class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">0</span>
+            <span class="w-7 h-7 rounded-xl bg-orange-100 text-orange-900 flex items-center justify-center text-sm">🖨️</span>
+            <span id="badge-missing-parts" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900">0</span>
           </div>
           <div>
-            <h4 class="font-bold text-sm text-stone-900">Planer Stołu</h4>
-            <p class="text-[10px] text-stone-500">Optymalizacja P1S</p>
+            <h4 class="font-bold text-xs text-stone-900">Planer</h4>
+            <p class="text-[9px] text-stone-400">Stoły P1S</p>
           </div>
         </button>
 
-        <!-- Przycisk Szpule / Magazyn -->
-        <button onclick="switchAdminTab('spools')" class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-32">
+        <!-- 3. Półka z nadwyżkami -->
+        <button onclick="switchAdminTab('shelf')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center text-lg">🧵</span>
-            <span id="badge-spool-alert" class="hidden w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+            <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-sm">🪑</span>
+            <span id="badge-shelf-count" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-800">0</span>
           </div>
           <div>
-            <h4 class="font-bold text-sm text-stone-900">Szpule AMS</h4>
-            <p class="text-[10px] text-stone-500">Stany filamentu</p>
+            <h4 class="font-bold text-xs text-stone-900">Półka</h4>
+            <p class="text-[9px] text-stone-400">Nadwyżki</p>
           </div>
         </button>
 
-        <!-- Przycisk Ustawienia -->
-        <button onclick="switchAdminTab('settings')" class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-32">
-          <span class="w-8 h-8 rounded-xl bg-stone-100 text-stone-800 flex items-center justify-center text-lg">⚙️</span>
+        <!-- 4. Szpule AMS -->
+        <button onclick="switchAdminTab('spools')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
+          <div class="flex items-center justify-between w-full">
+            <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center text-sm">🧵</span>
+            <span id="badge-spool-alert" class="hidden w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          </div>
           <div>
-            <h4 class="font-bold text-sm text-stone-900">Ustawienia</h4>
-            <p class="text-[10px] text-stone-500">Czasy i wagi</p>
+            <h4 class="font-bold text-xs text-stone-900">Szpule</h4>
+            <p class="text-[9px] text-stone-400">Stany w AMS</p>
+          </div>
+        </button>
+
+        <!-- 5. Ustawienia -->
+        <button onclick="switchAdminTab('settings')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
+          <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-800 flex items-center justify-center text-sm">⚙️</span>
+          <div>
+            <h4 class="font-bold text-xs text-stone-900">Ustawienia</h4>
+            <p class="text-[9px] text-stone-400">Czasy i wagi</p>
           </div>
         </button>
       </div>
     </div>
 
 
-    <!-- WIDOK B: ZAMÓWIENIA -->
+    <!-- WIDOK B: ZAMÓWIENIA (3 ETAPY) -->
     <div id="admin-tab-orders" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="font-bold text-lg text-stone-900">Zarządzanie Zamówieniami</h3>
-          <p class="text-xs text-stone-500">Dane w chmurze Supabase</p>
+          <p class="text-xs text-stone-500">Obieg: W kolejce $\rightarrow$ Do spakowania $\rightarrow$ Zrealizowane</p>
         </div>
         <button onclick="fetchOrdersFromCloud()" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#faf6f0] border border-stone-200 hover:bg-stone-200">
           🔄 Odśwież
@@ -492,7 +514,20 @@
     </div>
 
 
-    <!-- WIDOK D: STAN SZPULE FILAMENTU (AMS) -->
+    <!-- WIDOK D: PÓŁKA Z NADWYŻKAMI (MAGAZYN BUFOROWY) -->
+    <div id="admin-tab-shelf" class="space-y-4 hidden">
+      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
+        <div>
+          <h3 class="font-bold text-lg text-stone-900">Półka z nadwyżkami (Bufor)</h3>
+          <p class="text-xs text-stone-500">Gotowe elementy wydrukowane na zapas. Zmniejszają kolejkę druku w nowych zamówieniach.</p>
+        </div>
+
+        <div id="shelf-items-list" class="space-y-2.5"></div>
+      </div>
+    </div>
+
+
+    <!-- WIDOK E: STAN SZPULE FILAMENTU (AMS) -->
     <div id="admin-tab-spools" class="space-y-4 hidden">
       <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
         <div>
@@ -505,7 +540,7 @@
     </div>
 
 
-    <!-- WIDOK E: USTAWIENIA PARAMETRÓW DRUKU -->
+    <!-- WIDOK F: USTAWIENIA PARAMETRÓW DRUKU -->
     <div id="admin-tab-settings" class="space-y-4 hidden">
       <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
         <div>
@@ -534,8 +569,16 @@
     let cloudOrders = [];
 
     // ==========================================
-    // SPECS & SZPULE FILAMENTU
+    // BAZA: CENY, PARAMETRY, PÓŁKA I SZPULE
     // ==========================================
+    const PRICES = {
+      'Dynia': 10,
+      'Lisek': 5,
+      'Wiewiórka': 5,
+      'Taca': 10,
+      'Orzeszki laskowe (9 szt.)': 10
+    };
+
     const DEFAULT_SPECS = {
       'Dynia': { weight: 42, hours: 1.7 },
       'Lisek': { weight: 55, hours: 2.2 },
@@ -568,6 +611,15 @@
 
     function saveSpools(spools) {
       localStorage.setItem("bambu_spools", JSON.stringify(spools));
+    }
+
+    function getShelf() {
+      const data = localStorage.getItem("bambu_shelf");
+      return data ? JSON.parse(data) : {};
+    }
+
+    function saveShelf(shelf) {
+      localStorage.setItem("bambu_shelf", JSON.stringify(shelf));
     }
 
     const ADMIN_PASSWORD = "bambu123";
@@ -619,7 +671,7 @@
     }
 
     function switchAdminTab(tabName) {
-      const tabs = ['hub', 'orders', 'batcher', 'spools', 'settings'];
+      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'settings'];
       tabs.forEach(t => {
         const el = document.getElementById(`admin-tab-${t}`);
         if (el) el.classList.add('hidden');
@@ -638,11 +690,14 @@
       } else {
         backBtn.classList.remove('hidden');
         if (tabName === 'orders') {
-          title.textContent = "Zamówienia (Chmura)";
+          title.textContent = "Zamówienia";
           renderOrdersView();
         } else if (tabName === 'batcher') {
           title.textContent = "Planer Stołu P1S";
           renderBatcherView();
+        } else if (tabName === 'shelf') {
+          title.textContent = "Półka z nadwyżkami";
+          renderShelfView();
         } else if (tabName === 'spools') {
           title.textContent = "Szpule Filamentu";
           renderSpoolsView();
@@ -667,6 +722,7 @@
         if (error) throw error;
         cloudOrders = data || [];
         updateHubStats();
+
         if (!document.getElementById('admin-tab-orders').classList.contains('hidden')) {
           renderOrdersView();
         }
@@ -674,15 +730,15 @@
           renderBatcherView();
         }
       } catch (err) {
-        console.error("Błąd pobierania zamówień:", err.message);
+        console.error("Błąd pobierania:", err.message);
       }
     }
 
-    async function markOrderDone(orderId) {
+    async function updateOrderStatus(orderId, newStatus) {
       try {
         const { error } = await supabaseClient
           .from('orders')
-          .update({ status: 'Zrealizowane' })
+          .update({ status: newStatus })
           .eq('id', orderId);
 
         if (error) throw error;
@@ -693,20 +749,43 @@
     }
 
     // ==========================================
-    // LOGIKA ADMINA & POWIADOMIENIA O SZPULACH
+    // LOGIKA ADMINA & STATYSTYKI FINANSOWE
     // ==========================================
     function updateHubStats() {
-      const activeCount = cloudOrders.filter(o => o.status !== "Zrealizowane").length;
-      document.getElementById('badge-active-orders').textContent = activeCount;
+      const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane");
+      document.getElementById('badge-active-orders').textContent = activeOrders.length;
 
       let missingPieces = 0;
-      cloudOrders.forEach(o => {
-        if (o.status !== "Zrealizowane") {
+      activeOrders.forEach(o => {
+        if (o.status === "W kolejce") {
           const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
           items.forEach(i => missingPieces += i.qty);
         }
       });
       document.getElementById('badge-missing-parts').textContent = missingPieces;
+
+      // Półka: suma sztuk
+      const shelf = getShelf();
+      const totalShelfItems = Object.values(shelf).reduce((acc, qty) => acc + qty, 0);
+      document.getElementById('badge-shelf-count').textContent = totalShelfItems;
+
+      // Statystyki finansowe ze zrealizowanych
+      let totalRevenue = 0;
+      let totalPiecesCompleted = 0;
+
+      cloudOrders.forEach(o => {
+        if (o.status === "Zrealizowane") {
+          const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
+          items.forEach(item => {
+            const price = PRICES[item.title] || 10;
+            totalRevenue += price * item.qty;
+            totalPiecesCompleted += item.qty;
+          });
+        }
+      });
+
+      document.getElementById('stat-revenue').textContent = `${totalRevenue.toFixed(2)} zł`;
+      document.getElementById('stat-completed-pieces').textContent = `${totalPiecesCompleted} szt.`;
 
       // Sprawdzanie poziomu szpul (< 150g)
       const spools = getSpools();
@@ -732,6 +811,9 @@
       else badgeSpool.classList.add('hidden');
     }
 
+    // ==========================================
+    // WIDOK ZAMÓWIEŃ (3 ETAPY)
+    // ==========================================
     function renderOrdersView() {
       const container = document.getElementById('orders-list-view');
       container.innerHTML = "";
@@ -741,6 +823,7 @@
         return;
       }
 
+      const shelf = getShelf();
       const customerCounts = {};
       cloudOrders.forEach(o => {
         const key = (o.contact || o.customer || "").trim().toLowerCase();
@@ -748,12 +831,27 @@
       });
 
       cloudOrders.forEach(order => {
-        const isDone = order.status === "Zrealizowane";
+        const status = order.status || "W kolejce";
+        const isDone = status === "Zrealizowane";
+        const isToPack = status === "Do spakowania";
+
         const customerKey = (order.contact || order.customer || "").trim().toLowerCase();
         const orderCount = customerCounts[customerKey] || 1;
         const isRepeat = orderCount > 1;
 
         const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+
+        // Sprawdź czy cokolwiek z tego zamówienia leży na półce
+        let shelfHints = [];
+        if (status === "W kolejce") {
+          items.forEach(item => {
+            const key = `${item.title}:::${item.color}`;
+            if (shelf[key] && shelf[key] > 0) {
+              shelfHints.push(`Na półce: ${shelf[key]}x ${item.title} (${item.color})`);
+            }
+          });
+        }
+
         let itemsHtml = items.map(item => `
           <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#faf6f0] border border-stone-200 text-xs text-stone-800">
             <strong>${item.qty}x</strong> ${item.title} (${item.color})
@@ -761,7 +859,7 @@
         `).join(" ");
 
         let repeatBadge = isRepeat ? `
-          <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-red-100 text-red-800 border border-red-200 text-[11px] font-bold">
+          <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-red-800 border border-red-200 text-[11px] font-bold">
             ⚠️ Powracający klient: Zamówienie złożone ${orderCount} raz!
           </div>
         ` : '';
@@ -772,6 +870,36 @@
           </div>
         ` : '';
 
+        let shelfNotice = shelfHints.length > 0 ? `
+          <div class="mt-2 text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-2 flex items-center justify-between">
+            <span>✨ <strong>Półka:</strong> Dostępne na stanie – nie musisz drukować! (${shelfHints.join(", ")})</span>
+            <button onclick="switchAdminTab('shelf')" class="underline font-bold ml-2">Wydaj z półki</button>
+          </div>
+        ` : '';
+
+        // Badge i przyciski akcji
+        let badgeColor = 'bg-stone-200 text-stone-700';
+        let actionBtn = '';
+
+        if (status === "W kolejce") {
+          badgeColor = 'bg-amber-100 text-amber-900';
+          actionBtn = `
+            <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="shrink-0 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold shadow-xs">
+              Wydrukowane (Spakuj) →
+            </button>
+          `;
+        } else if (isToPack) {
+          badgeColor = 'bg-orange-100 text-orange-900 border border-orange-300';
+          actionBtn = `
+            <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="shrink-0 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-xs">
+              ✓ Wydane (Zamknij)
+            </button>
+          `;
+        } else {
+          badgeColor = 'bg-emerald-100 text-emerald-800';
+          actionBtn = `<span class="text-xs text-emerald-700 font-bold">Zrealizowane ✓</span>`;
+        }
+
         const card = document.createElement("div");
         card.className = `p-4 rounded-3xl border transition ${isDone ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
         card.innerHTML = `
@@ -781,18 +909,13 @@
                 <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
                 <span class="text-xs font-semibold text-stone-700">${order.customer}</span>
                 <span class="text-xs text-stone-500">(${order.contact})</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">${order.status}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${status}</span>
               </div>
               ${repeatBadge}
               ${notesHtml}
+              ${shelfNotice}
             </div>
-            ${!isDone ? `
-              <button onclick="markOrderDone('${order.id}')" class="shrink-0 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-xl text-xs font-semibold">
-                ✓ Gotowe
-              </button>
-            ` : `
-              <span class="text-xs text-emerald-700 font-bold">Wysłane ✓</span>
-            `}
+            ${actionBtn}
           </div>
           <div class="mt-3 flex flex-wrap gap-1.5">
             ${itemsHtml}
@@ -802,13 +925,16 @@
       });
     }
 
+    // ==========================================
+    // PLANER STOŁU
+    // ==========================================
     function renderBatcherView() {
       const specs = getSpecs();
       const missing = {};
       let totalPieces = 0;
 
       cloudOrders.forEach(order => {
-        if (order.status !== "Zrealizowane") {
+        if (order.status === "W kolejce") {
           const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
           items.forEach(item => {
             const key = `${item.color}:::${item.title}`;
@@ -830,7 +956,7 @@
       const grid = document.getElementById('tab-missing-grid');
       grid.innerHTML = "";
       if (Object.keys(colorGroups).length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-4 text-stone-400 text-center">Wszystko wydrukowane! 🍂</div>`;
+        grid.innerHTML = `<div class="col-span-full py-4 text-stone-400 text-center">Brak oczekujących elementów na stół! 🎉</div>`;
       } else {
         for (const [col, list] of Object.entries(colorGroups)) {
           const card = document.createElement("div");
@@ -874,14 +1000,14 @@
         batchContainer.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-orange-600 text-white">Rekomendowany Stół</span>
-            <span class="text-xs text-stone-400">1 kolor = 0 odpadu purge tower</span>
+            <span class="text-xs text-stone-400">1 kolor stołu = brak strat filamentu</span>
           </div>
           <h4 class="text-lg font-bold">Wsad: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
           <div class="flex flex-wrap gap-4 text-xs text-stone-300">
             <div>⏱️ Czas: <strong class="text-amber-300 font-bold">${formattedHours} godziny</strong></div>
             <div>⚖️ Filament: <strong class="text-amber-300 font-bold">~${totalGrams}g (${bestColor})</strong></div>
           </div>
-          <div class="pt-2">
+          <div class="pt-2 flex flex-wrap gap-2">
             <button onclick="applyBatchPrint('${bestColor}', ${totalGrams})" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
               ✓ Oznacz wsad i odejmij filament ze szpuli
             </button>
@@ -890,7 +1016,7 @@
       } else {
         batchContainer.innerHTML = `
           <div class="text-sm font-medium text-stone-300 py-2">
-            Brak oczekujących zleceń na stół. Bambu P1S odpoczywa! 💤
+            Wszystkie oczekujące zamówienia są już wydrukowane! 💤
           </div>
         `;
       }
@@ -909,6 +1035,71 @@
       alert(`Wsad (${color}) zrealizowany! Odliczono ~${grams}g ze szpuli.`);
     }
 
+    // ==========================================
+    // PÓŁKA Z NADWYŻKAMI (MAGAZYN BUFOROWY)
+    // ==========================================
+    const ALL_MODELS = ['Dynia', 'Lisek', 'Wiewiórka', 'Taca'];
+    const ALL_COLORS = ['Zielony', 'Rudy', 'Żółty', 'Biały'];
+
+    function renderShelfView() {
+      const shelf = getShelf();
+      const container = document.getElementById('shelf-items-list');
+      container.innerHTML = '';
+
+      // Wygeneruj wiersz dla każdego modelu i koloru
+      ALL_MODELS.forEach(model => {
+        ALL_COLORS.forEach(color => {
+          const key = `${model}:::${color}`;
+          const count = shelf[key] || 0;
+
+          const row = document.createElement('div');
+          row.className = `p-2.5 rounded-2xl border flex items-center justify-between ${count > 0 ? 'bg-amber-50/60 border-amber-200' : 'bg-[#faf6f0] border-stone-200'}`;
+          row.innerHTML = `
+            <div>
+              <span class="font-bold text-xs text-stone-900">${model}</span>
+              <span class="text-[11px] text-stone-500 ml-1">(${color})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">-</button>
+              <span class="w-6 text-center text-xs font-bold ${count > 0 ? 'text-amber-900' : 'text-stone-400'}">${count}</span>
+              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">+</button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      });
+
+      // Zestaw orzeszków
+      const hazelnutKey = `Orzeszki laskowe (9 szt.):::Zielono-Brązowy`;
+      const hazelnutCount = shelf[hazelnutKey] || 0;
+      const hRow = document.createElement('div');
+      hRow.className = `p-2.5 rounded-2xl border flex items-center justify-between ${hazelnutCount > 0 ? 'bg-amber-50/60 border-amber-200' : 'bg-[#faf6f0] border-stone-200'}`;
+      hRow.innerHTML = `
+        <div>
+          <span class="font-bold text-xs text-stone-900">Orzeszki laskowe (9 szt.)</span>
+          <span class="text-[11px] text-stone-500 ml-1">(Zielono-Brązowy)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="changeShelfQty('${hazelnutKey}', -1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">-</button>
+          <span class="w-6 text-center text-xs font-bold ${hazelnutCount > 0 ? 'text-amber-900' : 'text-stone-400'}">${hazelnutCount}</span>
+          <button onclick="changeShelfQty('${hazelnutKey}', 1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">+</button>
+        </div>
+      `;
+      container.appendChild(hRow);
+    }
+
+    function changeShelfQty(key, delta) {
+      const shelf = getShelf();
+      const current = shelf[key] || 0;
+      shelf[key] = Math.max(0, current + delta);
+      saveShelf(shelf);
+      renderShelfView();
+      updateHubStats();
+    }
+
+    // ==========================================
+    // SZPULE & USTAWIENIA
+    // ==========================================
     function renderSpoolsView() {
       const spools = getSpools();
       const container = document.getElementById('spools-list-container');
