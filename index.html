@@ -384,7 +384,6 @@
   <!-- ========================================== -->
   <div id="admin-app" class="max-w-2xl mx-auto px-4 pt-5 pb-16 hidden space-y-5">
     
-    <!-- Pasek nagłówka admina -->
     <header class="flex items-center justify-between border-b border-amber-900/10 pb-4">
       <div class="flex items-center gap-2">
         <span class="w-8 h-8 rounded-xl bg-stone-900 text-amber-100 flex items-center justify-center font-bold text-xs">⚙️</span>
@@ -403,23 +402,32 @@
       </div>
     </header>
 
-    <!-- ALERT O KOŃCZĄCYM SIĘ FILAMENCIE -->
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI + PODSUMOWANIE FINANSOWE) -->
+    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI + BILANS KOSZTÓW I ZYSKU) -->
     <div id="admin-tab-hub" class="space-y-4">
       
-      <!-- PODSUMOWANIE FINANSOWE I PRACY -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="p-4 rounded-3xl bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 shadow-sm border border-stone-700">
-          <span class="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">Zrealizowany przychód</span>
-          <div class="text-2xl font-bold mt-1 text-amber-200" id="stat-revenue">0,00 zł</div>
-          <span class="text-[10px] text-stone-400">z odebranych zamówień</span>
-        </div>
+      <!-- PEŁNY BILANS FINANSOWY -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- 1. Przychód -->
         <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
-          <span class="text-[10px] uppercase font-bold tracking-wider text-amber-900/60 block">Wydane figurki</span>
-          <div class="text-2xl font-bold mt-1 text-stone-900" id="stat-completed-pieces">0 szt.</div>
-          <span class="text-[10px] text-stone-400">zakończone realizacje</span>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-800 block">Przychód (Zrealizowane)</span>
+          <div class="text-2xl font-bold mt-1 text-emerald-700" id="stat-revenue">0,00 zł</div>
+          <span class="text-[10px] text-stone-400" id="stat-completed-pieces">0 szt. figurek</span>
+        </div>
+
+        <!-- 2. Koszty produkcji -->
+        <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-rose-800 block">Koszty produkcji</span>
+          <div class="text-2xl font-bold mt-1 text-rose-700" id="stat-costs">0,00 zł</div>
+          <span class="text-[10px] text-stone-400" id="stat-cost-breakdown">Plastik + Prąd</span>
+        </div>
+
+        <!-- 3. Zysk na czysto -->
+        <div class="p-4 rounded-3xl bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 shadow-sm border border-stone-700">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">Zysk na czysto</span>
+          <div class="text-2xl font-bold mt-1 text-amber-200" id="stat-profit">0,00 zł</div>
+          <span class="text-[10px] text-stone-400">Do podziału na 2 osoby</span>
         </div>
       </div>
 
@@ -432,7 +440,7 @@
           </div>
           <div>
             <h4 class="font-bold text-xs text-stone-900">Zamówienia</h4>
-            <p class="text-[9px] text-stone-400">Druk & Pakowanie</p>
+            <p class="text-[9px] text-stone-400">Obieg & Edycja</p>
           </div>
         </button>
 
@@ -477,19 +485,19 @@
           <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-800 flex items-center justify-center text-sm">⚙️</span>
           <div>
             <h4 class="font-bold text-xs text-stone-900">Ustawienia</h4>
-            <p class="text-[9px] text-stone-400">Czasy i wagi</p>
+            <p class="text-[9px] text-stone-400">Koszty & Wagi</p>
           </div>
         </button>
       </div>
     </div>
 
 
-    <!-- WIDOK B: ZAMÓWIENIA (3 ETAPY) -->
+    <!-- WIDOK B: ZAMÓWIENIA -->
     <div id="admin-tab-orders" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="font-bold text-lg text-stone-900">Zarządzanie Zamówieniami</h3>
-          <p class="text-xs text-stone-500">Obieg: W kolejce $\rightarrow$ Do spakowania $\rightarrow$ Zrealizowane</p>
+          <p class="text-xs text-stone-500">Zarządzaj statusem, edytuj ilości lub anuluj zlecenia</p>
         </div>
         <button onclick="fetchOrdersFromCloud()" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#faf6f0] border border-stone-200 hover:bg-stone-200">
           🔄 Odśwież
@@ -506,7 +514,7 @@
 
       <div class="bg-[#fffdfa] p-4 rounded-3xl border border-amber-900/10 shadow-sm space-y-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-bold text-sm text-stone-900">Wszystkie braki do wydruku (Kolejka)</h4>
+          <h4 class="font-bold text-sm text-stone-900">Braki do wydruku (Kolejka stołów)</h4>
           <span id="tab-missing-count" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">0 szt.</span>
         </div>
         <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"></div>
@@ -514,7 +522,7 @@
     </div>
 
 
-    <!-- WIDOK D: PÓŁKA Z NADWYŻKAMI (MAGAZYN BUFOROWY) -->
+    <!-- WIDOK D: PÓŁKA Z NADWYŻKAMI -->
     <div id="admin-tab-shelf" class="space-y-4 hidden">
       <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
         <div>
@@ -527,7 +535,7 @@
     </div>
 
 
-    <!-- WIDOK E: STAN SZPULE FILAMENTU (AMS) -->
+    <!-- WIDOK E: STAN SZPULE FILAMENTU -->
     <div id="admin-tab-spools" class="space-y-4 hidden">
       <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
         <div>
@@ -540,22 +548,88 @@
     </div>
 
 
-    <!-- WIDOK F: USTAWIENIA PARAMETRÓW DRUKU -->
+    <!-- WIDOK F: USTAWIENIA PARAMETRÓW DRUKU I KOSZTÓW -->
     <div id="admin-tab-settings" class="space-y-4 hidden">
-      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
+      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-5">
         <div>
-          <h3 class="font-bold text-lg text-stone-900">Parametry Wydruków (Bambu Studio)</h3>
-          <p class="text-xs text-stone-500">Czas podawaj w godzinach z przecinkiem, np. <span class="font-bold text-amber-800">2,7</span> godziny.</p>
+          <h3 class="font-bold text-lg text-stone-900">Koszty produkcji (Kalkulator Zysku)</h3>
+          <p class="text-xs text-stone-500">Podaj ceny, aby system obliczał realny zysk netto ze sprzedaży.</p>
         </div>
 
-        <div id="specs-editor" class="space-y-3 divide-y divide-amber-900/10 text-xs"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-[#faf6f0] rounded-2xl border border-stone-200">
+            <label class="block font-bold text-stone-800 mb-1">Cena filamentu za 1 kg (zł):</label>
+            <input type="number" id="setting-cost-filament" step="0.5" class="w-full px-3 py-2 rounded-xl border border-amber-900/20 bg-white font-bold text-stone-900">
+            <span class="text-[10px] text-stone-400 mt-1 block">np. 80 zł (daje 0,08 zł za gram)</span>
+          </div>
+          <div class="p-3 bg-[#faf6f0] rounded-2xl border border-stone-200">
+            <label class="block font-bold text-stone-800 mb-1">Cena prądu za 1 kWh (zł):</label>
+            <input type="number" id="setting-cost-energy" step="0.05" class="w-full px-3 py-2 rounded-xl border border-amber-900/20 bg-white font-bold text-stone-900">
+            <span class="text-[10px] text-stone-400 mt-1 block">P1S zużywa ~0,11 kWh na godzinę</span>
+          </div>
+        </div>
 
-        <button onclick="saveSpecsChanges()" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl font-bold text-xs transition">
-          Zapisz zmiany parametrów
+        <div class="border-t border-amber-900/10 pt-4">
+          <h3 class="font-bold text-base text-stone-900">Parametry Wydruków (Bambu Studio)</h3>
+          <p class="text-xs text-stone-500 mb-3">Czas w godzinach z przecinkiem, np. <span class="font-bold text-amber-800">2,7</span> godziny.</p>
+          <div id="specs-editor" class="space-y-3 divide-y divide-amber-900/10 text-xs"></div>
+        </div>
+
+        <button onclick="saveSettingsAll()" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl font-bold text-xs transition">
+          Zapisz wszystkie parametry i koszty
         </button>
       </div>
     </div>
 
+  </div>
+
+  <!-- MODAL EDYCJI ZAMÓWIENIA -->
+  <div id="edit-order-modal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
+    <div class="bg-[#fffdfa] rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4 border-t border-amber-900/10">
+      <div class="flex items-center justify-between border-b border-amber-900/10 pb-3">
+        <h3 class="font-bold text-base text-stone-900">Edycja: #ZAM-<span id="edit-order-id-label"></span></h3>
+        <button onclick="closeEditModal()" class="text-stone-400 hover:text-stone-700 text-sm font-semibold p-1">✕ Anuluj</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-stone-700 mb-1">Pozycje w zamówieniu:</label>
+          <div id="edit-items-list" class="space-y-2 border border-stone-200 rounded-2xl p-2.5 bg-[#faf6f0]"></div>
+        </div>
+
+        <div class="border-t border-stone-200 pt-2">
+          <label class="block font-semibold text-stone-700 mb-1">+ Dodaj nową pozycję:</label>
+          <div class="grid grid-cols-12 gap-1.5">
+            <select id="edit-add-title" class="col-span-6 bg-white border border-stone-300 rounded-xl px-2 py-1.5 text-xs font-semibold">
+              <option value="Dynia">Dynia (10 zł)</option>
+              <option value="Lisek">Lisek (5 zł)</option>
+              <option value="Wiewiórka">Wiewiórka (5 zł)</option>
+              <option value="Taca">Taca (10 zł)</option>
+              <option value="Orzeszki laskowe (9 szt.)">Orzeszki (10 zł)</option>
+            </select>
+            <select id="edit-add-color" class="col-span-4 bg-white border border-stone-300 rounded-xl px-2 py-1.5 text-xs">
+              <option value="Rudy">Rudy</option>
+              <option value="Zielony">Zielony</option>
+              <option value="Żółty">Żółty</option>
+              <option value="Biały">Biały</option>
+              <option value="Zielono-Brązowy">Zielono-Brązowy</option>
+            </select>
+            <button type="button" onclick="addPositionToEditOrder()" class="col-span-2 bg-stone-900 text-white rounded-xl font-bold text-xs flex items-center justify-center">+</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-700 mb-1">Uwagi do zamówienia:</label>
+          <input id="edit-order-notes" type="text" class="w-full bg-[#faf6f0] border border-stone-300 rounded-xl px-3 py-2 text-xs">
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="saveOrderEdits()" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs">
+          Zapisz zmiany w zamówieniu
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -567,9 +641,11 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let cloudOrders = [];
+    let currentEditingOrderId = null;
+    let currentEditingItems = [];
 
     // ==========================================
-    // BAZA: CENY, PARAMETRY, PÓŁKA I SZPULE
+    // BAZA: CENY, PARAMETRY, KOSZTY, PÓŁKA I SZPULE
     // ==========================================
     const PRICES = {
       'Dynia': 10,
@@ -587,6 +663,11 @@
       'Orzeszki laskowe (9 szt.)': { weight: 60, hours: 3.5 }
     };
 
+    const DEFAULT_COSTS = {
+      filamentKg: 80, // zł / kg
+      energyKwh: 1.15 // zł / kWh
+    };
+
     const DEFAULT_SPOOLS = {
       'Zielony': 1000,
       'Rudy': 1000,
@@ -599,16 +680,22 @@
       const data = localStorage.getItem("bambu_specs");
       return data ? JSON.parse(data) : DEFAULT_SPECS;
     }
-
     function saveSpecs(specs) {
       localStorage.setItem("bambu_specs", JSON.stringify(specs));
+    }
+
+    function getCosts() {
+      const data = localStorage.getItem("bambu_costs");
+      return data ? JSON.parse(data) : DEFAULT_COSTS;
+    }
+    function saveCosts(costs) {
+      localStorage.setItem("bambu_costs", JSON.stringify(costs));
     }
 
     function getSpools() {
       const data = localStorage.getItem("bambu_spools");
       return data ? JSON.parse(data) : DEFAULT_SPOOLS;
     }
-
     function saveSpools(spools) {
       localStorage.setItem("bambu_spools", JSON.stringify(spools));
     }
@@ -617,7 +704,6 @@
       const data = localStorage.getItem("bambu_shelf");
       return data ? JSON.parse(data) : {};
     }
-
     function saveShelf(shelf) {
       localStorage.setItem("bambu_shelf", JSON.stringify(shelf));
     }
@@ -702,7 +788,7 @@
           title.textContent = "Szpule Filamentu";
           renderSpoolsView();
         } else if (tabName === 'settings') {
-          title.textContent = "Ustawienia Wydruków";
+          title.textContent = "Ustawienia Wydruków i Kosztów";
           renderSettingsView();
         }
       }
@@ -748,11 +834,162 @@
       }
     }
 
+    async function deleteOrderPermanently(orderId) {
+      if (confirm(`Czy na pewno trwale usunąć zamówienie #ZAM-${orderId} z bazy danych?`)) {
+        try {
+          const { error } = await supabaseClient
+            .from('orders')
+            .delete()
+            .eq('id', orderId);
+
+          if (error) throw error;
+          await fetchOrdersFromCloud();
+        } catch (err) {
+          alert("Błąd usuwania: " + err.message);
+        }
+      }
+    }
+
+    // ==========================================
+    // LOGIKA ANULOWANIA ZAMÓWIENIA
+    // ==========================================
+    async function cancelOrderWithLogic(orderId) {
+      const order = cloudOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+
+      if (order.status === "Do spakowania") {
+        const putOnShelf = confirm(
+          `To zamówienie (#ZAM-${orderId}) jest oznaczone jako WYDRUKOWANE.\n\nCzy chcesz przenieść te elementy do magazynu na Półkę buforową?`
+        );
+
+        if (putOnShelf) {
+          const shelf = getShelf();
+          items.forEach(item => {
+            const key = `${item.title}:::${item.color}`;
+            shelf[key] = (shelf[key] || 0) + item.qty;
+          });
+          saveShelf(shelf);
+          updateHubStats();
+        }
+      } else {
+        if (!confirm(`Czy na pewno chcesz anulować zamówienie #ZAM-${orderId}? Elementy znikną z Planera stołu.`)) {
+          return;
+        }
+      }
+
+      await updateOrderStatus(orderId, 'Anulowane');
+    }
+
+    // ==========================================
+    // LOGIKA EDYCJI ZAMÓWIENIA
+    // ==========================================
+    function openEditOrderModal(orderId) {
+      const order = cloudOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      currentEditingOrderId = orderId;
+      const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      currentEditingItems = JSON.parse(JSON.stringify(rawItems));
+
+      document.getElementById('edit-order-id-label').textContent = orderId;
+      document.getElementById('edit-order-notes').value = order.notes || "";
+
+      renderEditItemsList();
+      document.getElementById('edit-order-modal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-order-modal').classList.add('hidden');
+      currentEditingOrderId = null;
+      currentEditingItems = [];
+    }
+
+    function renderEditItemsList() {
+      const container = document.getElementById('edit-items-list');
+      container.innerHTML = "";
+
+      if (currentEditingItems.length === 0) {
+        container.innerHTML = `<span class="text-stone-400">Brak pozycji w zamówieniu.</span>`;
+        return;
+      }
+
+      currentEditingItems.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
+        row.innerHTML = `
+          <div>
+            <span class="font-bold text-stone-800">${item.title}</span>
+            <span class="text-stone-500">(${item.color})</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+              <button type="button" onclick="changeEditItemQty(${index}, -1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">-</button>
+              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <button type="button" onclick="changeEditItemQty(${index}, 1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">+</button>
+            </div>
+            <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold px-1.5">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function changeEditItemQty(index, delta) {
+      currentEditingItems[index].qty = Math.max(1, currentEditingItems[index].qty + delta);
+      renderEditItemsList();
+    }
+
+    function removeEditItem(index) {
+      currentEditingItems.splice(index, 1);
+      renderEditItemsList();
+    }
+
+    function addPositionToEditOrder() {
+      const title = document.getElementById('edit-add-title').value;
+      const color = document.getElementById('edit-add-color').value;
+
+      const existing = currentEditingItems.find(i => i.title === title && i.color === color);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        currentEditingItems.push({ title, color, qty: 1 });
+      }
+      renderEditItemsList();
+    }
+
+    async function saveOrderEdits() {
+      if (!currentEditingOrderId) return;
+      if (currentEditingItems.length === 0) {
+        alert("Zamówienie musi mieć przynajmniej jedną pozycję!");
+        return;
+      }
+
+      const notes = document.getElementById('edit-order-notes').value;
+
+      try {
+        const { error } = await supabaseClient
+          .from('orders')
+          .update({
+            items: currentEditingItems,
+            notes: notes
+          })
+          .eq('id', currentEditingOrderId);
+
+        if (error) throw error;
+        closeEditModal();
+        await fetchOrdersFromCloud();
+      } catch (err) {
+        alert("Błąd zapisu edycji: " + err.message);
+      }
+    }
+
     // ==========================================
     // LOGIKA ADMINA & STATYSTYKI FINANSOWE
     // ==========================================
     function updateHubStats() {
-      const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane");
+      const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
       document.getElementById('badge-active-orders').textContent = activeOrders.length;
 
       let missingPieces = 0;
@@ -764,30 +1001,51 @@
       });
       document.getElementById('badge-missing-parts').textContent = missingPieces;
 
-      // Półka: suma sztuk
+      // Półka
       const shelf = getShelf();
       const totalShelfItems = Object.values(shelf).reduce((acc, qty) => acc + qty, 0);
       document.getElementById('badge-shelf-count').textContent = totalShelfItems;
 
-      // Statystyki finansowe ze zrealizowanych
+      // Obliczanie Przychodów, Kosztów i Zysku ze ZREALIZOWANYCH
+      const specs = getSpecs();
+      const costs = getCosts();
+
       let totalRevenue = 0;
       let totalPiecesCompleted = 0;
+      let totalGramsPrinted = 0;
+      let totalHoursPrinted = 0;
 
       cloudOrders.forEach(o => {
         if (o.status === "Zrealizowane") {
           const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
           items.forEach(item => {
             const price = PRICES[item.title] || 10;
+            const spec = specs[item.title] || { weight: 45, hours: 1.5 };
+
             totalRevenue += price * item.qty;
             totalPiecesCompleted += item.qty;
+            totalGramsPrinted += spec.weight * item.qty;
+            totalHoursPrinted += (spec.hours || 1.5) * item.qty;
           });
         }
       });
 
-      document.getElementById('stat-revenue').textContent = `${totalRevenue.toFixed(2)} zł`;
-      document.getElementById('stat-completed-pieces').textContent = `${totalPiecesCompleted} szt.`;
+      // Koszt plastiku: gramy * (cena za kg / 1000)
+      const costFilament = totalGramsPrinted * (costs.filamentKg / 1000);
+      // Koszt energii: godziny * 0.11 kWh * cena za 1 kWh
+      const costEnergy = totalHoursPrinted * 0.11 * costs.energyKwh;
+      const totalCosts = costFilament + costEnergy;
+      const netProfit = totalRevenue - totalCosts;
 
-      // Sprawdzanie poziomu szpul (< 150g)
+      document.getElementById('stat-revenue').textContent = `${totalRevenue.toFixed(2)} zł`;
+      document.getElementById('stat-completed-pieces').textContent = `${totalPiecesCompleted} szt. figurek`;
+
+      document.getElementById('stat-costs').textContent = `${totalCosts.toFixed(2)} zł`;
+      document.getElementById('stat-cost-breakdown').textContent = `Filament: ${costFilament.toFixed(1)} zł | Prąd: ${costEnergy.toFixed(1)} zł`;
+
+      document.getElementById('stat-profit').textContent = `${netProfit.toFixed(2)} zł`;
+
+      // Alert o kończącym się filamencie
       const spools = getSpools();
       const alertContainer = document.getElementById('spool-alert-container');
       alertContainer.innerHTML = '';
@@ -812,7 +1070,7 @@
     }
 
     // ==========================================
-    // WIDOK ZAMÓWIEŃ (3 ETAPY)
+    // WIDOK ZAMÓWIEŃ
     // ==========================================
     function renderOrdersView() {
       const container = document.getElementById('orders-list-view');
@@ -827,21 +1085,21 @@
       const customerCounts = {};
       cloudOrders.forEach(o => {
         const key = (o.contact || o.customer || "").trim().toLowerCase();
-        if (key) customerCounts[key] = (customerCounts[key] || 0) + 1;
+        if (key && o.status !== "Anulowane") customerCounts[key] = (customerCounts[key] || 0) + 1;
       });
 
       cloudOrders.forEach(order => {
         const status = order.status || "W kolejce";
         const isDone = status === "Zrealizowane";
         const isToPack = status === "Do spakowania";
+        const isCanceled = status === "Anulowane";
 
         const customerKey = (order.contact || order.customer || "").trim().toLowerCase();
         const orderCount = customerCounts[customerKey] || 1;
-        const isRepeat = orderCount > 1;
+        const isRepeat = orderCount > 1 && !isCanceled;
 
         const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
 
-        // Sprawdź czy cokolwiek z tego zamówienia leży na półce
         let shelfHints = [];
         if (status === "W kolejce") {
           items.forEach(item => {
@@ -877,31 +1135,56 @@
           </div>
         ` : '';
 
-        // Badge i przyciski akcji
         let badgeColor = 'bg-stone-200 text-stone-700';
-        let actionBtn = '';
+        let actionBtns = '';
 
         if (status === "W kolejce") {
           badgeColor = 'bg-amber-100 text-amber-900';
-          actionBtn = `
-            <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="shrink-0 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold shadow-xs">
-              Wydrukowane (Spakuj) →
-            </button>
+          actionBtns = `
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="openEditOrderModal('${order.id}')" class="px-2.5 py-1.5 bg-[#faf6f0] border border-stone-300 hover:bg-stone-200 rounded-xl text-xs font-semibold" title="Edytuj zamówienie">
+                ✏️
+              </button>
+              <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold shadow-xs">
+                Wydrukowane →
+              </button>
+              <button onclick="cancelOrderWithLogic('${order.id}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-semibold" title="Anuluj">
+                ✕
+              </button>
+            </div>
           `;
         } else if (isToPack) {
           badgeColor = 'bg-orange-100 text-orange-900 border border-orange-300';
-          actionBtn = `
-            <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="shrink-0 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-xs">
-              ✓ Wydane (Zamknij)
-            </button>
+          actionBtns = `
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="openEditOrderModal('${order.id}')" class="px-2.5 py-1.5 bg-[#faf6f0] border border-stone-300 hover:bg-stone-200 rounded-xl text-xs font-semibold" title="Edytuj zamówienie">
+                ✏️
+              </button>
+              <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-xs">
+                ✓ Wydane (Zamknij)
+              </button>
+              <button onclick="cancelOrderWithLogic('${order.id}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-semibold" title="Anuluj">
+                ✕
+              </button>
+            </div>
+          `;
+        } else if (isCanceled) {
+          badgeColor = 'bg-rose-100 text-rose-800 line-through';
+          actionBtns = `
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-xs text-rose-600 font-bold">Anulowane</span>
+              <button onclick="deleteOrderPermanently('${order.id}')" class="text-xs text-stone-400 hover:text-stone-700 underline" title="Usuń trwale z bazy">
+                Usuń z bazy
+              </button>
+            </div>
           `;
         } else {
           badgeColor = 'bg-emerald-100 text-emerald-800';
-          actionBtn = `<span class="text-xs text-emerald-700 font-bold">Zrealizowane ✓</span>`;
+          actionBtns = `<span class="text-xs text-emerald-700 font-bold">Zrealizowane ✓</span>`;
         }
 
         const card = document.createElement("div");
-        card.className = `p-4 rounded-3xl border transition ${isDone ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
+        card.className = `p-4 rounded-3xl border transition ${isDone || isCanceled ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
         card.innerHTML = `
           <div class="flex items-start justify-between gap-3">
             <div>
@@ -915,7 +1198,7 @@
               ${notesHtml}
               ${shelfNotice}
             </div>
-            ${actionBtn}
+            ${actionBtns}
           </div>
           <div class="mt-3 flex flex-wrap gap-1.5">
             ${itemsHtml}
@@ -1000,7 +1283,7 @@
         batchContainer.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-orange-600 text-white">Rekomendowany Stół</span>
-            <span class="text-xs text-stone-400">1 kolor stołu = brak strat filamentu</span>
+            <span class="text-xs text-stone-400">1 kolor = brak strat filamentu</span>
           </div>
           <h4 class="text-lg font-bold">Wsad: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
           <div class="flex flex-wrap gap-4 text-xs text-stone-300">
@@ -1036,7 +1319,7 @@
     }
 
     // ==========================================
-    // PÓŁKA Z NADWYŻKAMI (MAGAZYN BUFOROWY)
+    // PÓŁKA Z NADWYŻKAMI
     // ==========================================
     const ALL_MODELS = ['Dynia', 'Lisek', 'Wiewiórka', 'Taca'];
     const ALL_COLORS = ['Zielony', 'Rudy', 'Żółty', 'Biały'];
@@ -1046,7 +1329,6 @@
       const container = document.getElementById('shelf-items-list');
       container.innerHTML = '';
 
-      // Wygeneruj wiersz dla każdego modelu i koloru
       ALL_MODELS.forEach(model => {
         ALL_COLORS.forEach(color => {
           const key = `${model}:::${color}`;
@@ -1069,7 +1351,6 @@
         });
       });
 
-      // Zestaw orzeszków
       const hazelnutKey = `Orzeszki laskowe (9 szt.):::Zielono-Brązowy`;
       const hazelnutCount = shelf[hazelnutKey] || 0;
       const hRow = document.createElement('div');
@@ -1137,6 +1418,11 @@
 
     function renderSettingsView() {
       const specs = getSpecs();
+      const costs = getCosts();
+
+      document.getElementById('setting-cost-filament').value = costs.filamentKg;
+      document.getElementById('setting-cost-energy').value = costs.energyKwh;
+
       const container = document.getElementById('specs-editor');
       container.innerHTML = "";
 
@@ -1165,7 +1451,7 @@
       });
     }
 
-    function saveSpecsChanges() {
+    function saveSettingsAll() {
       const specs = getSpecs();
       Object.keys(specs).forEach(name => {
         const w = parseInt(document.getElementById(`spec-weight-${name}`).value) || 0;
@@ -1174,7 +1460,13 @@
         specs[name] = { weight: w, hours: h };
       });
       saveSpecs(specs);
-      alert("Parametry druku zapisane!");
+
+      const fKg = parseFloat(document.getElementById('setting-cost-filament').value) || 80;
+      const eKwh = parseFloat(document.getElementById('setting-cost-energy').value) || 1.15;
+      saveCosts({ filamentKg: fKg, energyKwh: eKwh });
+
+      alert("Parametry druku oraz koszty produkcji zostały zaktualizowane!");
+      updateHubStats();
     }
 
 
