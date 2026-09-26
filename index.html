@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jesienna Pracownia 3D</title>
+  <title>sezonowe3d.pl</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -29,7 +29,7 @@
   <!-- 1. WIDOK SKLEPU (DLA KLIENTA)             -->
   <!-- ========================================== -->
   <div id="client-app">
-    <!-- Header -->
+    <!-- Header z nową nazwą -->
     <header class="bg-[#fffdfa]/90 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-4 py-3.5 shadow-sm">
       <div class="max-w-md mx-auto flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -37,7 +37,7 @@
             🍁
           </div>
           <div>
-            <h1 class="font-bold text-lg text-stone-900 leading-none">Leśna Pracownia 3D</h1>
+            <h1 class="font-bold text-lg text-stone-900 leading-none">sezonowe3d.pl</h1>
             <p class="text-[11px] font-medium text-amber-800/70 mt-0.5">Rękodzieło i dekoracje</p>
           </div>
         </div>
@@ -264,4 +264,589 @@
               <div class="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#fffdfa] border border-amber-900/10 shadow-xs">
                 <span class="w-3 h-3 rounded-full bg-[#2d5a27]"></span>
                 <span class="text-stone-400 text-xs">+</span>
-                <span cl
+                <span class="w-3 h-3 rounded-full bg-[#5c2c16]"></span>
+                <span class="text-[11px] font-semibold text-stone-700">Zielono-Brązowy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex items-center gap-2">
+            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
+              <button onclick="changeQty('orzeszki', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-orzeszki" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('orzeszki', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+            </div>
+            <button onclick="addHazelnutsToCartWithQty()" class="flex-1 py-2.5 px-4 bg-[#5c2c16] hover:bg-[#4a2311] text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98] shadow-sm">
+              <span>+ Dodaj zestaw</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Pływający dolny pasek koszyka -->
+    <div id="sticky-bar" class="fixed bottom-3 inset-x-3 max-w-md mx-auto hidden z-40">
+      <div class="bg-stone-900 text-amber-50 p-3.5 rounded-2xl shadow-xl shadow-stone-900/30 flex items-center justify-between border border-stone-700/80">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center font-bold text-sm shadow-inner">
+            🛒
+          </div>
+          <div>
+            <div class="text-xs text-stone-300"><span id="cart-count">0</span> szt. w koszyku</div>
+            <div class="text-base font-bold text-amber-200" id="cart-total">0,00 zł</div>
+          </div>
+        </div>
+        <button onclick="openCheckout()" class="bg-amber-100 hover:bg-white text-stone-900 px-5 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 flex items-center gap-1 shadow-sm">
+          Przejdź do kasy →
+        </button>
+      </div>
+    </div>
+
+    <!-- Szuflada kasy -->
+    <div id="checkout-modal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
+      <div class="bg-[#fffdfa] rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4 border-t border-amber-900/10">
+        <div class="flex items-center justify-between border-b border-amber-900/10 pb-3">
+          <h3 class="font-bold text-lg text-stone-900">Twoje zamówienie</h3>
+          <button onclick="closeCheckout()" class="text-stone-400 hover:text-stone-700 text-sm font-semibold p-1">✕ Zamknij</button>
+        </div>
+
+        <div id="cart-items" class="divide-y divide-amber-900/5 text-sm"></div>
+
+        <div class="flex justify-between items-center pt-2 font-bold text-base text-stone-900 border-t border-amber-900/10">
+          <span>Do zapłaty:</span>
+          <span id="modal-total" class="text-amber-800 text-lg">0,00 zł</span>
+        </div>
+
+        <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 pt-2">
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Imię i Nazwisko / Nick *</label>
+            <input id="form-name" required type="text" placeholder="np. Kasia Kowalska" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Telefon lub e-mail *</label>
+            <input id="form-contact" required type="text" placeholder="np. 600 700 800" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Sposób odbioru</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="border border-amber-900/15 bg-[#faf6f0] p-2.5 rounded-xl flex items-center gap-2 cursor-pointer has-[:checked]:border-amber-800 has-[:checked]:bg-amber-100/50">
+                <input type="radio" name="delivery" value="Odbiór osobisty" checked class="accent-amber-800">
+                <span class="font-medium text-stone-800">Odbiór osobisty</span>
+              </label>
+              <label class="border border-amber-900/15 bg-[#faf6f0] p-2.5 rounded-xl flex items-center gap-2 cursor-pointer has-[:checked]:border-amber-800 has-[:checked]:bg-amber-100/50">
+                <input type="radio" name="delivery" value="Paczkomat" class="accent-amber-800">
+                <span class="font-medium text-stone-800">Paczkomat InPost</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 text-amber-50 font-bold py-3.5 rounded-2xl shadow-lg shadow-orange-950/20 text-sm transition active:scale-[0.99]">
+            Złóż zamówienie 🍁
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Ekran sukcesu klienta -->
+    <div id="success-view" class="max-w-md mx-auto px-4 pt-8 hidden text-center space-y-6">
+      <div class="w-16 h-16 bg-amber-100 text-amber-800 border border-amber-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner">
+        🍁
+      </div>
+      <div>
+        <span class="text-xs uppercase tracking-wider font-bold text-amber-900/60">Przyjęte do realizacji!</span>
+        <h2 class="text-2xl font-bold mt-1 text-stone-900">Numer: #ZAM-<span id="order-id">418</span></h2>
+        <p class="text-xs text-stone-600 mt-1">Dziękujemy za złożenie zamówienia w naszej pracowni</p>
+      </div>
+
+      <button onclick="location.reload()" class="w-full py-3 bg-[#f0e6d6] hover:bg-[#e6d8c4] text-stone-800 font-semibold rounded-2xl text-xs transition">
+        ← Wróć do sklepu
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- 2. LOGOWANIE ADMINA                       -->
+  <!-- ========================================== -->
+  <div id="admin-login" class="max-w-xs mx-auto px-4 pt-20 hidden">
+    <div class="bg-[#fffdfa] p-6 rounded-3xl border border-amber-900/20 shadow-xl text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-stone-900 text-amber-100 flex items-center justify-center mx-auto text-xl">
+        🔒
+      </div>
+      <div>
+        <h2 class="font-bold text-lg text-stone-900">Panel Administratora</h2>
+        <p class="text-xs text-stone-500 mt-1">Podaj hasło, aby zarządzać drukiem</p>
+      </div>
+      <form onsubmit="checkAdminPassword(event)" class="space-y-3">
+        <input id="admin-pass-input" type="password" placeholder="Hasło dostępu" class="w-full text-center text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+        <p id="login-error" class="text-xs text-red-600 hidden font-medium">Nieprawidłowe hasło!</p>
+        <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-amber-50 font-bold py-2.5 rounded-xl text-xs">
+          Zaloguj się
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- 3. GŁÓWNY PANEL ADMINA                    -->
+  <!-- ========================================== -->
+  <div id="admin-dashboard" class="max-w-2xl mx-auto px-4 pt-5 pb-16 hidden space-y-6">
+    
+    <div class="flex items-center justify-between border-b border-amber-900/10 pb-4">
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">Centrum Zarządzania Produkcją</span>
+        <h2 class="text-xl font-bold text-stone-900">Bambu Lab P1S + AMS</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="logoutAdmin()" class="text-xs font-semibold px-3 py-1.5 rounded-xl border border-stone-300 hover:bg-stone-200">
+          Wyloguj
+        </button>
+      </div>
+    </div>
+
+    <!-- REKOMENDOWANY STÓŁ -->
+    <div id="batch-recommendation" class="bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 p-5 rounded-3xl shadow-lg border border-stone-700 space-y-3"></div>
+
+    <!-- BRAKI DO WYDRUKU -->
+    <div class="bg-[#fffdfa] p-4 rounded-3xl border border-amber-900/10 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm text-stone-900">Braki do wydrukowania (Kolejka P1S)</h3>
+        <span id="total-parts-count" class="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900">0 szt.</span>
+      </div>
+      <div id="missing-parts-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"></div>
+    </div>
+
+    <!-- ZAMÓWIENIA -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm text-stone-900">Wszystkie zamówienia (<span id="orders-count">0</span>)</h3>
+        <button onclick="clearCompletedOrders()" class="text-[11px] text-stone-400 hover:text-stone-700 underline">Wyczyść zrealizowane</button>
+      </div>
+      <div id="orders-list" class="space-y-3"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const SPECS = {
+      'Dynia': { weight: 42, timeMinutes: 100 },
+      'Lisek': { weight: 55, timeMinutes: 130 },
+      'Wiewiórka': { weight: 50, timeMinutes: 120 },
+      'Taca': { weight: 110, timeMinutes: 195 },
+      'Orzeszki laskowe (9 szt.)': { weight: 60, timeMinutes: 210 }
+    };
+
+    const ADMIN_PASSWORD = "bambu123";
+
+    const initialOrders = [
+      {
+        id: "401",
+        customer: "Tomasz Nowak",
+        contact: "501 222 333",
+        delivery: "Paczkomat",
+        date: "2026-09-26 18:30",
+        status: "W kolejce",
+        items: [
+          { title: "Lisek", color: "Rudy", qty: 2 },
+          { title: "Dynia", color: "Rudy", qty: 1 }
+        ]
+      },
+      {
+        id: "402",
+        customer: "Anna Wiśniewska",
+        contact: "ania@gmail.com",
+        delivery: "Odbiór osobisty",
+        date: "2026-09-26 19:15",
+        status: "W kolejce",
+        items: [
+          { title: "Taca", color: "Zielony", qty: 1 },
+          { title: "Lisek", color: "Rudy", qty: 1 },
+          { title: "Orzeszki laskowe (9 szt.)", color: "Zielono-Brązowy", qty: 1 }
+        ]
+      }
+    ];
+
+    function getOrders() {
+      const data = localStorage.getItem("bambu_3d_orders");
+      if (!data) {
+        localStorage.setItem("bambu_3d_orders", JSON.stringify(initialOrders));
+        return initialOrders;
+      }
+      return JSON.parse(data);
+    }
+
+    function saveOrders(orders) {
+      localStorage.setItem("bambu_3d_orders", JSON.stringify(orders));
+    }
+
+    function route() {
+      const hash = window.location.hash;
+      const isAuth = sessionStorage.getItem("bambu_admin_logged") === "true";
+
+      if (hash === "#admin") {
+        document.getElementById("client-app").classList.add("hidden");
+        if (isAuth) {
+          document.getElementById("admin-login").classList.add("hidden");
+          document.getElementById("admin-dashboard").classList.remove("hidden");
+          renderAdminPanel();
+        } else {
+          document.getElementById("admin-dashboard").classList.add("hidden");
+          document.getElementById("admin-login").classList.remove("hidden");
+        }
+      } else {
+        document.getElementById("admin-login").classList.add("hidden");
+        document.getElementById("admin-dashboard").classList.add("hidden");
+        document.getElementById("client-app").classList.remove("hidden");
+      }
+    }
+
+    window.addEventListener("hashchange", route);
+    window.addEventListener("DOMContentLoaded", route);
+
+    function checkAdminPassword(e) {
+      e.preventDefault();
+      const input = document.getElementById("admin-pass-input").value;
+      if (input === ADMIN_PASSWORD) {
+        sessionStorage.setItem("bambu_admin_logged", "true");
+        document.getElementById("login-error").classList.add("hidden");
+        route();
+      } else {
+        document.getElementById("login-error").classList.remove("hidden");
+      }
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem("bambu_admin_logged");
+      window.location.hash = "";
+      route();
+    }
+
+    function renderAdminPanel() {
+      const orders = getOrders();
+      document.getElementById("orders-count").textContent = orders.length;
+
+      const missing = {};
+      let totalPieces = 0;
+
+      orders.forEach(order => {
+        if (order.status !== "Zrealizowane") {
+          order.items.forEach(item => {
+            const key = `${item.color}:::${item.title}`;
+            missing[key] = (missing[key] || 0) + item.qty;
+            totalPieces += item.qty;
+          });
+        }
+      });
+
+      document.getElementById("total-parts-count").textContent = `${totalPieces} szt.`;
+
+      const missingGrid = document.getElementById("missing-parts-grid");
+      missingGrid.innerHTML = "";
+
+      const colorGroups = {};
+      Object.keys(missing).forEach(k => {
+        const [color, title] = k.split(":::");
+        if (!colorGroups[color]) colorGroups[color] = [];
+        colorGroups[color].push({ title, qty: missing[k] });
+      });
+
+      if (Object.keys(colorGroups).length === 0) {
+        missingGrid.innerHTML = `<div class="col-span-full py-4 text-stone-400 text-center">Wszystkie zamówienia są wydrukowane! 🎉</div>`;
+      } else {
+        for (const [col, list] of Object.entries(colorGroups)) {
+          const card = document.createElement("div");
+          card.className = "p-2.5 rounded-2xl border border-stone-200 bg-[#faf6f0] flex flex-col justify-between";
+          let itemsHtml = list.map(i => `<div class="font-bold text-stone-800 text-[11px]">${i.qty}x ${i.title}</div>`).join("");
+          card.innerHTML = `
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">${col}</span>
+              ${itemsHtml}
+            </div>
+          `;
+          missingGrid.appendChild(card);
+        }
+      }
+
+      const batchContainer = document.getElementById("batch-recommendation");
+      let bestColor = null;
+      let maxQty = 0;
+
+      for (const [col, list] of Object.entries(colorGroups)) {
+        const sum = list.reduce((acc, cur) => acc + cur.qty, 0);
+        if (sum > maxQty) {
+          maxQty = sum;
+          bestColor = col;
+        }
+      }
+
+      if (bestColor) {
+        const itemsToPrint = colorGroups[bestColor];
+        let totalGrams = 0;
+        let totalMinutes = 0;
+        let itemsStr = [];
+
+        itemsToPrint.forEach(i => {
+          const spec = SPECS[i.title] || { weight: 45, timeMinutes: 90 };
+          totalGrams += spec.weight * i.qty;
+          totalMinutes += spec.timeMinutes * i.qty;
+          itemsStr.push(`${i.qty}x ${i.title}`);
+        });
+
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+
+        batchContainer.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-orange-600 text-white">Rekomendacja P1S</span>
+            <span class="text-xs text-stone-400">Jeden kolor stołu = brak zmian szpuli</span>
+          </div>
+          <h4 class="text-lg font-bold">Wsad Stołu: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
+          <div class="flex flex-wrap gap-4 text-xs text-stone-300">
+            <div>⏱️ Czas druku: <strong class="text-amber-300 font-bold">${hours}h ${mins}m</strong></div>
+            <div>⚖️ Filament: <strong class="text-amber-300 font-bold">~${totalGrams}g (${bestColor})</strong></div>
+          </div>
+          <div class="pt-2 flex gap-2">
+            <button onclick="completeColorBatch('${bestColor}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
+              ✓ Oznacz ten wsad jako wydrukowany
+            </button>
+          </div>
+        `;
+      } else {
+        batchContainer.innerHTML = `
+          <div class="text-sm font-medium text-stone-300 py-2">
+            Brak oczekujących elementów na stół. Drukarka Bambu P1S może odpoczywać! 💤
+          </div>
+        `;
+      }
+
+      const ordersContainer = document.getElementById("orders-list");
+      ordersContainer.innerHTML = "";
+
+      orders.forEach(order => {
+        const isDone = order.status === "Zrealizowane";
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-3xl border transition ${isDone ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
+
+        let itemsHtml = order.items.map(item => `
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#faf6f0] border border-stone-200 text-xs text-stone-800">
+            <strong>${item.qty}x</strong> ${item.title} (${item.color})
+          </span>
+        `).join(" ");
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
+                <span class="text-xs text-stone-500">${order.customer} (${order.contact})</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">${order.status}</span>
+              </div>
+              <div class="text-xs text-stone-400 mt-0.5">Odbiór: ${order.delivery} | Złożono: ${order.date}</div>
+            </div>
+            ${!isDone ? `
+              <button onclick="markOrderDone('${order.id}')" class="shrink-0 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-xl text-xs font-semibold">
+                ✓ Gotowe
+              </button>
+            ` : `
+              <span class="text-xs text-emerald-700 font-bold">Wysłane ✓</span>
+            `}
+          </div>
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            ${itemsHtml}
+          </div>
+        `;
+        ordersContainer.appendChild(card);
+      });
+    }
+
+    function markOrderDone(orderId) {
+      const orders = getOrders();
+      const target = orders.find(o => o.id === orderId);
+      if (target) {
+        target.status = "Zrealizowane";
+        saveOrders(orders);
+        renderAdminPanel();
+      }
+    }
+
+    function completeColorBatch(color) {
+      alert(`Wsad stołu (${color}) wydrukowany!`);
+    }
+
+    function clearCompletedOrders() {
+      if (confirm("Czy na pewno chcesz usunąć z bazy zamówienia zrealizowane?")) {
+        let orders = getOrders();
+        orders = orders.filter(o => o.status !== "Zrealizowane");
+        saveOrders(orders);
+        renderAdminPanel();
+      }
+    }
+
+    const state = {
+      dynia: { color: 'Rudy', hex: '#c2410c' },
+      lisek: { color: 'Rudy', hex: '#c2410c' },
+      wiewiorka: { color: 'Rudy', hex: '#c2410c' },
+      taca: { color: 'Zielony', hex: '#2d5a27' }
+    };
+
+    const quantities = {
+      dynia: 1,
+      lisek: 1,
+      wiewiorka: 1,
+      taca: 1,
+      orzeszki: 1
+    };
+
+    let cart = [];
+
+    function changeQty(productId, delta) {
+      quantities[productId] = Math.max(1, quantities[productId] + delta);
+      document.getElementById(`qty-${productId}`).textContent = quantities[productId];
+    }
+
+    function setProductColor(productId, colorName, hexCode, btnElement) {
+      state[productId].color = colorName;
+      state[productId].hex = hexCode;
+
+      const svg = document.getElementById(`svg-${productId}`);
+      if (svg) svg.style.color = hexCode;
+
+      const label = document.getElementById(`label-${productId}`);
+      if (label) label.textContent = colorName;
+
+      const parent = btnElement.parentElement;
+      parent.querySelectorAll('.color-chip').forEach(chip => chip.classList.remove('active'));
+      btnElement.classList.add('active');
+    }
+
+    function addToCartWithQty(title, productId, unitPrice) {
+      const selectedColor = state[productId].color;
+      const count = quantities[productId];
+
+      const existingIndex = cart.findIndex(item => item.title === title && item.color === selectedColor);
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += count;
+      } else {
+        cart.push({ title, color: selectedColor, unitPrice, qty: count });
+      }
+
+      quantities[productId] = 1;
+      document.getElementById(`qty-${productId}`).textContent = 1;
+      updateCartUI();
+    }
+
+    function addHazelnutsToCartWithQty() {
+      const count = quantities['orzeszki'];
+      const title = 'Orzeszki laskowe (9 szt.)';
+      const color = 'Zielono-Brązowy';
+      const unitPrice = 10;
+
+      const existingIndex = cart.findIndex(item => item.title === title);
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += count;
+      } else {
+        cart.push({ title, color, unitPrice, qty: count });
+      }
+
+      quantities['orzeszki'] = 1;
+      document.getElementById('qty-orzeszki').textContent = 1;
+      updateCartUI();
+    }
+
+    function changeCartItemQty(index, delta) {
+      cart[index].qty += delta;
+      if (cart[index].qty <= 0) cart.splice(index, 1);
+      updateCartUI();
+      renderCartDrawer();
+      if (cart.length === 0) closeCheckout();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+      renderCartDrawer();
+      if (cart.length === 0) closeCheckout();
+    }
+
+    function updateCartUI() {
+      const totalPieces = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+
+      document.getElementById('cart-count').textContent = totalPieces;
+      document.getElementById('cart-total').textContent = totalPrice.toFixed(2) + ' zł';
+      document.getElementById('modal-total').textContent = totalPrice.toFixed(2) + ' zł';
+
+      const bar = document.getElementById('sticky-bar');
+      if (totalPieces > 0) bar.classList.remove('hidden');
+      else bar.classList.add('hidden');
+    }
+
+    function openCheckout() {
+      renderCartDrawer();
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckout() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function renderCartDrawer() {
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+      cart.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'py-3 flex justify-between items-center';
+        row.innerHTML = `
+          <div>
+            <div class="font-medium text-stone-900">${item.title}</div>
+            <div class="text-xs text-stone-500">Kolor: <span class="font-semibold text-stone-700">${item.color}</span></div>
+            <div class="text-xs text-stone-400 mt-0.5">${item.unitPrice.toFixed(2)} zł / szt.</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center border border-amber-900/15 rounded-xl bg-[#faf6f0] px-1 py-0.5 text-xs">
+              <button onclick="changeCartItemQty(${index}, -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-lg">-</button>
+              <span class="w-6 text-center font-bold text-stone-900">${item.qty}</span>
+              <button onclick="changeCartItemQty(${index}, 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-lg">+</button>
+            </div>
+            <span class="font-bold text-stone-900 w-16 text-right">${(item.unitPrice * item.qty).toFixed(2)} zł</span>
+            <button onclick="removeFromCart(${index})" class="text-amber-800 hover:text-red-700 text-xs font-semibold ml-1">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      const customerName = document.getElementById("form-name").value;
+      const customerContact = document.getElementById("form-contact").value;
+      const deliveryMethod = document.querySelector('input[name="delivery"]:checked').value;
+      const orderId = Math.floor(100 + Math.random() * 900).toString();
+
+      const orders = getOrders();
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 16).replace("T", " ");
+
+      orders.unshift({
+        id: orderId,
+        customer: customerName,
+        contact: customerContact,
+        delivery: deliveryMethod,
+        date: dateStr,
+        status: "W kolejce",
+        items: cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }))
+      });
+      saveOrders(orders);
+
+      closeCheckout();
+      document.getElementById('catalog-view').classList.add('hidden');
+      document.getElementById('sticky-bar').classList.add('hidden');
+      document.getElementById('order-id').textContent = orderId;
+      document.getElementById('success-view').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
