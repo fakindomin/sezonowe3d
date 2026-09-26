@@ -26,10 +26,9 @@
 <body class="bg-[#faf6f0] text-stone-800 pb-28">
 
   <!-- ========================================== -->
-  <!-- 1. WIDOK SKLEPU (DLA KLIENTA)             -->
+  <!-- 1. SKLEP DLA KLIENTA                      -->
   <!-- ========================================== -->
   <div id="client-app">
-    <!-- Header z nową nazwą -->
     <header class="bg-[#fffdfa]/90 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-4 py-3.5 shadow-sm">
       <div class="max-w-md mx-auto flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -47,7 +46,6 @@
       </div>
     </header>
 
-    <!-- Główny kontener katalogu -->
     <main class="max-w-md mx-auto px-4 pt-5 space-y-4" id="catalog-view">
       <div class="relative overflow-hidden bg-gradient-to-br from-amber-100/90 via-orange-50 to-[#f6ecdc] p-4 rounded-3xl border border-amber-900/10 shadow-sm">
         <div class="relative z-10">
@@ -285,7 +283,7 @@
       </div>
     </main>
 
-    <!-- Pływający dolny pasek koszyka -->
+    <!-- Pływający pasek koszyka -->
     <div id="sticky-bar" class="fixed bottom-3 inset-x-3 max-w-md mx-auto hidden z-40">
       <div class="bg-stone-900 text-amber-50 p-3.5 rounded-2xl shadow-xl shadow-stone-900/30 flex items-center justify-between border border-stone-700/80">
         <div class="flex items-center gap-3">
@@ -348,7 +346,7 @@
       </div>
     </div>
 
-    <!-- Ekran sukcesu klienta -->
+    <!-- Sukces klienta -->
     <div id="success-view" class="max-w-md mx-auto px-4 pt-8 hidden text-center space-y-6">
       <div class="w-16 h-16 bg-amber-100 text-amber-800 border border-amber-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner">
         🍁
@@ -376,10 +374,10 @@
       </div>
       <div>
         <h2 class="font-bold text-lg text-stone-900">Panel Administratora</h2>
-        <p class="text-xs text-stone-500 mt-1">Podaj hasło, aby zarządzać drukiem</p>
+        <p class="text-xs text-stone-500 mt-1">Podaj hasło dostępu</p>
       </div>
       <form onsubmit="checkAdminPassword(event)" class="space-y-3">
-        <input id="admin-pass-input" type="password" placeholder="Hasło dostępu" class="w-full text-center text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+        <input id="admin-pass-input" type="password" placeholder="Hasło" class="w-full text-center text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
         <p id="login-error" class="text-xs text-red-600 hidden font-medium">Nieprawidłowe hasło!</p>
         <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-amber-50 font-bold py-2.5 rounded-xl text-xs">
           Zaloguj się
@@ -390,53 +388,155 @@
 
 
   <!-- ========================================== -->
-  <!-- 3. GŁÓWNY PANEL ADMINA                    -->
+  <!-- 3. GŁÓWNY PANEL ADMINA (PODSTRONY)        -->
   <!-- ========================================== -->
-  <div id="admin-dashboard" class="max-w-2xl mx-auto px-4 pt-5 pb-16 hidden space-y-6">
+  <div id="admin-app" class="max-w-2xl mx-auto px-4 pt-5 pb-16 hidden space-y-5">
     
-    <div class="flex items-center justify-between border-b border-amber-900/10 pb-4">
-      <div>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">Centrum Zarządzania Produkcją</span>
-        <h2 class="text-xl font-bold text-stone-900">Bambu Lab P1S + AMS</h2>
+    <!-- Pasek nagłówka admina -->
+    <header class="flex items-center justify-between border-b border-amber-900/10 pb-4">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-xl bg-stone-900 text-amber-100 flex items-center justify-center font-bold text-xs">⚙️</span>
+        <div>
+          <h2 class="font-bold text-base text-stone-900">Admin sezonowe3d</h2>
+          <p class="text-[10px] text-stone-500" id="current-view-title">Menu główne</p>
+        </div>
       </div>
       <div class="flex items-center gap-2">
+        <button id="btn-back-hub" onclick="switchAdminTab('hub')" class="hidden text-xs font-semibold px-3 py-1.5 rounded-xl bg-amber-100 text-amber-900 border border-amber-200">
+          ← Wróć do menu
+        </button>
         <button onclick="logoutAdmin()" class="text-xs font-semibold px-3 py-1.5 rounded-xl border border-stone-300 hover:bg-stone-200">
           Wyloguj
         </button>
       </div>
+    </header>
+
+    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI / PRZYCISKI) -->
+    <div id="admin-tab-hub" class="space-y-4">
+      <div class="bg-gradient-to-br from-amber-100/70 to-orange-50 p-4 rounded-3xl border border-amber-900/10">
+        <h3 class="font-bold text-lg text-stone-900">Witaj w pracowni!</h3>
+        <p class="text-xs text-stone-600 mt-0.5">Wybierz moduł, którym chcesz zarządzać:</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Przycisk Zamówienia -->
+        <button onclick="switchAdminTab('orders')" class="p-5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md hover:border-amber-700/40 text-left transition flex flex-col justify-between h-36">
+          <div class="flex items-center justify-between w-full">
+            <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center text-xl">📦</span>
+            <span id="badge-active-orders" class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-600 text-white">0</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-base text-stone-900">Zamówienia</h4>
+            <p class="text-[11px] text-stone-500">Lista klientów i statusy</p>
+          </div>
+        </button>
+
+        <!-- Przycisk Planer Druku P1S -->
+        <button onclick="switchAdminTab('batcher')" class="p-5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md hover:border-amber-700/40 text-left transition flex flex-col justify-between h-36">
+          <div class="flex items-center justify-between w-full">
+            <span class="w-10 h-10 rounded-2xl bg-orange-100 text-orange-900 flex items-center justify-center text-xl">🖨️</span>
+            <span id="badge-missing-parts" class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">0 szt.</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-base text-stone-900">Planer Stołu</h4>
+            <p class="text-[11px] text-stone-500">Optymalizacja P1S + AMS</p>
+          </div>
+        </button>
+
+        <!-- Przycisk Ustawienia Wydruków -->
+        <button onclick="switchAdminTab('settings')" class="p-5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md hover:border-amber-700/40 text-left transition flex flex-col justify-between h-36">
+          <span class="w-10 h-10 rounded-2xl bg-stone-100 text-stone-800 flex items-center justify-center text-xl">⚙️</span>
+          <div>
+            <h4 class="font-bold text-base text-stone-900">Ustawienia</h4>
+            <p class="text-[11px] text-stone-500">Czasy i wagi filamentu</p>
+          </div>
+        </button>
+      </div>
     </div>
 
-    <!-- REKOMENDOWANY STÓŁ -->
-    <div id="batch-recommendation" class="bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 p-5 rounded-3xl shadow-lg border border-stone-700 space-y-3"></div>
 
-    <!-- BRAKI DO WYDRUKU -->
-    <div class="bg-[#fffdfa] p-4 rounded-3xl border border-amber-900/10 shadow-sm space-y-3">
+    <!-- WIDOK B: PODSTRONA ZAMÓWIENIA -->
+    <div id="admin-tab-orders" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-sm text-stone-900">Braki do wydrukowania (Kolejka P1S)</h3>
-        <span id="total-parts-count" class="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900">0 szt.</span>
+        <div>
+          <h3 class="font-bold text-lg text-stone-900">Zarządzanie Zamówieniami</h3>
+          <p class="text-xs text-stone-500">Śledź realizację i oznaczaj jako gotowe</p>
+        </div>
+        <button onclick="clearCompletedOrders()" class="text-xs text-stone-400 hover:text-stone-700 underline">
+          Usuń zrealizowane
+        </button>
       </div>
-      <div id="missing-parts-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"></div>
+
+      <div id="orders-list-view" class="space-y-3">
+        <!-- Renderowane przez JS -->
+      </div>
     </div>
 
-    <!-- ZAMÓWIENIA -->
-    <div class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-sm text-stone-900">Wszystkie zamówienia (<span id="orders-count">0</span>)</h3>
-        <button onclick="clearCompletedOrders()" class="text-[11px] text-stone-400 hover:text-stone-700 underline">Wyczyść zrealizowane</button>
+
+    <!-- WIDOK C: PODSTRONA PLANER STOŁU I BRAKI -->
+    <div id="admin-tab-batcher" class="space-y-5 hidden">
+      <!-- Rekomendacja partii -->
+      <div id="batch-recommendation" class="bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 p-5 rounded-3xl shadow-lg border border-stone-700 space-y-3">
+        <!-- Renderowane dynamicznie -->
       </div>
-      <div id="orders-list" class="space-y-3"></div>
+
+      <!-- Sumaryczna lista elementów -->
+      <div class="bg-[#fffdfa] p-4 rounded-3xl border border-amber-900/10 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-sm text-stone-900">Wszystkie braki do wydruku (Kolejka)</h4>
+          <span id="tab-missing-count" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">0 szt.</span>
+        </div>
+        <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <!-- Renderowane przez JS -->
+        </div>
+      </div>
+    </div>
+
+
+    <!-- WIDOK D: PODSTRONA USTAWIENIA PARAMETRÓW DRUKU -->
+    <div id="admin-tab-settings" class="space-y-4 hidden">
+      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
+        <div>
+          <h3 class="font-bold text-lg text-stone-900">Parametry Wydruków (Bambu Studio)</h3>
+          <p class="text-xs text-stone-500">Podaj rzeczywiste wagi i czasy, aby kalkulator wyliczał dokładne wsady stołu.</p>
+        </div>
+
+        <div id="specs-editor" class="space-y-3 divide-y divide-amber-900/10 text-xs">
+          <!-- Generowane dynamicznie dla każdego modelu -->
+        </div>
+
+        <button onclick="saveSpecsChanges()" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl font-bold text-xs transition">
+          Zapisz zmiany parametrów
+        </button>
+      </div>
     </div>
 
   </div>
 
   <script>
-    const SPECS = {
+    // ==========================================
+    // BAZA DANYCH I USTAWIENIA
+    // ==========================================
+    const DEFAULT_SPECS = {
       'Dynia': { weight: 42, timeMinutes: 100 },
       'Lisek': { weight: 55, timeMinutes: 130 },
       'Wiewiórka': { weight: 50, timeMinutes: 120 },
       'Taca': { weight: 110, timeMinutes: 195 },
       'Orzeszki laskowe (9 szt.)': { weight: 60, timeMinutes: 210 }
     };
+
+    function getSpecs() {
+      const data = localStorage.getItem("bambu_specs");
+      if (!data) {
+        localStorage.setItem("bambu_specs", JSON.stringify(DEFAULT_SPECS));
+        return DEFAULT_SPECS;
+      }
+      return JSON.parse(data);
+    }
+
+    function saveSpecs(newSpecs) {
+      localStorage.setItem("bambu_specs", JSON.stringify(newSpecs));
+    }
 
     const ADMIN_PASSWORD = "bambu123";
 
@@ -481,6 +581,9 @@
       localStorage.setItem("bambu_3d_orders", JSON.stringify(orders));
     }
 
+    // ==========================================
+    // ROUTING & NAWIGACJA PO PANELU
+    // ==========================================
     function route() {
       const hash = window.location.hash;
       const isAuth = sessionStorage.getItem("bambu_admin_logged") === "true";
@@ -489,15 +592,15 @@
         document.getElementById("client-app").classList.add("hidden");
         if (isAuth) {
           document.getElementById("admin-login").classList.add("hidden");
-          document.getElementById("admin-dashboard").classList.remove("hidden");
-          renderAdminPanel();
+          document.getElementById("admin-app").classList.remove("hidden");
+          switchAdminTab('hub');
         } else {
-          document.getElementById("admin-dashboard").classList.add("hidden");
+          document.getElementById("admin-app").classList.add("hidden");
           document.getElementById("admin-login").classList.remove("hidden");
         }
       } else {
         document.getElementById("admin-login").classList.add("hidden");
-        document.getElementById("admin-dashboard").classList.add("hidden");
+        document.getElementById("admin-app").classList.add("hidden");
         document.getElementById("client-app").classList.remove("hidden");
       }
     }
@@ -523,106 +626,66 @@
       route();
     }
 
-    function renderAdminPanel() {
+    // Przełączanie podstron w adminie
+    function switchAdminTab(tabName) {
+      const tabs = ['hub', 'orders', 'batcher', 'settings'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`admin-tab-${t}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`admin-tab-${tabName}`);
+      if (target) target.classList.remove('hidden');
+
+      const backBtn = document.getElementById('btn-back-hub');
+      const title = document.getElementById('current-view-title');
+
+      if (tabName === 'hub') {
+        backBtn.classList.add('hidden');
+        title.textContent = "Menu główne";
+        updateHubBadges();
+      } else {
+        backBtn.classList.remove('hidden');
+        if (tabName === 'orders') {
+          title.textContent = "Zamówienia";
+          renderOrdersView();
+        } else if (tabName === 'batcher') {
+          title.textContent = "Planer Stołu P1S";
+          renderBatcherView();
+        } else if (tabName === 'settings') {
+          title.textContent = "Ustawienia Wydruków";
+          renderSettingsView();
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==========================================
+    // LOGIKA PODSTRON ADMINA
+    // ==========================================
+    function updateHubBadges() {
       const orders = getOrders();
-      document.getElementById("orders-count").textContent = orders.length;
+      const activeCount = orders.filter(o => o.status !== "Zrealizowane").length;
+      document.getElementById('badge-active-orders').textContent = activeCount;
 
-      const missing = {};
-      let totalPieces = 0;
-
-      orders.forEach(order => {
-        if (order.status !== "Zrealizowane") {
-          order.items.forEach(item => {
-            const key = `${item.color}:::${item.title}`;
-            missing[key] = (missing[key] || 0) + item.qty;
-            totalPieces += item.qty;
-          });
+      let missingPieces = 0;
+      orders.forEach(o => {
+        if (o.status !== "Zrealizowane") {
+          o.items.forEach(i => missingPieces += i.qty);
         }
       });
+      document.getElementById('badge-missing-parts').textContent = `${missingPieces} szt.`;
+    }
 
-      document.getElementById("total-parts-count").textContent = `${totalPieces} szt.`;
+    function renderOrdersView() {
+      const orders = getOrders();
+      const container = document.getElementById('orders-list-view');
+      container.innerHTML = "";
 
-      const missingGrid = document.getElementById("missing-parts-grid");
-      missingGrid.innerHTML = "";
-
-      const colorGroups = {};
-      Object.keys(missing).forEach(k => {
-        const [color, title] = k.split(":::");
-        if (!colorGroups[color]) colorGroups[color] = [];
-        colorGroups[color].push({ title, qty: missing[k] });
-      });
-
-      if (Object.keys(colorGroups).length === 0) {
-        missingGrid.innerHTML = `<div class="col-span-full py-4 text-stone-400 text-center">Wszystkie zamówienia są wydrukowane! 🎉</div>`;
-      } else {
-        for (const [col, list] of Object.entries(colorGroups)) {
-          const card = document.createElement("div");
-          card.className = "p-2.5 rounded-2xl border border-stone-200 bg-[#faf6f0] flex flex-col justify-between";
-          let itemsHtml = list.map(i => `<div class="font-bold text-stone-800 text-[11px]">${i.qty}x ${i.title}</div>`).join("");
-          card.innerHTML = `
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">${col}</span>
-              ${itemsHtml}
-            </div>
-          `;
-          missingGrid.appendChild(card);
-        }
+      if (orders.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-stone-400">Brak zamówień w bazie.</div>`;
+        return;
       }
-
-      const batchContainer = document.getElementById("batch-recommendation");
-      let bestColor = null;
-      let maxQty = 0;
-
-      for (const [col, list] of Object.entries(colorGroups)) {
-        const sum = list.reduce((acc, cur) => acc + cur.qty, 0);
-        if (sum > maxQty) {
-          maxQty = sum;
-          bestColor = col;
-        }
-      }
-
-      if (bestColor) {
-        const itemsToPrint = colorGroups[bestColor];
-        let totalGrams = 0;
-        let totalMinutes = 0;
-        let itemsStr = [];
-
-        itemsToPrint.forEach(i => {
-          const spec = SPECS[i.title] || { weight: 45, timeMinutes: 90 };
-          totalGrams += spec.weight * i.qty;
-          totalMinutes += spec.timeMinutes * i.qty;
-          itemsStr.push(`${i.qty}x ${i.title}`);
-        });
-
-        const hours = Math.floor(totalMinutes / 60);
-        const mins = totalMinutes % 60;
-
-        batchContainer.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-orange-600 text-white">Rekomendacja P1S</span>
-            <span class="text-xs text-stone-400">Jeden kolor stołu = brak zmian szpuli</span>
-          </div>
-          <h4 class="text-lg font-bold">Wsad Stołu: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
-          <div class="flex flex-wrap gap-4 text-xs text-stone-300">
-            <div>⏱️ Czas druku: <strong class="text-amber-300 font-bold">${hours}h ${mins}m</strong></div>
-            <div>⚖️ Filament: <strong class="text-amber-300 font-bold">~${totalGrams}g (${bestColor})</strong></div>
-          </div>
-          <div class="pt-2 flex gap-2">
-            <button onclick="completeColorBatch('${bestColor}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
-              ✓ Oznacz ten wsad jako wydrukowany
-            </button>
-          </div>
-        `;
-      } else {
-        batchContainer.innerHTML = `
-          <div class="text-sm font-medium text-stone-300 py-2">
-            Brak oczekujących elementów na stół. Drukarka Bambu P1S może odpoczywać! 💤
-          </div>
-        `;
-      }
-
-      const ordersContainer = document.getElementById("orders-list");
-      ordersContainer.innerHTML = "";
 
       orders.forEach(order => {
         const isDone = order.status === "Zrealizowane";
@@ -657,7 +720,7 @@
             ${itemsHtml}
           </div>
         `;
-        ordersContainer.appendChild(card);
+        container.appendChild(card);
       });
     }
 
@@ -667,23 +730,161 @@
       if (target) {
         target.status = "Zrealizowane";
         saveOrders(orders);
-        renderAdminPanel();
+        renderOrdersView();
+        updateHubBadges();
       }
-    }
-
-    function completeColorBatch(color) {
-      alert(`Wsad stołu (${color}) wydrukowany!`);
     }
 
     function clearCompletedOrders() {
-      if (confirm("Czy na pewno chcesz usunąć z bazy zamówienia zrealizowane?")) {
+      if (confirm("Usunąć wszystkie zrealizowane zamówienia?")) {
         let orders = getOrders();
         orders = orders.filter(o => o.status !== "Zrealizowane");
         saveOrders(orders);
-        renderAdminPanel();
+        renderOrdersView();
+        updateHubBadges();
       }
     }
 
+    function renderBatcherView() {
+      const orders = getOrders();
+      const specs = getSpecs();
+      const missing = {};
+      let totalPieces = 0;
+
+      orders.forEach(order => {
+        if (order.status !== "Zrealizowane") {
+          order.items.forEach(item => {
+            const key = `${item.color}:::${item.title}`;
+            missing[key] = (missing[key] || 0) + item.qty;
+            totalPieces += item.qty;
+          });
+        }
+      });
+
+      document.getElementById('tab-missing-count').textContent = `${totalPieces} szt.`;
+
+      const colorGroups = {};
+      Object.keys(missing).forEach(k => {
+        const [color, title] = k.split(":::");
+        if (!colorGroups[color]) colorGroups[color] = [];
+        colorGroups[color].push({ title, qty: missing[k] });
+      });
+
+      // Render kafelków braków
+      const grid = document.getElementById('tab-missing-grid');
+      grid.innerHTML = "";
+      if (Object.keys(colorGroups).length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-4 text-stone-400 text-center">Wszystko wydrukowane! 🍂</div>`;
+      } else {
+        for (const [col, list] of Object.entries(colorGroups)) {
+          const card = document.createElement("div");
+          card.className = "p-2.5 rounded-2xl border border-stone-200 bg-[#faf6f0]";
+          let itemsHtml = list.map(i => `<div class="font-bold text-stone-800 text-[11px]">${i.qty}x ${i.title}</div>`).join("");
+          card.innerHTML = `
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">${col}</span>
+            ${itemsHtml}
+          `;
+          grid.appendChild(card);
+        }
+      }
+
+      // Rekomendacja stołu
+      const batchContainer = document.getElementById("batch-recommendation");
+      let bestColor = null;
+      let maxQty = 0;
+
+      for (const [col, list] of Object.entries(colorGroups)) {
+        const sum = list.reduce((acc, cur) => acc + cur.qty, 0);
+        if (sum > maxQty) {
+          maxQty = sum;
+          bestColor = col;
+        }
+      }
+
+      if (bestColor) {
+        const itemsToPrint = colorGroups[bestColor];
+        let totalGrams = 0;
+        let totalMinutes = 0;
+        let itemsStr = [];
+
+        itemsToPrint.forEach(i => {
+          const spec = specs[i.title] || { weight: 45, timeMinutes: 90 };
+          totalGrams += spec.weight * i.qty;
+          totalMinutes += spec.timeMinutes * i.qty;
+          itemsStr.push(`${i.qty}x ${i.title}`);
+        });
+
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+
+        batchContainer.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-orange-600 text-white">Rekomendowany Stół</span>
+            <span class="text-xs text-stone-400">1 kolor = 0 odpadu na wieżę purge</span>
+          </div>
+          <h4 class="text-lg font-bold">Wsad: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
+          <div class="flex flex-wrap gap-4 text-xs text-stone-300">
+            <div>⏱️ Czas druku: <strong class="text-amber-300 font-bold">${hours}h ${mins}m</strong></div>
+            <div>⚖️ Filament: <strong class="text-amber-300 font-bold">~${totalGrams}g (${bestColor})</strong></div>
+          </div>
+          <div class="pt-2">
+            <button onclick="alert('Wsad (${bestColor}) oznaczony. Zamknij teraz zrealizowane zamówienia na podstronie Zamówienia.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
+              ✓ Oznacz ten wsad jako wydrukowany
+            </button>
+          </div>
+        `;
+      } else {
+        batchContainer.innerHTML = `
+          <div class="text-sm font-medium text-stone-300 py-2">
+            Drukarka odpoczywa! Brak oczekujących zleceń. 💤
+          </div>
+        `;
+      }
+    }
+
+    function renderSettingsView() {
+      const specs = getSpecs();
+      const container = document.getElementById('specs-editor');
+      container.innerHTML = "";
+
+      Object.keys(specs).forEach(name => {
+        const item = specs[name];
+        const row = document.createElement("div");
+        row.className = "pt-3 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2";
+        row.innerHTML = `
+          <div class="font-bold text-stone-900 text-sm">${name}</div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1">
+              <span class="text-stone-500">Waga:</span>
+              <input type="number" id="spec-weight-${name}" value="${item.weight}" class="w-16 px-2 py-1 rounded-lg border border-amber-900/20 bg-[#faf6f0] text-center font-bold">
+              <span class="text-stone-400">g</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="text-stone-500">Czas:</span>
+              <input type="number" id="spec-time-${name}" value="${item.timeMinutes}" class="w-16 px-2 py-1 rounded-lg border border-amber-900/20 bg-[#faf6f0] text-center font-bold">
+              <span class="text-stone-400">min</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function saveSpecsChanges() {
+      const specs = getSpecs();
+      Object.keys(specs).forEach(name => {
+        const w = parseInt(document.getElementById(`spec-weight-${name}`).value) || 0;
+        const t = parseInt(document.getElementById(`spec-time-${name}`).value) || 0;
+        specs[name] = { weight: w, timeMinutes: t };
+      });
+      saveSpecs(specs);
+      alert("Parametry druku zostały pomyślnie zaktualizowane!");
+    }
+
+
+    // ==========================================
+    // LOGIKA KOSZYKA I SKLEPU (FRONTEND)
+    // ==========================================
     const state = {
       dynia: { color: 'Rudy', hex: '#c2410c' },
       lisek: { color: 'Rudy', hex: '#c2410c' },
