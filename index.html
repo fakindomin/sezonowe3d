@@ -25,250 +25,243 @@
 </head>
 <body class="bg-[#faf6f0] text-stone-800 pb-28">
 
-  <!-- Header -->
-  <header class="bg-[#fffdfa]/90 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-4 py-3.5 shadow-sm">
-    <div class="max-w-md mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center text-amber-50 text-lg shadow-md shadow-orange-900/20">
-          🍁
-        </div>
-        <div>
-          <h1 class="font-bold text-lg text-stone-900 leading-none">Leśna Pracownia 3D</h1>
-          <p class="text-[11px] font-medium text-amber-800/70 mt-0.5">Rękodzieło i dekoracje</p>
-        </div>
-      </div>
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100/70 text-amber-900 border border-amber-300/60">
-        Pracownia otwarta
-      </span>
-    </div>
-  </header>
-
-  <!-- Główny kontener -->
-  <main class="max-w-md mx-auto px-4 pt-5 space-y-4" id="catalog-view">
-    <!-- Baner powitalny -->
-    <div class="relative overflow-hidden bg-gradient-to-br from-amber-100/90 via-orange-50 to-[#f6ecdc] p-4 rounded-3xl border border-amber-900/10 shadow-sm">
-      <div class="relative z-10">
-        <span class="text-[10px] font-bold tracking-widest uppercase text-amber-800 block mb-1">Kolekcja Sezonowa</span>
-        <h2 class="text-2xl font-bold text-stone-900 tracking-tight">Jesienne Dekoracje</h2>
-        <p class="text-xs text-stone-600 mt-1 max-w-[260px]">Wybierz figurki, dobierz kolory oraz liczbę sztuk.</p>
-      </div>
-      <span class="absolute -right-3 -bottom-3 text-6xl opacity-20 rotate-12 select-none">🍂</span>
-    </div>
-
-    <!-- Siatka produktów -->
-    <div class="grid grid-cols-1 gap-4" id="products-list">
-      
-      <!-- 1. DYNIA (10 zł) -->
-      <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between" id="card-dynia">
-        <div class="flex gap-4">
-          <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-            <svg id="svg-dynia" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
-              <path d="M30 18c0-6 4-10 8-11-1 3-1 6-3 8" fill="none" stroke="#2d5a27" stroke-width="3.5" stroke-linecap="round"/>
-              <ellipse cx="32" cy="38" rx="20" ry="17" fill="currentColor"/>
-              <ellipse cx="32" cy="38" rx="13" ry="17" fill="black" fill-opacity="0.08"/>
-              <ellipse cx="32" cy="38" rx="6" ry="17" fill="black" fill-opacity="0.08"/>
-            </svg>
+  <!-- ========================================== -->
+  <!-- 1. WIDOK SKLEPU (DLA KLIENTA)             -->
+  <!-- ========================================== -->
+  <div id="client-app">
+    <!-- Header -->
+    <header class="bg-[#fffdfa]/90 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-4 py-3.5 shadow-sm">
+      <div class="max-w-md mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center text-amber-50 text-lg shadow-md shadow-orange-900/20">
+            🍁
           </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-base text-stone-900 leading-tight">Dynia dekoracyjna</h3>
-            <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
+          <div>
+            <h1 class="font-bold text-lg text-stone-900 leading-none">Leśna Pracownia 3D</h1>
+            <p class="text-[11px] font-medium text-amber-800/70 mt-0.5">Rękodzieło i dekoracje</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100/70 text-amber-900 border border-amber-300/60">
+          Pracownia otwarta
+        </span>
+      </div>
+    </header>
 
-            <!-- Wybór koloru -->
-            <div class="mt-2.5">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-dynia" class="text-stone-900 font-bold">Rudy</span></span>
-              <div class="flex flex-wrap gap-1.5">
-                <button type="button" onclick="setProductColor('dynia', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                </button>
-                <button type="button" onclick="setProductColor('dynia', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                </button>
-                <button type="button" onclick="setProductColor('dynia', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                </button>
-                <button type="button" onclick="setProductColor('dynia', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                </button>
+    <!-- Główny kontener katalogu -->
+    <main class="max-w-md mx-auto px-4 pt-5 space-y-4" id="catalog-view">
+      <div class="relative overflow-hidden bg-gradient-to-br from-amber-100/90 via-orange-50 to-[#f6ecdc] p-4 rounded-3xl border border-amber-900/10 shadow-sm">
+        <div class="relative z-10">
+          <span class="text-[10px] font-bold tracking-widest uppercase text-amber-800 block mb-1">Kolekcja Sezonowa</span>
+          <h2 class="text-2xl font-bold text-stone-900 tracking-tight">Jesienne Dekoracje</h2>
+          <p class="text-xs text-stone-600 mt-1 max-w-[260px]">Wybierz figurki, dobierz kolory oraz liczbę sztuk.</p>
+        </div>
+        <span class="absolute -right-3 -bottom-3 text-6xl opacity-20 rotate-12 select-none">🍂</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4" id="products-list">
+        
+        <!-- 1. DYNIA (10 zł) -->
+        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-dynia">
+          <div class="flex gap-4">
+            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
+              <svg id="svg-dynia" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
+                <path d="M30 18c0-6 4-10 8-11-1 3-1 6-3 8" fill="none" stroke="#2d5a27" stroke-width="3.5" stroke-linecap="round"/>
+                <ellipse cx="32" cy="38" rx="20" ry="17" fill="currentColor"/>
+                <ellipse cx="32" cy="38" rx="13" ry="17" fill="black" fill-opacity="0.08"/>
+                <ellipse cx="32" cy="38" rx="6" ry="17" fill="black" fill-opacity="0.08"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-base text-stone-900 leading-tight">Dynia dekoracyjna</h3>
+              <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
+
+              <div class="mt-2.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-dynia" class="text-stone-900 font-bold">Rudy</span></span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="setProductColor('dynia', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
+                  </button>
+                  <button type="button" onclick="setProductColor('dynia', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
+                  </button>
+                  <button type="button" onclick="setProductColor('dynia', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
+                  </button>
+                  <button type="button" onclick="setProductColor('dynia', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="mt-4 flex items-center gap-2">
+            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
+              <button onclick="changeQty('dynia', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-dynia" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('dynia', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+            </div>
+            <button onclick="addToCartWithQty('Dynia', 'dynia', 10)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
+              <span>+ Dodaj do koszyka</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Licznik i przycisk dodawania -->
-        <div class="mt-4 flex items-center gap-2">
-          <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-            <button onclick="changeQty('dynia', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-            <span id="qty-dynia" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-            <button onclick="changeQty('dynia', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-          </div>
-          <button onclick="addToCartWithQty('Dynia dekoracyjna', 'dynia', 10)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-            <span>+ Dodaj do koszyka</span>
-          </button>
-        </div>
-      </div>
+        <!-- 2. LISEK (5 zł) -->
+        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-lisek">
+          <div class="flex gap-4">
+            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
+              <svg id="svg-lisek" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
+                <polygon points="12,18 24,32 16,36" fill="currentColor"/>
+                <polygon points="52,18 40,32 48,36" fill="currentColor"/>
+                <polygon points="32,24 16,36 32,54 48,36" fill="currentColor"/>
+                <polygon points="32,24 24,32 40,32" fill="black" fill-opacity="0.12"/>
+                <polygon points="28,48 32,54 36,48" fill="#292524"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-base text-stone-900 leading-tight">Lisek geometryczny</h3>
+              <div class="text-sm font-bold text-amber-900 mt-0.5">5,00 zł</div>
 
-      <!-- 2. LISEK (5 zł) -->
-      <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between" id="card-lisek">
-        <div class="flex gap-4">
-          <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-            <svg id="svg-lisek" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
-              <polygon points="12,18 24,32 16,36" fill="currentColor"/>
-              <polygon points="52,18 40,32 48,36" fill="currentColor"/>
-              <polygon points="32,24 16,36 32,54 48,36" fill="currentColor"/>
-              <polygon points="32,24 24,32 40,32" fill="black" fill-opacity="0.12"/>
-              <polygon points="28,48 32,54 36,48" fill="#292524"/>
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-base text-stone-900 leading-tight">Lisek geometryczny</h3>
-            <div class="text-sm font-bold text-amber-900 mt-0.5">5,00 zł</div>
-
-            <div class="mt-2.5">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-lisek" class="text-stone-900 font-bold">Rudy</span></span>
-              <div class="flex flex-wrap gap-1.5">
-                <button type="button" onclick="setProductColor('lisek', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                </button>
-                <button type="button" onclick="setProductColor('lisek', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                </button>
-                <button type="button" onclick="setProductColor('lisek', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                </button>
-                <button type="button" onclick="setProductColor('lisek', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                </button>
+              <div class="mt-2.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-lisek" class="text-stone-900 font-bold">Rudy</span></span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="setProductColor('lisek', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
+                  </button>
+                  <button type="button" onclick="setProductColor('lisek', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
+                  </button>
+                  <button type="button" onclick="setProductColor('lisek', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
+                  </button>
+                  <button type="button" onclick="setProductColor('lisek', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="mt-4 flex items-center gap-2">
+            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
+              <button onclick="changeQty('lisek', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-lisek" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('lisek', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+            </div>
+            <button onclick="addToCartWithQty('Lisek', 'lisek', 5)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
+              <span>+ Dodaj do koszyka</span>
+            </button>
+          </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-2">
-          <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-            <button onclick="changeQty('lisek', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-            <span id="qty-lisek" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-            <button onclick="changeQty('lisek', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-          </div>
-          <button onclick="addToCartWithQty('Lisek geometryczny', 'lisek', 5)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-            <span>+ Dodaj do koszyka</span>
-          </button>
-        </div>
-      </div>
+        <!-- 3. WIEWIÓRKA (5 zł) -->
+        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-wiewiorka">
+          <div class="flex gap-4">
+            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
+              <svg id="svg-wiewiorka" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
+                <path d="M42 46c8 0 14-8 14-16s-6-14-12-14c-4 0-6 4-6 4s1 6-2 10c-3 4-8 5-8 5" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+                <ellipse cx="26" cy="40" rx="9" ry="12" fill="currentColor"/>
+                <circle cx="24" cy="24" r="7" fill="currentColor"/>
+                <polygon points="20,18 24,12 26,18" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-base text-stone-900 leading-tight">Wiewiórka</h3>
+              <div class="text-sm font-bold text-amber-900 mt-0.5">5,00 zł</div>
 
-      <!-- 3. WIEWIÓRKA (5 zł) -->
-      <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between" id="card-wiewiorka">
-        <div class="flex gap-4">
-          <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-            <svg id="svg-wiewiorka" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
-              <path d="M42 46c8 0 14-8 14-16s-6-14-12-14c-4 0-6 4-6 4s1 6-2 10c-3 4-8 5-8 5" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
-              <ellipse cx="26" cy="40" rx="9" ry="12" fill="currentColor"/>
-              <circle cx="24" cy="24" r="7" fill="currentColor"/>
-              <polygon points="20,18 24,12 26,18" fill="currentColor"/>
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-base text-stone-900 leading-tight">Wiewiórka</h3>
-            <div class="text-sm font-bold text-amber-900 mt-0.5">5,00 zł</div>
-
-            <div class="mt-2.5">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-wiewiorka" class="text-stone-900 font-bold">Rudy</span></span>
-              <div class="flex flex-wrap gap-1.5">
-                <button type="button" onclick="setProductColor('wiewiorka', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                </button>
-                <button type="button" onclick="setProductColor('wiewiorka', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                </button>
-                <button type="button" onclick="setProductColor('wiewiorka', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                </button>
-                <button type="button" onclick="setProductColor('wiewiorka', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                </button>
+              <div class="mt-2.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-wiewiorka" class="text-stone-900 font-bold">Rudy</span></span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
+                  </button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
+                  </button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
+                  </button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="mt-4 flex items-center gap-2">
+            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
+              <button onclick="changeQty('wiewiorka', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-wiewiorka" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('wiewiorka', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+            </div>
+            <button onclick="addToCartWithQty('Wiewiórka', 'wiewiorka', 5)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
+              <span>+ Dodaj do koszyka</span>
+            </button>
+          </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-2">
-          <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-            <button onclick="changeQty('wiewiorka', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-            <span id="qty-wiewiorka" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-            <button onclick="changeQty('wiewiorka', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-          </div>
-          <button onclick="addToCartWithQty('Wiewiórka', 'wiewiorka', 5)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-            <span>+ Dodaj do koszyka</span>
-          </button>
-        </div>
-      </div>
+        <!-- 4. TACA OKRĄGŁA (10 zł) -->
+        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-taca">
+          <div class="flex gap-4">
+            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
+              <svg id="svg-taca" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #2d5a27;">
+                <circle cx="32" cy="32" r="24" fill="currentColor"/>
+                <circle cx="32" cy="32" r="19" fill="black" fill-opacity="0.08"/>
+                <circle cx="32" cy="32" r="16" fill="currentColor" fill-opacity="0.95"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-base text-stone-900 leading-tight">Okrągła tacka</h3>
+              <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
 
-      <!-- 4. TACA OKRĄGŁA (10 zł) -->
-      <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between" id="card-taca">
-        <div class="flex gap-4">
-          <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-            <svg id="svg-taca" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #2d5a27;">
-              <circle cx="32" cy="32" r="24" fill="currentColor"/>
-              <circle cx="32" cy="32" r="19" fill="black" fill-opacity="0.08"/>
-              <circle cx="32" cy="32" r="16" fill="currentColor" fill-opacity="0.95"/>
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-base text-stone-900 leading-tight">Okrągła tacka</h3>
-            <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
-
-            <div class="mt-2.5">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-taca" class="text-stone-900 font-bold">Zielony</span></span>
-              <div class="flex flex-wrap gap-1.5">
-                <button type="button" onclick="setProductColor('taca', 'Zielony', '#2d5a27', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                </button>
-                <button type="button" onclick="setProductColor('taca', 'Rudy', '#c2410c', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                </button>
-                <button type="button" onclick="setProductColor('taca', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                </button>
-                <button type="button" onclick="setProductColor('taca', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                  <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                </button>
+              <div class="mt-2.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-taca" class="text-stone-900 font-bold">Zielony</span></span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="setProductColor('taca', 'Zielony', '#2d5a27', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
+                  </button>
+                  <button type="button" onclick="setProductColor('taca', 'Rudy', '#c2410c', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
+                  </button>
+                  <button type="button" onclick="setProductColor('taca', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
+                  </button>
+                  <button type="button" onclick="setProductColor('taca', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
+                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="mt-4 flex items-center gap-2">
-          <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-            <button onclick="changeQty('taca', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-            <span id="qty-taca" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-            <button onclick="changeQty('taca', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-          </div>
-          <button onclick="addToCartWithQty('Okrągła tacka', 'taca', 10)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-            <span>+ Dodaj do koszyka</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 5. ORZESZKI (10 zł) -->
-      <div class="bg-gradient-to-br from-[#f8f1e5] via-[#faf5ec] to-[#f2e6d2] rounded-3xl p-4 border-2 border-dashed border-amber-900/25 shadow-sm flex flex-col justify-between">
-        <div class="flex gap-4">
-          <div class="w-24 h-24 rounded-2xl bg-amber-200/40 border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-            <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm">
-              <path d="M18 28c0-8 6-16 14-16s14 8 14 16c-3-1-7 0-9 2-3-2-7-2-10 0-3-2-6-2-9-2z" fill="#2d5a27"/>
-              <path d="M20 28c0 10 5 22 12 22s12-12 12-22" fill="#5c2c16"/>
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-base text-stone-900 leading-tight">Orzeszki laskowe (9 szt.)</h3>
-            <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
-
-            <div class="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#fffdfa] border border-amber-900/10 shadow-xs">
-              <span class="w-3 h-3 rounded-full bg-[#2d5a27]"></span>
-              <span class="text-stone-400 text-xs">+</span>
-              <span class="w-3 h-3 rounded-full bg-[#5c2c16]"></span>
-              <span class="text-[11px] font-semibold text-stone-700">Zielono-Brązowy</span>
+          <div class="mt-4 flex items-center gap-2">
+            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
+              <button onclick="changeQty('taca', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-taca" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('taca', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
             </div>
+            <button onclick="addToCartWithQty('Taca', 'taca', 10)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
+              <span>+ Dodaj do koszyka</span>
+            </button>
           </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-2">
-          <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#
+        <!-- 5. ORZESZKI (10 zł) -->
+        <div class="bg-gradient-to-br from-[#f8f1e5] via-[#faf5ec] to-[#f2e6d2] rounded-3xl p-4 border-2 border-dashed border-amber-900/25 shadow-sm flex flex-col justify-between">
+          <div class="flex gap-4">
+            <div class="w-24 h-24 rounded-2xl bg-amber-200/40 border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
+              <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm">
+                <path d="M18 28c0-8 6-16 14-16s14 8 14 16c-3-1-7 0-9 2-3-2-7-2-10 0-3-2-6-2-9-2z" fill="#2d5a27"/>
+                <path d="M20 28c0 10 5 22 12 22s12-12 12-22" fill="#5c2c16"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-base text-stone-900 leading-tight">Orzeszki laskowe (9 szt.)</h3>
+              <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
+
+              <div class="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#fffdfa] border border-amber-900/10 shadow-xs">
+                <span class="w-3 h-3 rounded-full bg-[#2d5a27]"></span>
+                <span class="text-stone-400 text-xs">+</span>
+                <span cl
