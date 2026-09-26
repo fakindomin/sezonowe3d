@@ -326,17 +326,8 @@
             <input id="form-contact" required type="text" placeholder="np. 600 700 800" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-stone-700 mb-1">Sposób odbioru</label>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <label class="border border-amber-900/15 bg-[#faf6f0] p-2.5 rounded-xl flex items-center gap-2 cursor-pointer has-[:checked]:border-amber-800 has-[:checked]:bg-amber-100/50">
-                <input type="radio" name="delivery" value="Odbiór osobisty" checked class="accent-amber-800">
-                <span class="font-medium text-stone-800">Odbiór osobisty</span>
-              </label>
-              <label class="border border-amber-900/15 bg-[#faf6f0] p-2.5 rounded-xl flex items-center gap-2 cursor-pointer has-[:checked]:border-amber-800 has-[:checked]:bg-amber-100/50">
-                <input type="radio" name="delivery" value="Paczkomat" class="accent-amber-800">
-                <span class="font-medium text-stone-800">Paczkomat InPost</span>
-              </label>
-            </div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Uwagi do zamówienia (opcjonalnie)</label>
+            <input id="form-notes" type="text" placeholder="np. zależy mi na odbiorze do piątku" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
           </div>
 
           <button type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 text-amber-50 font-bold py-3.5 rounded-2xl shadow-lg shadow-orange-950/20 text-sm transition active:scale-[0.99]">
@@ -411,7 +402,7 @@
       </div>
     </header>
 
-    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI / PRZYCISKI) -->
+    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI) -->
     <div id="admin-tab-hub" class="space-y-4">
       <div class="bg-gradient-to-br from-amber-100/70 to-orange-50 p-4 rounded-3xl border border-amber-900/10">
         <h3 class="font-bold text-lg text-stone-900">Witaj w pracowni!</h3>
@@ -427,7 +418,7 @@
           </div>
           <div>
             <h4 class="font-bold text-base text-stone-900">Zamówienia</h4>
-            <p class="text-[11px] text-stone-500">Lista klientów i statusy</p>
+            <p class="text-[11px] text-stone-500">Lista klientów i uwagi</p>
           </div>
         </button>
 
@@ -448,7 +439,7 @@
           <span class="w-10 h-10 rounded-2xl bg-stone-100 text-stone-800 flex items-center justify-center text-xl">⚙️</span>
           <div>
             <h4 class="font-bold text-base text-stone-900">Ustawienia</h4>
-            <p class="text-[11px] text-stone-500">Czasy i wagi filamentu</p>
+            <p class="text-[11px] text-stone-500">Wagi i czasy w godzinach</p>
           </div>
         </button>
       </div>
@@ -460,7 +451,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h3 class="font-bold text-lg text-stone-900">Zarządzanie Zamówieniami</h3>
-          <p class="text-xs text-stone-500">Śledź realizację i oznaczaj jako gotowe</p>
+          <p class="text-xs text-stone-500">Weryfikuj uwagi i powtarzających się klientów</p>
         </div>
         <button onclick="clearCompletedOrders()" class="text-xs text-stone-400 hover:text-stone-700 underline">
           Usuń zrealizowane
@@ -475,12 +466,10 @@
 
     <!-- WIDOK C: PODSTRONA PLANER STOŁU I BRAKI -->
     <div id="admin-tab-batcher" class="space-y-5 hidden">
-      <!-- Rekomendacja partii -->
       <div id="batch-recommendation" class="bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 p-5 rounded-3xl shadow-lg border border-stone-700 space-y-3">
         <!-- Renderowane dynamicznie -->
       </div>
 
-      <!-- Sumaryczna lista elementów -->
       <div class="bg-[#fffdfa] p-4 rounded-3xl border border-amber-900/10 shadow-sm space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-bold text-sm text-stone-900">Wszystkie braki do wydruku (Kolejka)</h4>
@@ -498,7 +487,7 @@
       <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
         <div>
           <h3 class="font-bold text-lg text-stone-900">Parametry Wydruków (Bambu Studio)</h3>
-          <p class="text-xs text-stone-500">Podaj rzeczywiste wagi i czasy, aby kalkulator wyliczał dokładne wsady stołu.</p>
+          <p class="text-xs text-stone-500">Czas podawaj w godzinach z przecinkiem, np. <span class="font-bold text-amber-800">2,7</span> lub <span class="font-bold text-amber-800">1,5</span> godziny.</p>
         </div>
 
         <div id="specs-editor" class="space-y-3 divide-y divide-amber-900/10 text-xs">
@@ -515,14 +504,14 @@
 
   <script>
     // ==========================================
-    // BAZA DANYCH I USTAWIENIA
+    // BAZA DANYCH I USTAWIENIA (CZASY W GODZINACH)
     // ==========================================
     const DEFAULT_SPECS = {
-      'Dynia': { weight: 42, timeMinutes: 100 },
-      'Lisek': { weight: 55, timeMinutes: 130 },
-      'Wiewiórka': { weight: 50, timeMinutes: 120 },
-      'Taca': { weight: 110, timeMinutes: 195 },
-      'Orzeszki laskowe (9 szt.)': { weight: 60, timeMinutes: 210 }
+      'Dynia': { weight: 42, hours: 1.7 },
+      'Lisek': { weight: 55, hours: 2.2 },
+      'Wiewiórka': { weight: 50, hours: 2.0 },
+      'Taca': { weight: 110, hours: 3.3 },
+      'Orzeszki laskowe (9 szt.)': { weight: 60, hours: 3.5 }
     };
 
     function getSpecs() {
@@ -545,8 +534,7 @@
         id: "401",
         customer: "Tomasz Nowak",
         contact: "501 222 333",
-        delivery: "Paczkomat",
-        date: "2026-09-26 18:30",
+        notes: "Pilny odbiór",
         status: "W kolejce",
         items: [
           { title: "Lisek", color: "Rudy", qty: 2 },
@@ -557,8 +545,7 @@
         id: "402",
         customer: "Anna Wiśniewska",
         contact: "ania@gmail.com",
-        delivery: "Odbiór osobisty",
-        date: "2026-09-26 19:15",
+        notes: "",
         status: "W kolejce",
         items: [
           { title: "Taca", color: "Zielony", qty: 1 },
@@ -626,7 +613,6 @@
       route();
     }
 
-    // Przełączanie podstron w adminie
     function switchAdminTab(tabName) {
       const tabs = ['hub', 'orders', 'batcher', 'settings'];
       tabs.forEach(t => {
@@ -687,8 +673,21 @@
         return;
       }
 
+      // Zliczanie zamówień per klient (kontakt lub nazwisko) do wykrywania powtórzeń
+      const customerCounts = {};
+      orders.forEach(o => {
+        const key = (o.contact || o.customer || "").trim().toLowerCase();
+        if (key) {
+          customerCounts[key] = (customerCounts[key] || 0) + 1;
+        }
+      });
+
       orders.forEach(order => {
         const isDone = order.status === "Zrealizowane";
+        const customerKey = (order.contact || order.customer || "").trim().toLowerCase();
+        const orderCount = customerCounts[customerKey] || 1;
+        const isRepeatCustomer = orderCount > 1;
+
         const card = document.createElement("div");
         card.className = `p-4 rounded-3xl border transition ${isDone ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
 
@@ -698,15 +697,29 @@
           </span>
         `).join(" ");
 
+        let repeatBadge = isRepeatCustomer ? `
+          <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-red-100 text-red-800 border border-red-200 text-[11px] font-bold">
+            ⚠️ Powracający klient: Zamówienie złożone ${orderCount} raz!
+          </div>
+        ` : '';
+
+        let notesHtml = order.notes && order.notes.trim() !== "" ? `
+          <div class="mt-2 text-xs bg-amber-50 border border-amber-200/80 rounded-xl p-2 text-amber-900">
+            💬 <strong>Info do zamówienia:</strong> ${order.notes}
+          </div>
+        ` : '';
+
         card.innerHTML = `
           <div class="flex items-start justify-between gap-3">
             <div>
               <div class="flex items-center gap-2">
                 <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
-                <span class="text-xs text-stone-500">${order.customer} (${order.contact})</span>
+                <span class="text-xs font-semibold text-stone-700">${order.customer}</span>
+                <span class="text-xs text-stone-500">(${order.contact})</span>
                 <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">${order.status}</span>
               </div>
-              <div class="text-xs text-stone-400 mt-0.5">Odbiór: ${order.delivery} | Złożono: ${order.date}</div>
+              ${repeatBadge}
+              ${notesHtml}
             </div>
             ${!isDone ? `
               <button onclick="markOrderDone('${order.id}')" class="shrink-0 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-xl text-xs font-semibold">
@@ -770,7 +783,6 @@
         colorGroups[color].push({ title, qty: missing[k] });
       });
 
-      // Render kafelków braków
       const grid = document.getElementById('tab-missing-grid');
       grid.innerHTML = "";
       if (Object.keys(colorGroups).length === 0) {
@@ -788,7 +800,6 @@
         }
       }
 
-      // Rekomendacja stołu
       const batchContainer = document.getElementById("batch-recommendation");
       let bestColor = null;
       let maxQty = 0;
@@ -804,18 +815,17 @@
       if (bestColor) {
         const itemsToPrint = colorGroups[bestColor];
         let totalGrams = 0;
-        let totalMinutes = 0;
+        let totalHours = 0;
         let itemsStr = [];
 
         itemsToPrint.forEach(i => {
-          const spec = specs[i.title] || { weight: 45, timeMinutes: 90 };
+          const spec = specs[i.title] || { weight: 45, hours: 1.5 };
           totalGrams += spec.weight * i.qty;
-          totalMinutes += spec.timeMinutes * i.qty;
+          totalHours += (spec.hours || 1.5) * i.qty;
           itemsStr.push(`${i.qty}x ${i.title}`);
         });
 
-        const hours = Math.floor(totalMinutes / 60);
-        const mins = totalMinutes % 60;
+        const formattedHours = totalHours.toFixed(1).replace(".", ",");
 
         batchContainer.innerHTML = `
           <div class="flex items-center gap-2">
@@ -824,11 +834,11 @@
           </div>
           <h4 class="text-lg font-bold">Wsad: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
           <div class="flex flex-wrap gap-4 text-xs text-stone-300">
-            <div>⏱️ Czas druku: <strong class="text-amber-300 font-bold">${hours}h ${mins}m</strong></div>
+            <div>⏱️ Czas druku: <strong class="text-amber-300 font-bold">${formattedHours} godziny</strong></div>
             <div>⚖️ Filament: <strong class="text-amber-300 font-bold">~${totalGrams}g (${bestColor})</strong></div>
           </div>
           <div class="pt-2">
-            <button onclick="alert('Wsad (${bestColor}) oznaczony. Zamknij teraz zrealizowane zamówienia na podstronie Zamówienia.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
+            <button onclick="alert('Wsad (${bestColor}) oznaczony jako wydrukowany. Zamknij teraz zrealizowane zamówienia na podstronie Zamówienia.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
               ✓ Oznacz ten wsad jako wydrukowany
             </button>
           </div>
@@ -851,6 +861,9 @@
         const item = specs[name];
         const row = document.createElement("div");
         row.className = "pt-3 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2";
+        
+        const hoursDisplay = (item.hours !== undefined ? item.hours : 2.0).toString().replace(".", ",");
+
         row.innerHTML = `
           <div class="font-bold text-stone-900 text-sm">${name}</div>
           <div class="flex items-center gap-3">
@@ -861,8 +874,8 @@
             </div>
             <div class="flex items-center gap-1">
               <span class="text-stone-500">Czas:</span>
-              <input type="number" id="spec-time-${name}" value="${item.timeMinutes}" class="w-16 px-2 py-1 rounded-lg border border-amber-900/20 bg-[#faf6f0] text-center font-bold">
-              <span class="text-stone-400">min</span>
+              <input type="text" id="spec-time-${name}" value="${hoursDisplay}" class="w-20 px-2 py-1 rounded-lg border border-amber-900/20 bg-[#faf6f0] text-center font-bold">
+              <span class="text-stone-400">godz.</span>
             </div>
           </div>
         `;
@@ -874,11 +887,12 @@
       const specs = getSpecs();
       Object.keys(specs).forEach(name => {
         const w = parseInt(document.getElementById(`spec-weight-${name}`).value) || 0;
-        const t = parseInt(document.getElementById(`spec-time-${name}`).value) || 0;
-        specs[name] = { weight: w, timeMinutes: t };
+        const timeValRaw = document.getElementById(`spec-time-${name}`).value.replace(",", ".");
+        const h = parseFloat(timeValRaw) || 1.0;
+        specs[name] = { weight: w, hours: h };
       });
       saveSpecs(specs);
-      alert("Parametry druku zostały pomyślnie zaktualizowane!");
+      alert("Parametry druku (waga i czas w godzinach) zostały zapisane!");
     }
 
 
@@ -1023,19 +1037,16 @@
       e.preventDefault();
       const customerName = document.getElementById("form-name").value;
       const customerContact = document.getElementById("form-contact").value;
-      const deliveryMethod = document.querySelector('input[name="delivery"]:checked').value;
+      const customerNotes = document.getElementById("form-notes").value;
       const orderId = Math.floor(100 + Math.random() * 900).toString();
 
       const orders = getOrders();
-      const now = new Date();
-      const dateStr = now.toISOString().slice(0, 16).replace("T", " ");
 
       orders.unshift({
         id: orderId,
         customer: customerName,
         contact: customerContact,
-        delivery: deliveryMethod,
-        date: dateStr,
+        notes: customerNotes,
         status: "W kolejce",
         items: cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }))
       });
