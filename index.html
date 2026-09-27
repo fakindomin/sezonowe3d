@@ -188,7 +188,7 @@
 
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: HUB GŁÓWNY -->
+    <!-- WIDOK A: HUB GŁÓWNY (Z BANEREM POWIADOMIENIA) -->
     <div id="admin-tab-hub" class="space-y-4">
       
       <!-- BANER O NOWYM ZAMÓWIENIU -->
@@ -233,7 +233,7 @@
           </div>
           <div>
             <div class="font-bold text-xs text-stone-900">Zamówienia</div>
-            <div class="text-[9px] text-stone-400">Do realizacji & Archiwum</div>
+            <div class="text-[9px] text-stone-400">Statusy & Kompletacja</div>
           </div>
         </button>
 
@@ -280,19 +280,23 @@
       </div>
     </div>
 
-    <!-- WIDOK B: ZAMÓWIENIA -->
+    <!-- WIDOK B: ZAMÓWIENIA (TRZY KATEGORIE) -->
     <div id="admin-tab-orders" class="space-y-3 hidden">
-      <div class="flex justify-between items-center gap-2">
-        <div class="flex bg-stone-200 p-0.5 rounded-xl text-xs font-bold">
-          <button id="tab-btn-pending" onclick="switchOrdersCategory('pending')" class="px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <!-- PRZEŁĄCZNIK 3 KATEGORII -->
+        <div class="flex bg-stone-200 p-0.5 rounded-xl text-xs font-bold w-full sm:w-auto overflow-x-auto">
+          <button id="tab-btn-pending" onclick="switchOrdersCategory('pending')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs whitespace-nowrap">
             Do zrealizowania (<span id="count-pending-orders">0</span>)
           </button>
-          <button id="tab-btn-completed" onclick="switchOrdersCategory('completed')" class="px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900">
+          <button id="tab-btn-completed" onclick="switchOrdersCategory('completed')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900 whitespace-nowrap">
             Zrealizowane (<span id="count-completed-orders">0</span>)
+          </button>
+          <button id="tab-btn-canceled" onclick="switchOrdersCategory('canceled')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900 whitespace-nowrap">
+            Anulowane (<span id="count-canceled-orders">0</span>)
           </button>
         </div>
 
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5 self-end sm:self-auto">
           <button onclick="openManualOrderModal()" class="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-stone-900 text-white hover:bg-stone-800 shadow-xs">
             + Ręczne
           </button>
@@ -390,7 +394,7 @@
 
   </div>
 
-  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA -->
+  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA (Z OPCJĄ ANULOWANIA) -->
   <div id="packing-modal" class="fixed inset-0 bg-stone-950/70 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[92vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-start border-b border-stone-200 pb-3">
@@ -416,9 +420,15 @@
         <button id="pack-fulfill-btn" onclick="fulfillCurrentOrder()" class="w-full py-3.5 rounded-2xl font-bold text-xs transition duration-200">
           Wydaj zamówienie ✓
         </button>
-        <button onclick="closePackingModal()" class="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl text-xs">
-          Wróć (Zapisz stan odhaczenia)
-        </button>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="closePackingModal()" class="py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl text-xs">
+            Wróć
+          </button>
+          <!-- PRZYCISK ANULOWANIA ZAMÓWIENIA W SZCZEGÓŁACH -->
+          <button onclick="cancelCurrentOrderFromModal()" class="py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl text-xs border border-rose-200">
+            ✕ Anuluj zamówienie
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -530,7 +540,7 @@
     let manualOrderItems = [];
     let activeBatchPayload = null;
 
-    let ordersActiveCategory = 'pending';
+    let ordersActiveCategory = 'pending'; // 'pending' | 'completed' | 'canceled'
     let currentPackingOrder = null;
 
     function getPackingProgress() {
@@ -1036,7 +1046,6 @@
       const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
 
       try {
-        // 1. Zapis w bazie Supabase
         const { error: dbError } = await supabaseClient
           .from('orders')
           .insert([{
@@ -1050,7 +1059,6 @@
 
         if (dbError) throw dbError;
 
-        // 2. Bezpośrednie wywołanie EmailJS (z poprawnym ID serwisu)
         try {
           const res = await emailjs.send(
             EMAILJS_SERVICE_ID,
@@ -1229,7 +1237,7 @@
     }
 
     async function deleteOrderPermanently(orderId) {
-      if (confirm(`Trwale usunąć zamówienie #ZAM-${orderId} z bazy?`)) {
+      if (confirm(`Trwale usunąć zamówienie #ZAM-${orderId} z bazy danych? Tej operacji nie można cofnąć.`)) {
         try {
           const { error } = await supabaseClient
             .from('orders')
@@ -1245,20 +1253,21 @@
     }
 
     // ==========================================
-    // DWIE KATEGORIE & KAFELKI Z STATUSAMI
+    // TRZY KATEGORIE & KAFELKI Z STATUSAMI
     // ==========================================
     function switchOrdersCategory(cat) {
       ordersActiveCategory = cat;
       const btnPending = document.getElementById('tab-btn-pending');
       const btnCompleted = document.getElementById('tab-btn-completed');
+      const btnCanceled = document.getElementById('tab-btn-canceled');
 
-      if (cat === 'pending') {
-        btnPending.className = "px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs";
-        btnCompleted.className = "px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900";
-      } else {
-        btnCompleted.className = "px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs";
-        btnPending.className = "px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900";
-      }
+      const activeClass = "flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs whitespace-nowrap";
+      const inactiveClass = "flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900 whitespace-nowrap";
+
+      btnPending.className = cat === 'pending' ? activeClass : inactiveClass;
+      btnCompleted.className = cat === 'completed' ? activeClass : inactiveClass;
+      btnCanceled.className = cat === 'canceled' ? activeClass : inactiveClass;
+
       renderOrdersView();
     }
 
@@ -1272,11 +1281,16 @@
 
       const pendingOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
       const completedOrders = cloudOrders.filter(o => o.status === "Zrealizowane");
+      const canceledOrders = cloudOrders.filter(o => o.status === "Anulowane");
 
       document.getElementById('count-pending-orders').textContent = pendingOrders.length;
       document.getElementById('count-completed-orders').textContent = completedOrders.length;
+      document.getElementById('count-canceled-orders').textContent = canceledOrders.length;
 
-      const currentList = ordersActiveCategory === 'pending' ? pendingOrders : completedOrders;
+      let currentList = [];
+      if (ordersActiveCategory === 'pending') currentList = pendingOrders;
+      else if (ordersActiveCategory === 'completed') currentList = completedOrders;
+      else currentList = canceledOrders;
 
       if (currentList.length === 0) {
         container.innerHTML = `<div class="p-8 text-center text-stone-400 bg-white rounded-2xl border border-stone-200">Brak zamówień w tej kategorii.</div>`;
@@ -1321,9 +1335,12 @@
           } else {
             badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200">⏳ Czeka na wydruk (0/${totalPieces})</span>`;
           }
-        } else {
+        } else if (ordersActiveCategory === 'completed') {
           badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-500">Zrealizowane ✓</span>`;
-          cardBorderClass = 'border-stone-200 bg-stone-50 opacity-75';
+          cardBorderClass = 'border-stone-200 bg-stone-50 opacity-80';
+        } else {
+          badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">Anulowane ✕</span>`;
+          cardBorderClass = 'border-rose-200 bg-rose-50/30 opacity-85';
         }
 
         const itemsSummary = items.map((item, idx) => {
@@ -1335,6 +1352,32 @@
             </span>
           `;
         }).join(" ");
+
+        let footerActions = '';
+        if (ordersActiveCategory === 'pending') {
+          footerActions = `
+            <button onclick="openPackingModal('${order.id}')" class="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📦 Spakuj / Szczegóły</span>
+            </button>
+            <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 rounded-xl text-xs font-semibold">
+              ✏️
+            </button>
+          `;
+        } else if (ordersActiveCategory === 'completed') {
+          footerActions = `
+            <span class="text-xs text-stone-400 font-medium">Zlecenie zakończone</span>
+          `;
+        } else {
+          // KATEGORIA ANULOWANE: PRZYWRÓĆ LUB USUŃ TRWALE
+          footerActions = `
+            <button onclick="restoreOrder('${order.id}')" class="flex-1 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xs">
+              Przywróć zamówienie ↺
+            </button>
+            <button onclick="deleteOrderPermanently('${order.id}')" class="py-2.5 px-3 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold">
+              Usuń trwale
+            </button>
+          `;
+        }
 
         const card = document.createElement("div");
         card.className = `p-4 rounded-2xl border ${cardBorderClass} shadow-2xs hover:shadow-xs transition flex flex-col justify-between`;
@@ -1360,19 +1403,7 @@
           </div>
 
           <div class="mt-4 pt-3 border-t border-stone-200/80 flex items-center justify-between gap-2">
-            ${ordersActiveCategory === 'pending' ? `
-              <button onclick="openPackingModal('${order.id}')" class="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs">
-                <span>📦 Spakuj / Szczegóły</span>
-              </button>
-              <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 rounded-xl text-xs font-semibold">
-                ✏️
-              </button>
-            ` : `
-              <span class="text-xs text-stone-400 font-medium">Zakończono zlecenie</span>
-              <button onclick="deleteOrderPermanently('${order.id}')" class="text-stone-400 hover:text-stone-600 underline text-xs">
-                Usuń z bazy
-              </button>
-            `}
+            ${footerActions}
           </div>
         `;
         container.appendChild(card);
@@ -1497,6 +1528,37 @@
       closePackingModal();
       switchOrdersCategory('completed');
       alert(`Zamówienie #ZAM-${orderId} zostało pomyślnie wydane i przeniesione do zrealizowanych!`);
+    }
+
+    // ==========================================
+    // ANULOWANIE I PRZYWRACANIE ZAMÓWIEŃ
+    // ==========================================
+    async function cancelCurrentOrderFromModal() {
+      if (!currentPackingOrder) return;
+
+      const orderId = currentPackingOrder.id;
+      if (!confirm(`Czy na pewno chcesz anulować zamówienie #ZAM-${orderId}?\nZlecenie zostanie przeniesione do kategorii Anulowane i zniknie z kolejki stołu.`)) {
+        return;
+      }
+
+      // Zerujemy stan odhaczenia w pamięci podręcznej dla tego zamówienia
+      const progress = getPackingProgress();
+      const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
+      items.forEach((_, idx) => {
+        delete progress[`${orderId}:::${idx}`];
+      });
+      savePackingProgress(progress);
+
+      closePackingModal();
+      await updateOrderStatus(orderId, 'Anulowane');
+      switchOrdersCategory('canceled');
+    }
+
+    async function restoreOrder(orderId) {
+      if (confirm(`Czy przywrócić zamówienie #ZAM-${orderId} do kolejki do zrealizowania?`)) {
+        await updateOrderStatus(orderId, 'W kolejce');
+        switchOrdersCategory('pending');
+      }
     }
 
     // ==========================================
