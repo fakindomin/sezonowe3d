@@ -26,7 +26,6 @@
   <!-- 1. SKLEP DLA KLIENTA                      -->
   <!-- ========================================== -->
   <div id="client-app">
-    <!-- NAGŁÓWEK SKLEPU Z JASYM LOGO -->
     <header class="bg-white/90 backdrop-blur-md border-b border-stone-200 sticky top-0 z-30 px-4 py-3 shadow-xs">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -73,14 +72,11 @@
     </header>
 
     <main class="max-w-4xl mx-auto px-4 pt-5 space-y-6" id="catalog-view">
-      
-      <!-- PASEK WYBORU KOLEKCJI -->
       <div class="flex items-center justify-between border-b border-stone-200 pb-3 overflow-x-auto gap-2">
         <div class="flex items-center gap-2" id="season-selector-bar"></div>
         <span class="text-[11px] font-semibold text-stone-400 shrink-0 hidden sm:inline">Kolekcje sezonowe</span>
       </div>
 
-      <!-- BANER AKTUALNEJ KOLEKCJI -->
       <div id="season-banner" class="p-6 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 text-white shadow-md relative overflow-hidden transition-all duration-300">
         <div class="relative z-10 max-w-md">
           <span class="text-xs uppercase font-extrabold tracking-widest text-amber-200 block mb-1">Limitowana Seria</span>
@@ -89,11 +85,9 @@
         </div>
       </div>
 
-      <!-- SIATKA PRODUKTÓW (ZE ZDJĘCIAMI .WEBP I WYMIARAMI) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="products-grid"></div>
     </main>
 
-    <!-- PŁYWAJĄCY PASEK KOSZYKA -->
     <div id="sticky-bar" class="fixed bottom-4 inset-x-4 max-w-md mx-auto hidden z-40">
       <div class="bg-stone-900 text-amber-50 p-4 rounded-2xl shadow-xl flex items-center justify-between border border-stone-800">
         <div>
@@ -106,7 +100,6 @@
       </div>
     </div>
 
-    <!-- SZUFLADA KASY -->
     <div id="checkout-modal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
       <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
         <div class="flex items-center justify-between border-b border-stone-200 pb-3">
@@ -142,7 +135,6 @@
       </div>
     </div>
 
-    <!-- EKRAN SUKCESU -->
     <div id="success-view" class="max-w-md mx-auto px-4 pt-12 hidden text-center space-y-4">
       <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-2xl mx-auto">✓</div>
       <div>
@@ -271,11 +263,17 @@
 
     <!-- WIDOK B: ZAMÓWIENIA -->
     <div id="admin-tab-orders" class="space-y-3 hidden">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center gap-2">
         <h3 class="font-bold text-sm text-stone-900">Lista Zamówień</h3>
-        <button onclick="fetchOrdersFromCloud()" class="text-xs font-semibold px-2 py-1 rounded bg-stone-100 border border-stone-300">
-          🔄 Odśwież
-        </button>
+        <div class="flex items-center gap-1.5">
+          <!-- PRZYCISK RĘCZNEGO ZAMÓWIENIA (PKT 3) -->
+          <button onclick="openManualOrderModal()" class="text-xs font-bold px-2.5 py-1 rounded bg-stone-900 text-white hover:bg-stone-800 shadow-xs">
+            + Nowe zamówienie ręczne
+          </button>
+          <button onclick="fetchOrdersFromCloud()" class="text-xs font-semibold px-2 py-1 rounded bg-stone-100 border border-stone-300 hover:bg-stone-200">
+            🔄 Odśwież
+          </button>
+        </div>
       </div>
       <div id="orders-list-view" class="space-y-3"></div>
     </div>
@@ -409,6 +407,49 @@
     </div>
   </div>
 
+  <!-- MODAL RĘCZNEGO DODAWANIA ZAMÓWIENIA (PKT 3) -->
+  <div id="manual-order-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-3">
+      <div class="flex justify-between items-center border-b border-stone-200 pb-2">
+        <div>
+          <h3 class="font-bold text-sm text-stone-900">Nowe zamówienie ręczne</h3>
+          <p class="text-[11px] text-stone-500">Dla zamówień z telefonu, Instagrama lub jarmarku</p>
+        </div>
+        <button onclick="closeManualOrderModal()" class="text-stone-400 font-bold text-sm">✕</button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="block font-semibold text-stone-700 mb-0.5">Klient (Imię / Nick / Telefon) *</label>
+          <input id="manual-customer-name" type="text" placeholder="np. Marek (Instagram) lub 500 600 700" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5 font-medium">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-700 mb-0.5">Pozycje w zamówieniu:</label>
+          <div id="manual-items-list" class="space-y-1.5 border border-stone-200 rounded-xl p-2 bg-stone-50 min-h-[50px]"></div>
+        </div>
+
+        <div class="border-t border-stone-200 pt-2">
+          <label class="block font-semibold text-stone-700 mb-1">+ Wybierz figurkę:</label>
+          <div class="grid grid-cols-12 gap-1.5">
+            <select id="manual-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
+            <select id="manual-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5"></select>
+            <button type="button" onclick="addPositionToManualOrder()" class="col-span-2 bg-stone-900 text-white rounded-lg font-bold">+</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-700 mb-0.5">Uwagi warsztatowe (opcjonalnie):</label>
+          <input id="manual-order-notes" type="text" placeholder="np. odbiór osobisty w pracowni" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5">
+        </div>
+      </div>
+
+      <button onclick="submitManualOrder()" class="w-full py-2.5 bg-stone-900 text-white font-bold rounded-xl text-xs mt-2">
+        Dodaj do bazy i kolejki druku
+      </button>
+    </div>
+  </div>
+
   <script>
     // ==========================================
     // SUPABASE KONFIGURACJA
@@ -420,6 +461,7 @@
     let cloudOrders = [];
     let currentEditingOrderId = null;
     let currentEditingItems = [];
+    let manualOrderItems = [];
     let activeBatchPayload = null;
 
     // ==========================================
@@ -440,7 +482,6 @@
             price: 10,
             hasColors: true,
             defaultColor: 'Pomarańczowy',
-            // UJEDNOLICONA KOLEJNOŚĆ KOLORÓW
             colors: [
               { name: 'Pomarańczowy', hex: '#c2410c', img: 'dynia_orange.webp' },
               { name: 'Zielony', hex: '#15803d', img: 'dynia_green.webp' },
@@ -481,7 +522,6 @@
             price: 10,
             hasColors: true,
             defaultColor: 'Pomarańczowy',
-            // UJEDNOLICONA KOLEJNOŚĆ KOLORÓW (TAKA SAMA JAK W DYNI)
             colors: [
               { name: 'Pomarańczowy', hex: '#c2410c', img: 'tacka_orange.webp' },
               { name: 'Zielony', hex: '#15803d', img: 'tacka_green.webp' },
@@ -1119,6 +1159,161 @@
     }
 
     // ==========================================
+    // LOGIKA PKT 1: WYDANIE BEZPOŚREDNIO Z PÓŁKI
+    // ==========================================
+    async function fulfillOrderFromShelf(orderId) {
+      const order = cloudOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const shelf = getShelf();
+      const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+
+      // Sprawdzenie dostępności
+      let missingFromShelf = false;
+      items.forEach(item => {
+        const key = `${item.title}:::${item.color}`;
+        if ((shelf[key] || 0) < item.qty) {
+          missingFromShelf = true;
+        }
+      });
+
+      if (missingFromShelf) {
+        if (!confirm("Uwaga: Na półce nie ma wystarczającej liczby wszystkich elementów. Czy na pewno pobrać tyle, ile jest i przekazać do spakowania?")) {
+          return;
+        }
+      } else {
+        if (!confirm(`Czy pobrać wszystkie elementy dla zamówienia #ZAM-${orderId} ze stanu półki i przekazać od razu do spakowania?`)) {
+          return;
+        }
+      }
+
+      // Zdjęcie ze stanu półki
+      items.forEach(item => {
+        const key = `${item.title}:::${item.color}`;
+        if (shelf[key]) {
+          shelf[key] = Math.max(0, shelf[key] - item.qty);
+        }
+      });
+      saveShelf(shelf);
+
+      // Aktualizacja statusu
+      await updateOrderStatus(orderId, 'Do spakowania');
+      updateHubStats();
+    }
+
+    // ==========================================
+    // LOGIKA PKT 3: RĘCZNE ZAMÓWIENIE (ADMIN)
+    // ==========================================
+    function openManualOrderModal() {
+      manualOrderItems = [];
+      document.getElementById('manual-customer-name').value = '';
+      document.getElementById('manual-order-notes').value = '';
+
+      const titleSelect = document.getElementById('manual-add-title');
+      titleSelect.innerHTML = Object.keys(ALL_PRICES).map(t => `<option value="${t}">${t} (${ALL_PRICES[t]} zł)</option>`).join('');
+
+      const colorSelect = document.getElementById('manual-add-color');
+      colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
+
+      renderManualItemsList();
+      document.getElementById('manual-order-modal').classList.remove('hidden');
+    }
+
+    function closeManualOrderModal() {
+      document.getElementById('manual-order-modal').classList.add('hidden');
+      manualOrderItems = [];
+    }
+
+    function renderManualItemsList() {
+      const container = document.getElementById('manual-items-list');
+      container.innerHTML = '';
+
+      if (manualOrderItems.length === 0) {
+        container.innerHTML = `<span class="text-stone-400">Brak wybranych figurek. Wybierz poniżej i kliknij +.</span>`;
+        return;
+      }
+
+      manualOrderItems.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
+        row.innerHTML = `
+          <div>
+            <span class="font-bold text-stone-800">${item.title}</span>
+            <span class="text-stone-500 text-[11px]">(${item.color})</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+              <button type="button" onclick="changeManualItemQty(${index}, -1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">-</button>
+              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <button type="button" onclick="changeManualItemQty(${index}, 1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">+</button>
+            </div>
+            <button type="button" onclick="removeManualItem(${index})" class="text-rose-600 font-bold p-1">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addPositionToManualOrder() {
+      const title = document.getElementById('manual-add-title').value;
+      const color = document.getElementById('manual-add-color').value;
+
+      const existing = manualOrderItems.find(i => i.title === title && i.color === color);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        manualOrderItems.push({ title, color, qty: 1 });
+      }
+      renderManualItemsList();
+    }
+
+    function changeManualItemQty(index, delta) {
+      manualOrderItems[index].qty = Math.max(1, manualOrderItems[index].qty + delta);
+      renderManualItemsList();
+    }
+
+    function removeManualItem(index) {
+      manualOrderItems.splice(index, 1);
+      renderManualItemsList();
+    }
+
+    async function submitManualOrder() {
+      const customer = document.getElementById('manual-customer-name').value.trim();
+      if (!customer) {
+        alert("Podaj imię, nick lub kontakt klienta!");
+        return;
+      }
+      if (manualOrderItems.length === 0) {
+        alert("Dodaj przynajmniej jedną figurkę do zamówienia!");
+        return;
+      }
+
+      const notes = document.getElementById('manual-order-notes').value.trim();
+      const orderId = Math.floor(100 + Math.random() * 900).toString();
+
+      try {
+        const { error } = await supabaseClient
+          .from('orders')
+          .insert([{
+            id: orderId,
+            customer: customer,
+            contact: "Zamówienie ręczne / Warsztat",
+            notes: notes ? `[Ręczne] ${notes}` : "[Ręczne]",
+            status: "W kolejce",
+            items: manualOrderItems
+          }]);
+
+        if (error) throw error;
+
+        closeManualOrderModal();
+        await fetchOrdersFromCloud();
+        alert(`Zamówienie #ZAM-${orderId} zostało dodane do kolejki!`);
+      } catch (err) {
+        alert("Błąd dodawania zamówienia: " + err.message);
+      }
+    }
+
+    // ==========================================
     // EDYCJA ZAMÓWIENIA
     // ==========================================
     function openEditOrderModal(orderId) {
@@ -1311,7 +1506,7 @@
     }
 
     // ==========================================
-    // WIDOK ZAMÓWIEŃ
+    // WIDOK ZAMÓWIEŃ (Z OBSŁUGĄ WYDANIA Z PÓŁKI)
     // ==========================================
     function renderOrdersView() {
       const container = document.getElementById('orders-list-view');
@@ -1342,13 +1537,21 @@
         const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
 
         let shelfHints = [];
+        let canFulfillEntirelyFromShelf = items.length > 0;
+
         if (status === "W kolejce") {
           items.forEach(item => {
             const key = `${item.title}:::${item.color}`;
-            if (shelf[key] && shelf[key] > 0) {
-              shelfHints.push(`Na półce: ${shelf[key]}x ${item.title} (${item.color})`);
+            const availableOnShelf = shelf[key] || 0;
+            if (availableOnShelf > 0) {
+              shelfHints.push(`Półka: ${availableOnShelf}x ${item.title} (${item.color})`);
+            }
+            if (availableOnShelf < item.qty) {
+              canFulfillEntirelyFromShelf = false;
             }
           });
+        } else {
+          canFulfillEntirelyFromShelf = false;
         }
 
         let itemsHtml = items.map(item => `
@@ -1371,7 +1574,7 @@
 
         let shelfNotice = shelfHints.length > 0 ? `
           <div class="mt-2 text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-2 flex justify-between items-center">
-            <span>✨ <strong>Półka:</strong> ${shelfHints.join(", ")}</span>
+            <span>✨ <strong>Dostępne na stanie:</strong> ${shelfHints.join(", ")}</span>
             <button onclick="switchAdminTab('shelf')" class="font-bold underline ml-2">Półka</button>
           </div>
         ` : '';
@@ -1381,8 +1584,19 @@
 
         if (status === "W kolejce") {
           badgeColor = 'bg-amber-100 text-amber-900';
+          
+          let shelfButtonHtml = '';
+          if (shelfHints.length > 0) {
+            shelfButtonHtml = `
+              <button onclick="fulfillOrderFromShelf('${order.id}')" class="w-full py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs">
+                <span>📦 Wydaj z półki (Pomiń druk)</span>
+              </button>
+            `;
+          }
+
           actionBlock = `
             <div class="mt-3 pt-2.5 border-t border-stone-200 space-y-2">
+              ${shelfButtonHtml}
               <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold">
                 Wydrukowane (Przekaż do spakowania) →
               </button>
