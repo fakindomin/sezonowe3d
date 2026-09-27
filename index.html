@@ -6,6 +6,8 @@
   <title>sezonowe3d.pl - Pracownia Druku 3D</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Biblioteka EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -169,6 +171,18 @@
   <!-- 3. PANEL WARSZTATOWY ADMINA                -->
   <!-- ========================================== -->
   <div id="admin-app" class="max-w-xl mx-auto px-4 pt-4 pb-16 hidden space-y-4">
+    
+    <!-- BANER O NOWYM ZAMÓWIENIU (ZAMYKANY RĘCZNIE) -->
+    <div id="new-order-banner" class="hidden p-3.5 rounded-2xl bg-amber-500 text-stone-950 font-bold text-xs flex items-center justify-between shadow-md border border-amber-600 animate-pulse">
+      <div class="flex items-center gap-2">
+        <span class="text-base">🔔</span>
+        <span>Nowe zamówienie wpadło do bazy! (<span id="banner-new-order-id">#ZAM-...</span>)</span>
+      </div>
+      <button onclick="dismissNewOrderBanner()" class="text-stone-950 hover:text-black font-extrabold px-2 py-1 rounded bg-amber-400 hover:bg-amber-300 text-xs">
+        ✕ Zamknij
+      </button>
+    </div>
+
     <header class="flex items-center justify-between border-b border-stone-200 pb-3">
       <div>
         <h2 class="font-heading font-bold text-sm text-stone-900">Warsztat sezonowe3d</h2>
@@ -266,7 +280,6 @@
       <div class="flex justify-between items-center gap-2">
         <h3 class="font-bold text-sm text-stone-900">Lista Zamówień</h3>
         <div class="flex items-center gap-1.5">
-          <!-- PRZYCISK RĘCZNEGO ZAMÓWIENIA (PKT 3) -->
           <button onclick="openManualOrderModal()" class="text-xs font-bold px-2.5 py-1 rounded bg-stone-900 text-white hover:bg-stone-800 shadow-xs">
             + Nowe zamówienie ręczne
           </button>
@@ -407,7 +420,7 @@
     </div>
   </div>
 
-  <!-- MODAL RĘCZNEGO DODAWANIA ZAMÓWIENIA (PKT 3) -->
+  <!-- MODAL RĘCZNEGO DODAWANIA ZAMÓWIENIA -->
   <div id="manual-order-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-3">
       <div class="flex justify-between items-center border-b border-stone-200 pb-2">
@@ -452,8 +465,14 @@
 
   <script>
     // ==========================================
-    // SUPABASE KONFIGURACJA
+    // EMAILJS & SUPABASE KONFIGURACJA
     // ==========================================
+    const EMAILJS_SERVICE_ID = "service_pouuu7z";
+    const EMAILJS_TEMPLATE_ID = "template_1mzt0sy";
+    const EMAILJS_PUBLIC_KEY = "V4t-nC9pkZvdySwll";
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
     const SUPABASE_URL = "https://ohtlirhvjhvzefkcxqfu.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9odGxpcmh2amh2emVma2N4cWZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NTUxMjUsImV4cCI6MjEwNjAzMTEyNX0.3Scttq4Xrvkt_Yv_wBOMjVf8i-mHMGc2fKO1Gj2K8kE";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -949,6 +968,9 @@
       });
     }
 
+    // ==========================================
+    // SKŁADANIE ZAMÓWIENIA + WYSYŁKA EMAILJS
+    // ==========================================
     async function submitOrder(e) {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
@@ -961,8 +983,11 @@
       const orderId = Math.floor(100 + Math.random() * 900).toString();
 
       const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
+      const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0).toFixed(2);
+      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${i.title} (${i.color})`).join("\n");
 
       try {
+        // 1. Zapis w Supabase
         const { error } = await supabaseClient
           .from('orders')
           .insert([{
@@ -975,6 +1000,20 @@
           }]);
 
         if (error) throw error;
+
+        // 2. Wysłanie powiadomienia e-mail (EmailJS)
+        try {
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            order_id: orderId,
+            customer_name: customerName,
+            customer_contact: customerContact,
+            order_items: itemsFormattedText,
+            customer_notes: customerNotes || "(brak uwag)",
+            order_total: totalPrice
+          });
+        } catch (mailErr) {
+          console.warn("Błąd wysyłki e-mail:", mailErr);
+        }
 
         closeCheckout();
         document.getElementById('catalog-view').classList.add('hidden');
@@ -1002,6 +1041,7 @@
           document.getElementById("admin-login").classList.add("hidden");
           document.getElementById("admin-app").classList.remove("hidden");
           fetchOrdersFromCloud();
+          setupRealtimeListener();
           switchAdminTab('hub');
         } else {
           document.getElementById("admin-app").classList.add("hidden");
@@ -1076,8 +1116,36 @@
     }
 
     // ==========================================
-    // SUPABASE CRUD
+    // SUPABASE CRUD & REALTIME POWIADOMIENIE
     // ==========================================
+    let isRealtimeInitialized = false;
+
+    function setupRealtimeListener() {
+      if (isRealtimeInitialized) return;
+      isRealtimeInitialized = true;
+
+      supabaseClient
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'orders' },
+          (payload) => {
+            // Pokaż baner o nowym zamówieniu
+            const newOrder = payload.new;
+            document.getElementById('banner-new-order-id').textContent = `#ZAM-${newOrder.id}`;
+            document.getElementById('new-order-banner').classList.remove('hidden');
+
+            // Odśwież dane
+            fetchOrdersFromCloud();
+          }
+        )
+        .subscribe();
+    }
+
+    function dismissNewOrderBanner() {
+      document.getElementById('new-order-banner').classList.add('hidden');
+    }
+
     async function fetchOrdersFromCloud() {
       try {
         const { data, error } = await supabaseClient
@@ -1168,7 +1236,6 @@
       const shelf = getShelf();
       const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
 
-      // Sprawdzenie dostępności
       let missingFromShelf = false;
       items.forEach(item => {
         const key = `${item.title}:::${item.color}`;
@@ -1187,7 +1254,6 @@
         }
       }
 
-      // Zdjęcie ze stanu półki
       items.forEach(item => {
         const key = `${item.title}:::${item.color}`;
         if (shelf[key]) {
@@ -1196,7 +1262,6 @@
       });
       saveShelf(shelf);
 
-      // Aktualizacja statusu
       await updateOrderStatus(orderId, 'Do spakowania');
       updateHubStats();
     }
@@ -1297,7 +1362,7 @@
           .insert([{
             id: orderId,
             customer: customer,
-            contact: "Zamówienie ręczne / Warsztat",
+            contact: "Zamówienie warsztatowe",
             notes: notes ? `[Ręczne] ${notes}` : "[Ręczne]",
             status: "W kolejce",
             items: manualOrderItems
@@ -1506,7 +1571,7 @@
     }
 
     // ==========================================
-    // WIDOK ZAMÓWIEŃ (Z OBSŁUGĄ WYDANIA Z PÓŁKI)
+    // WIDOK ZAMÓWIEŃ (Z PLAKIETKĄ [NOWE])
     // ==========================================
     function renderOrdersView() {
       const container = document.getElementById('orders-list-view');
@@ -1519,6 +1584,8 @@
 
       const shelf = getShelf();
       const customerCounts = {};
+      const now = new Date().getTime();
+
       cloudOrders.forEach(o => {
         const key = (o.contact || o.customer || "").trim().toLowerCase();
         if (key && o.status !== "Anulowane") customerCounts[key] = (customerCounts[key] || 0) + 1;
@@ -1530,6 +1597,10 @@
         const isToPack = status === "Do spakowania";
         const isCanceled = status === "Anulowane";
 
+        // Obliczenie czy zamówienie jest świeże (poniżej 2 godzin)
+        const orderTime = order.created_at ? new Date(order.created_at).getTime() : 0;
+        const isRecent = (now - orderTime) < (2 * 60 * 60 * 1000) && status === "W kolejce";
+
         const customerKey = (order.contact || order.customer || "").trim().toLowerCase();
         const orderCount = customerCounts[customerKey] || 1;
         const isRepeat = orderCount > 1 && !isCanceled;
@@ -1537,8 +1608,6 @@
         const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
 
         let shelfHints = [];
-        let canFulfillEntirelyFromShelf = items.length > 0;
-
         if (status === "W kolejce") {
           items.forEach(item => {
             const key = `${item.title}:::${item.color}`;
@@ -1546,12 +1615,7 @@
             if (availableOnShelf > 0) {
               shelfHints.push(`Półka: ${availableOnShelf}x ${item.title} (${item.color})`);
             }
-            if (availableOnShelf < item.qty) {
-              canFulfillEntirelyFromShelf = false;
-            }
           });
-        } else {
-          canFulfillEntirelyFromShelf = false;
         }
 
         let itemsHtml = items.map(item => `
@@ -1655,7 +1719,10 @@
           <div>
             <div class="flex justify-between items-start">
               <div>
-                <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
+                  ${isRecent ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-stone-950 text-[10px] font-extrabold uppercase tracking-wider animate-pulse">Nowe</span>' : ''}
+                </div>
                 <span class="font-semibold text-stone-800 text-xs ml-1">${order.customer}</span>
                 <span class="text-xs text-stone-500 block">${order.contact}</span>
               </div>
@@ -1704,7 +1771,6 @@
 
       document.getElementById('tab-missing-count').textContent = `${totalPieces} szt.`;
 
-      // 1. DEDYKOWANY STÓŁ NA OGONKI (BRĄZOWY)
       const stemBox = document.getElementById('batch-stem-box');
       const stemShelfCount = shelf['Ogonek dyni:::Brązowy'] || 0;
       const stemsNeeded = Math.max(0, totalStemDemand - stemShelfCount);
@@ -1743,7 +1809,6 @@
         `}
       `;
 
-      // 2. SUROWY SPIS BRAKÓW
       const colorGroups = {};
       Object.keys(missing).forEach(k => {
         const [color, title] = k.split(":::");
@@ -1768,7 +1833,6 @@
         }
       }
 
-      // 3. REKOMENDOWANY STÓŁ (DO 95% POJEMNOŚCI)
       const batchContainer = document.getElementById("batch-recommendation");
       let selectedColor = null;
       let maxItemCount = 0;
