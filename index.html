@@ -171,17 +171,6 @@
   <!-- ========================================== -->
   <div id="admin-app" class="max-w-xl mx-auto px-4 pt-4 pb-16 hidden space-y-4">
     
-    <!-- BANER O NOWYM ZAMÓWIENIU -->
-    <div id="new-order-banner" class="hidden p-3.5 rounded-2xl bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-between shadow-md border border-amber-500">
-      <div class="flex items-center gap-2">
-        <span class="text-base">🔔</span>
-        <span>Nowe zamówienie wpadło do bazy! (<span id="banner-new-order-id">#ZAM-...</span>)</span>
-      </div>
-      <button onclick="dismissNewOrderBanner()" class="text-stone-950 hover:text-black font-extrabold px-2 py-1 rounded bg-amber-300 hover:bg-amber-200 text-xs">
-        ✕ Zamknij
-      </button>
-    </div>
-
     <header class="flex items-center justify-between border-b border-stone-200 pb-3">
       <div>
         <h2 class="font-heading font-bold text-sm text-stone-900">Warsztat sezonowe3d</h2>
@@ -199,8 +188,25 @@
 
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: HUB GŁÓWNY -->
+    <!-- WIDOK A: HUB GŁÓWNY (Z BANEREM POWIADOMIENIA) -->
     <div id="admin-tab-hub" class="space-y-4">
+      
+      <!-- BANER O NOWYM ZAMÓWIENIU -->
+      <div id="new-order-banner" class="hidden p-3.5 rounded-2xl bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-between shadow-md border border-amber-500">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🔔</span>
+          <span>Nowe zamówienie wpadło do bazy! (<span id="banner-new-order-id">#ZAM-...</span>)</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="switchAdminTab('orders')" class="px-2.5 py-1 rounded-lg bg-stone-900 text-white text-[11px] font-bold hover:bg-stone-800">
+            Zobacz
+          </button>
+          <button onclick="dismissNewOrderBanner()" class="text-stone-950 hover:text-black font-extrabold px-2 py-1 rounded bg-amber-300 hover:bg-amber-200 text-xs">
+            ✕
+          </button>
+        </div>
+      </div>
+
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="p-3 rounded-2xl bg-white border border-stone-200 shadow-2xs">
           <span class="text-[10px] font-bold text-stone-500 uppercase block">Przychód</span>
@@ -1014,25 +1020,24 @@
     }
 
     // ==========================================
-    // SKŁADANIE ZAMÓWIENIA + WYSYŁKA EMAIL (KOMPATYBILNA Z TEMPLATE)
+    // SKŁADANIE ZAMÓWIENIA + CZYSTE POWIADOMIENIE EMAIL
     // ==========================================
     async function submitOrder(e) {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
-      btn.textContent = "Wysyłanie...";
+      btn.textContent = "Wysyłanie zamówienia...";
 
-      const customerName = document.getElementById("form-name").value;
-      const customerContact = document.getElementById("form-contact").value;
-      const customerNotes = document.getElementById("form-notes").value;
+      const customerName = document.getElementById("form-name").value.trim();
+      const customerContact = document.getElementById("form-contact").value.trim();
+      const customerNotes = document.getElementById("form-notes").value.trim();
       const orderId = Math.floor(100 + Math.random() * 900).toString();
 
       const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
-      const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0).toFixed(2);
-      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${i.title} (${i.color})`).join("\n");
 
       try {
-        const { error } = await supabaseClient
+        // 1. Zapis w bazie Supabase
+        const { error: dbError } = await supabaseClient
           .from('orders')
           .insert([{
             id: orderId,
@@ -1043,26 +1048,13 @@
             items: itemsPayload
           }]);
 
-        if (error) throw error;
+        if (dbError) throw dbError;
 
-        // Wysłanie maila z obsługą zmiennych szablonu
+        // 2. Czysty impuls e-mail (bez szczegółów)
         try {
-          const emailParams = {
-            order_id: orderId,
-            customer_name: customerName,
-            customer_contact: customerContact,
-            order_items: itemsFormattedText,
-            customer_notes: customerNotes || "(brak uwag)",
-            order_total: totalPrice,
-            // Fallback pod domyślny szablon EmailJS (Contact Us):
-            name: `${customerName} (${customerContact})`,
-            notes: customerNotes || "(brak)",
-            message: `Nowe zamówienie #ZAM-${orderId}\nKwota: ${totalPrice} zł\n\nPozycje:\n${itemsFormattedText}\n\nUwagi: ${customerNotes || 'Brak'}`
-          };
-
-          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams);
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {});
         } catch (mailErr) {
-          console.warn("Błąd wysyłki e-mail:", mailErr);
+          console.warn("Błąd EmailJS:", mailErr);
         }
 
         closeCheckout();
@@ -1175,7 +1167,7 @@
       isRealtimeInitialized = true;
 
       supabaseClient
-        .channel('public:orders')
+        .channel('public:orders_realtime')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'orders' },
@@ -1187,9 +1179,7 @@
           }
         )
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log("Realtime nasłuchuje nowych zamówień");
-          }
+          console.log("Realtime status:", status);
         });
     }
 
@@ -1385,7 +1375,7 @@
     }
 
     // ==========================================
-    // TRYB PAKOWANIA (ODHACZANIE SZTUKA PO SZTUCE)
+    // TRYB PAKOWANIA
     // ==========================================
     function openPackingModal(orderId) {
       currentPackingOrder = cloudOrders.find(o => o.id === orderId);
