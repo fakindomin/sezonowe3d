@@ -188,7 +188,7 @@
 
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: HUB GŁÓWNY (Z BANEREM POWIADOMIENIA) -->
+    <!-- WIDOK A: HUB GŁÓWNY -->
     <div id="admin-tab-hub" class="space-y-4">
       
       <!-- BANER O NOWYM ZAMÓWIENIU -->
@@ -514,7 +514,7 @@
     // ==========================================
     // EMAILJS & SUPABASE KONFIGURACJA
     // ==========================================
-    const EMAILJS_SERVICE_ID = "service_pouuu7z";
+    const EMAILJS_SERVICE_ID = "service_psuou7z";
     const EMAILJS_TEMPLATE_ID = "template_1mzt0sy";
     const EMAILJS_PUBLIC_KEY = "V4t-nC9pkZvdySwll";
 
@@ -1020,7 +1020,7 @@
     }
 
     // ==========================================
-    // SKŁADANIE ZAMÓWIENIA + CZYSTE POWIADOMIENIE EMAIL
+    // SKŁADANIE ZAMÓWIENIA + NIEZAWODNA WYSYŁKA EMAILJS
     // ==========================================
     async function submitOrder(e) {
       e.preventDefault();
@@ -1050,11 +1050,18 @@
 
         if (dbError) throw dbError;
 
-        // 2. Czysty impuls e-mail (bez szczegółów)
+        // 2. Bezpośrednie wywołanie EmailJS (z poprawnym ID serwisu)
         try {
-          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {});
+          const res = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            { to_name: "Pracownia", message: "Nowe zamówienie wpłynęło do sklepu!" },
+            EMAILJS_PUBLIC_KEY
+          );
+          console.log("Powiadomienie e-mail wysłane!", res.status);
         } catch (mailErr) {
-          console.warn("Błąd EmailJS:", mailErr);
+          console.error("Błąd wysyłki e-mail:", mailErr);
+          alert("Zamówienie zapisane, ale wystąpił błąd z mailem: " + (mailErr.text || mailErr.message || JSON.stringify(mailErr)));
         }
 
         closeCheckout();
@@ -1178,9 +1185,7 @@
             fetchOrdersFromCloud();
           }
         )
-        .subscribe((status) => {
-          console.log("Realtime status:", status);
-        });
+        .subscribe();
     }
 
     function dismissNewOrderBanner() {
