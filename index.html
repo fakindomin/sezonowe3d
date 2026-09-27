@@ -14,8 +14,8 @@
     h1, h2, h3, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
     
     .swatch-btn.active {
-      ring-width: 2px;
-      ring-offset-width: 2px;
+      outline: 2px solid #1c1917;
+      outline-offset: 2px;
       transform: scale(1.1);
     }
   </style>
@@ -26,11 +26,10 @@
   <!-- 1. SKLEP DLA KLIENTA                      -->
   <!-- ========================================== -->
   <div id="client-app">
-    <!-- NAGŁÓWEK SKLEPU Z NOWYM JASYM LOGO -->
-    <header class="bg-white/90 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-4 py-3 shadow-xs">
+    <!-- NAGŁÓWEK SKLEPU Z JASYM LOGO -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-stone-200 sticky top-0 z-30 px-4 py-3 shadow-xs">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <!-- JADNE LOGO TECHNICZNE (BEZ CZARNEJ PLAMY) -->
           <div class="w-10 h-10 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-center justify-center p-1 shadow-xs">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" fill="none">
               <defs>
@@ -64,7 +63,7 @@
           </div>
           <div>
             <span class="font-heading font-extrabold text-lg text-stone-900 leading-none tracking-tight block">sezonowe<span class="text-orange-600">3d</span><span class="text-stone-400 text-xs font-normal">.pl</span></span>
-            <p class="text-[10px] text-amber-900/60 font-semibold tracking-wider uppercase mt-0.5">Pracownia Druku 3D</p>
+            <p class="text-[10px] text-stone-500 font-semibold tracking-wider uppercase mt-0.5">Pracownia Druku 3D</p>
           </div>
         </div>
         <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -75,16 +74,14 @@
 
     <main class="max-w-4xl mx-auto px-4 pt-5 space-y-6" id="catalog-view">
       
-      <!-- PASEK WYBORU KOLEKCJI (STEROWANY Z PANELU) -->
-      <div class="flex items-center justify-between border-b border-amber-900/10 pb-3 overflow-x-auto gap-2">
-        <div class="flex items-center gap-2" id="season-selector-bar">
-          <!-- Generowane dynamicznie w JS -->
-        </div>
+      <!-- PASEK WYBORU KOLEKCJI -->
+      <div class="flex items-center justify-between border-b border-stone-200 pb-3 overflow-x-auto gap-2">
+        <div class="flex items-center gap-2" id="season-selector-bar"></div>
         <span class="text-[11px] font-semibold text-stone-400 shrink-0 hidden sm:inline">Kolekcje sezonowe</span>
       </div>
 
       <!-- BANER AKTUALNEJ KOLEKCJI -->
-      <div id="season-banner" class="p-6 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 text-amber-50 shadow-md relative overflow-hidden">
+      <div id="season-banner" class="p-6 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 text-white shadow-md relative overflow-hidden transition-all duration-300">
         <div class="relative z-10 max-w-md">
           <span class="text-xs uppercase font-extrabold tracking-widest text-amber-200 block mb-1">Limitowana Seria</span>
           <h2 class="text-2xl sm:text-3xl font-heading font-bold" id="banner-title">Kolekcja Jesienna 🍂</h2>
@@ -92,182 +89,8 @@
         </div>
       </div>
 
-      <!-- SIATKA PRODUKTÓW (2 KOLUMNY NA MONITORZE, 1 NA TELEFONIE) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="products-grid">
-        
-        <!-- 1. DYNIA (WYBÓR KOLORÓW) -->
-        <div class="bg-white rounded-3xl p-5 border border-amber-900/10 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-          <div>
-            <div class="w-full aspect-square rounded-2xl bg-amber-50/50 border border-amber-900/5 flex items-center justify-center p-8 mb-4">
-              <svg id="svg-dynia" viewBox="0 0 64 64" class="w-36 h-36 transition-colors duration-300 drop-shadow-sm" style="color: #c2410c;">
-                <path d="M30 18c0-6 4-10 8-11-1 3-1 6-3 8" fill="none" stroke="#78350f" stroke-width="4" stroke-linecap="round"/>
-                <ellipse cx="32" cy="38" rx="20" ry="17" fill="currentColor"/>
-                <ellipse cx="32" cy="38" rx="13" ry="17" fill="black" fill-opacity="0.09"/>
-                <ellipse cx="32" cy="38" rx="6" ry="17" fill="black" fill-opacity="0.09"/>
-              </svg>
-            </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="font-heading font-bold text-base text-stone-900">Dynia dekoracyjna</h3>
-                <p class="text-xs text-stone-500 mt-0.5">Brązowy ogonek w zestawie</p>
-              </div>
-              <span class="font-heading font-extrabold text-lg text-amber-900">10,00 zł</span>
-            </div>
-
-            <!-- PRÓBNIKI KOLORÓW -->
-            <div class="mt-4">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
-                Kolor: <strong id="label-dynia" class="text-stone-800">Pomarańczowy</strong>
-              </span>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="setProductColor('dynia', 'Pomarańczowy', '#c2410c', this)" class="swatch-btn active w-7 h-7 rounded-full bg-[#c2410c] ring-2 ring-stone-900 ring-offset-2 transition" title="Pomarańczowy"></button>
-                <button type="button" onclick="setProductColor('dynia', 'Zielony', '#15803d', this)" class="swatch-btn w-7 h-7 rounded-full bg-[#15803d] ring-offset-2 transition" title="Zielony"></button>
-                <button type="button" onclick="setProductColor('dynia', 'Żółty', '#d97706', this)" class="swatch-btn w-7 h-7 rounded-full bg-[#d97706] ring-offset-2 transition" title="Żółty"></button>
-                <button type="button" onclick="setProductColor('dynia', 'Biały', '#f5f5f4', this)" class="swatch-btn w-7 h-7 rounded-full bg-[#f5f5f4] border border-stone-300 ring-offset-2 transition" title="Biały"></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-4 border-t border-amber-900/10 flex items-center gap-2.5">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('dynia', -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-dynia" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('dynia', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-            </div>
-            <button onclick="addToCartWithQty('Dynia', 'dynia', 10)" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
-              + Dodaj do koszyka
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. LISEK (TYLKO POMARAŃCZOWY) -->
-        <div class="bg-white rounded-3xl p-5 border border-amber-900/10 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-          <div>
-            <div class="w-full aspect-square rounded-2xl bg-amber-50/50 border border-amber-900/5 flex items-center justify-center p-8 mb-4">
-              <svg id="svg-lisek" viewBox="0 0 64 64" class="w-36 h-36 drop-shadow-sm text-[#c2410c]">
-                <polygon points="12,18 24,32 16,36" fill="currentColor"/>
-                <polygon points="52,18 40,32 48,36" fill="currentColor"/>
-                <polygon points="32,24 16,36 32,54 48,36" fill="currentColor"/>
-                <polygon points="32,24 24,32 40,32" fill="black" fill-opacity="0.12"/>
-                <polygon points="28,48 32,54 36,48" fill="#1c1917"/>
-              </svg>
-            </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="font-heading font-bold text-base text-stone-900">Lisek geometryczny</h3>
-                <p class="text-xs text-stone-500 mt-0.5">Figurka low-poly</p>
-              </div>
-              <span class="font-heading font-extrabold text-lg text-amber-900">5,00 zł</span>
-            </div>
-
-            <!-- STAŁY KOLOR: POMARAŃCZOWY -->
-            <div class="mt-4">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor figurki</span>
-              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200">
-                <span class="w-3.5 h-3.5 rounded-full bg-[#c2410c]"></span>
-                <span class="text-xs font-bold text-orange-950">Pomarańczowy</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-4 border-t border-amber-900/10 flex items-center gap-2.5">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('lisek', -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-lisek" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('lisek', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-            </div>
-            <button onclick="addToCartWithQty('Lisek', 'lisek', 5)" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
-              + Dodaj do koszyka
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. WIEWIÓRKA (TYLKO POMARAŃCZOWY) -->
-        <div class="bg-white rounded-3xl p-5 border border-amber-900/10 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-          <div>
-            <div class="w-full aspect-square rounded-2xl bg-amber-50/50 border border-amber-900/5 flex items-center justify-center p-8 mb-4">
-              <svg id="svg-wiewiorka" viewBox="0 0 64 64" class="w-36 h-36 drop-shadow-sm text-[#c2410c]">
-                <path d="M42 46c8 0 14-8 14-16s-6-14-12-14c-4 0-6 4-6 4s1 6-2 10c-3 4-8 5-8 5" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
-                <ellipse cx="26" cy="40" rx="9" ry="12" fill="currentColor"/>
-                <circle cx="24" cy="24" r="7" fill="currentColor"/>
-                <polygon points="20,18 24,12 26,18" fill="currentColor"/>
-              </svg>
-            </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="font-heading font-bold text-base text-stone-900">Wiewiórka</h3>
-                <p class="text-xs text-stone-500 mt-0.5">Figurka dekoracyjna</p>
-              </div>
-              <span class="font-heading font-extrabold text-lg text-amber-900">5,00 zł</span>
-            </div>
-
-            <!-- STAŁY KOLOR: POMARAŃCZOWY -->
-            <div class="mt-4">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor figurki</span>
-              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200">
-                <span class="w-3.5 h-3.5 rounded-full bg-[#c2410c]"></span>
-                <span class="text-xs font-bold text-orange-950">Pomarańczowy</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-4 border-t border-amber-900/10 flex items-center gap-2.5">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('wiewiorka', -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-wiewiorka" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('wiewiorka', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-            </div>
-            <button onclick="addToCartWithQty('Wiewiórka', 'wiewiorka', 5)" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
-              + Dodaj do koszyka
-            </button>
-          </div>
-        </div>
-
-        <!-- 4. TACA OKRĄGŁA (WYBÓR KOLORÓW) -->
-        <div class="bg-white rounded-3xl p-5 border border-amber-900/10 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-          <div>
-            <div class="w-full aspect-square rounded-2xl bg-amber-50/50 border border-amber-900/5 flex items-center justify-center p-8 mb-4">
-              <svg id="svg-taca" viewBox="0 0 64 64" class="w-36 h-36 transition-colors duration-300 drop-shadow-sm text-[#15803d]">
-                <circle cx="32" cy="32" r="24" fill="currentColor"/>
-                <circle cx="32" cy="32" r="19" fill="black" fill-opacity="0.08"/>
-                <circle cx="32" cy="32" r="16" fill="currentColor" fill-opacity="0.95"/>
-              </svg>
-            </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="font-heading font-bold text-base text-stone-900">Okrągła tacka</h3>
-                <p class="text-xs text-stone-500 mt-0.5">Podstawka pod figurki</p>
-              </div>
-              <span class="font-heading font-extrabold text-lg text-amber-900">10,00 zł</span>
-            </div>
-
-            <!-- PRÓBNIKI KOLORÓW -->
-            <div class="mt-4">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
-                Kolor: <strong id="label-taca" class="text-stone-800">Zielony</strong>
-              </span>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="setProductColor('taca', 'Zielony', '#15803d', this)" class="swatch-btn active w-7 h-7 rounded-full bg-[#15803d] ring-2 ring-stone-900 ring-offset-2 transition" title="Zielony"></button>
-                <button type="button" onclick="setProductColor('taca', 'Pomarańczowy', '#c2410c', this)" class="swatch-btn w-7 h-7 rounded-full bg-[#c2410c] ring-offset-2 transition" title="Pomarańczowy"></button>
-                <button type="button" onclick="setProductColor('taca', 'Żółty', '#d97706', this)" class="swatch-btn w-7 h-7 rounded-full bg-[#d97706] ring-offset-2 transition" title="Żółty"></button>
-                <button type="button" onclick="setProductColor('taca', 'Biały', '#f5f5f4', this)" class="swatch-btn w-7 h-7 rounded-full bg-[#f5f5f4] border border-stone-300 ring-offset-2 transition" title="Biały"></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-4 border-t border-amber-900/10 flex items-center gap-2.5">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('taca', -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-taca" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('taca', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-            </div>
-            <button onclick="addToCartWithQty('Taca', 'taca', 10)" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
-              + Dodaj do koszyka
-            </button>
-          </div>
-        </div>
-
-      </div>
+      <!-- SIATKA PRODUKTÓW (ZE ZDJĘCIAMI .WEBP) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="products-grid"></div>
     </main>
 
     <!-- PŁYWAJĄCY PASEK KOSZYKA -->
@@ -309,11 +132,11 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-stone-700 mb-1">Uwagi do zamówienia</label>
-            <input id="form-notes" type="text" placeholder="np. zależy mi na odbiorze w piątek" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+            <input id="form-notes" type="text" placeholder="np. odbiór w piątek po południu" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
 
           <button id="submit-btn" type="submit" class="w-full mt-3 bg-stone-900 hover:bg-stone-800 text-amber-50 font-bold py-3.5 rounded-2xl text-xs transition active:scale-[0.99]">
-            Złóż zamówienie 🍁
+            Złóż zamówienie
           </button>
         </form>
       </div>
@@ -351,7 +174,7 @@
 
 
   <!-- ========================================== -->
-  <!-- 3. PANEL WARSZTATOWY ADMINA (SUROWY)       -->
+  <!-- 3. PANEL WARSZTATOWY ADMINA                -->
   <!-- ========================================== -->
   <div id="admin-app" class="max-w-xl mx-auto px-4 pt-4 pb-16 hidden space-y-4">
     <header class="flex items-center justify-between border-b border-stone-200 pb-3">
@@ -475,9 +298,9 @@
       <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
         <div>
           <h3 class="font-bold text-sm text-stone-900">Półka z nadwyżkami</h3>
-          <p class="text-[11px] text-stone-500">Wydrukowane elementy czekające na wykorzystanie.</p>
+          <p class="text-[11px] text-stone-500">Wydrukowane elementy gotowe do wydania.</p>
         </div>
-        <div id="shelf-items-list" class="space-y-1.5"></div>
+        <div id="shelf-items-list" class="space-y-1.5 max-h-96 overflow-y-auto pr-1"></div>
       </div>
     </div>
 
@@ -492,26 +315,24 @@
       </div>
     </div>
 
-    <!-- WIDOK F: USTAWIENIA (KOLEKCJE, POJEMNOŚĆ STOŁU I KOSZTY) -->
+    <!-- WIDOK F: USTAWIENIA -->
     <div id="admin-tab-settings" class="space-y-4 hidden">
       <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-4">
-        
-        <!-- STEROWANIE KOLEKCJAMI W SKLEPIE -->
         <div>
           <h3 class="font-heading font-bold text-sm text-stone-900">Dostępność Kolekcji w Sklepie</h3>
           <p class="text-[11px] text-stone-500 mb-2">Zaznacz, które sezony mają być widoczne i aktywne dla klientów.</p>
           <div class="space-y-2 text-xs">
-            <label class="flex items-center justify-between p-2 rounded-xl border border-stone-200 bg-stone-50">
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
               <span class="font-semibold text-stone-800">🍂 Kolekcja Jesienna</span>
-              <input type="checkbox" id="setting-season-autumn" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500" checked>
+              <input type="checkbox" id="setting-season-autumn" class="w-4 h-4 rounded text-orange-600">
             </label>
-            <label class="flex items-center justify-between p-2 rounded-xl border border-stone-200 bg-stone-50">
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
               <span class="font-semibold text-stone-800">🎄 Kolekcja Bożonarodzeniowa</span>
-              <input type="checkbox" id="setting-season-christmas" class="w-4 h-4 rounded text-red-600 focus:ring-red-500">
+              <input type="checkbox" id="setting-season-christmas" class="w-4 h-4 rounded text-red-600">
             </label>
-            <label class="flex items-center justify-between p-2 rounded-xl border border-stone-200 bg-stone-50">
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
               <span class="font-semibold text-stone-800">🐣 Kolekcja Wielkanocna</span>
-              <input type="checkbox" id="setting-season-easter" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+              <input type="checkbox" id="setting-season-easter" class="w-4 h-4 rounded text-emerald-600">
             </label>
           </div>
         </div>
@@ -533,7 +354,7 @@
         <div class="border-t border-stone-200 pt-3">
           <h3 class="font-heading font-bold text-sm text-stone-900">Pojemność Stołu P1S i Parametry</h3>
           <p class="text-[11px] text-stone-500 mb-2">Maksymalnie sztuk na pustym stole ze slicera.</p>
-          <div id="specs-editor" class="space-y-2.5 text-xs"></div>
+          <div id="specs-editor" class="space-y-2.5 text-xs max-h-72 overflow-y-auto pr-1"></div>
         </div>
 
         <button onclick="saveSettingsAll()" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs">
@@ -544,7 +365,7 @@
 
   </div>
 
-  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU (NIEUDANE WYDRUKI) -->
+  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU -->
   <div id="print-result-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
       <div class="border-b border-stone-200 pb-2">
@@ -572,18 +393,8 @@
         <div class="border-t border-stone-200 pt-2">
           <label class="block font-semibold text-stone-700 mb-1">+ Dodaj pozycję:</label>
           <div class="grid grid-cols-12 gap-1.5">
-            <select id="edit-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold">
-              <option value="Dynia">Dynia (10 zł)</option>
-              <option value="Lisek">Lisek (5 zł)</option>
-              <option value="Wiewiórka">Wiewiórka (5 zł)</option>
-              <option value="Taca">Taca (10 zł)</option>
-            </select>
-            <select id="edit-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5">
-              <option value="Pomarańczowy">Pomarańczowy</option>
-              <option value="Zielony">Zielony</option>
-              <option value="Żółty">Żółty</option>
-              <option value="Biały">Biały</option>
-            </select>
+            <select id="edit-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
+            <select id="edit-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5"></select>
             <button type="button" onclick="addPositionToEditOrder()" class="col-span-2 bg-stone-900 text-white rounded-lg font-bold">+</button>
           </div>
         </div>
@@ -612,83 +423,192 @@
     let activeBatchPayload = null;
 
     // ==========================================
-    // KONFIGURACJA KOLEKCJI SEZONOWYCH
+    // PEŁNA BAZA KOLEKCJI ZE ZDJĘCIAMI .WEBP
     // ==========================================
-    const SEASONS_CONFIG = {
+    const CATALOG = {
       autumn: {
         name: 'Jesień',
         icon: '🍂',
         title: 'Kolekcja Jesienna 🍂',
         desc: 'Ciepłe dekoracje dyniowe i leśne figurki drukowane w precyzyjnej technologii FDM.',
-        themeClass: 'from-orange-600 to-amber-700'
+        themeClass: 'from-orange-600 to-amber-700',
+        products: [
+          {
+            id: 'dynia',
+            title: 'Dynia dekoracyjna',
+            desc: 'Brązowy ogonek w zestawie',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Pomarańczowy',
+            colors: [
+              { name: 'Pomarańczowy', hex: '#c2410c', img: 'dynia_orange.webp' },
+              { name: 'Zielony', hex: '#15803d', img: 'dynia_green.webp' },
+              { name: 'Żółty', hex: '#d97706', img: 'dynia_yellow.webp' },
+              { name: 'Biały', hex: '#f5f5f4', img: 'dynia_white.webp' }
+            ],
+            renderVisual: (sel) => {
+              const src = sel.img || 'dynia_orange.webp';
+              return `<img src="${src}" alt="Dynia dekoracyjna" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+            }
+          },
+          {
+            id: 'lisek',
+            title: 'Lisek geometryczny',
+            desc: 'Figurka low-poly',
+            price: 5,
+            hasColors: false,
+            defaultColor: 'Pomarańczowy',
+            renderVisual: () => {
+              return `<img src="lisek.webp" alt="Lisek geometryczny" class="w-full h-full object-contain drop-shadow-sm">`;
+            }
+          },
+          {
+            id: 'wiewiorka',
+            title: 'Wiewiórka',
+            desc: 'Figurka dekoracyjna',
+            price: 5,
+            hasColors: false,
+            defaultColor: 'Pomarańczowy',
+            renderVisual: () => {
+              return `<img src="wiewiorka.webp" alt="Wiewiórka" class="w-full h-full object-contain drop-shadow-sm">`;
+            }
+          },
+          {
+            id: 'taca',
+            title: 'Okrągła tacka',
+            desc: 'Podstawka pod figurki',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Zielony',
+            colors: [
+              { name: 'Zielony', hex: '#15803d', img: 'tacka_green.webp' },
+              { name: 'Pomarańczowy', hex: '#c2410c', img: 'tacka_orange.webp' },
+              { name: 'Żółty', hex: '#d97706', img: 'tacka_yellow.webp' },
+              { name: 'Biały', hex: '#f5f5f4', img: 'tacka_white.webp' }
+            ],
+            renderVisual: (sel) => {
+              const src = sel.img || 'tacka_green.webp';
+              return `<img src="${src}" alt="Okrągła tacka" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+            }
+          }
+        ]
       },
       christmas: {
         name: 'Boże Narodzenie',
         icon: '🎄',
         title: 'Kolekcja Świąteczna 🎄',
-        desc: 'Eleganckie ozdoby choinkowe, geometryczne choinki i świąteczne akcenty.',
-        themeClass: 'from-red-700 to-emerald-800'
+        desc: 'Eleganckie ozdoby świąteczne, figurki i dekoracje w klasycznej palecie barw.',
+        themeClass: 'from-red-800 to-emerald-900',
+        products: [
+          {
+            id: 'jelonek',
+            title: 'Jelonek',
+            desc: 'Geometryczna figurka świąteczna',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Czerwony',
+            colors: [
+              { name: 'Zielony', hex: '#15803d' },
+              { name: 'Biały', hex: '#f5f5f4' },
+              { name: 'Czerwony', hex: '#dc2626' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><path d="M20 18 L26 12 L30 18 M44 18 L38 12 L34 18" stroke="#78350f" stroke-width="3" stroke-linecap="round"/><ellipse cx="32" cy="38" rx="14" ry="18" fill="currentColor"/><circle cx="32" cy="24" r="9" fill="currentColor"/><circle cx="32" cy="26" r="3" fill="#1c1917"/></svg>`
+          },
+          {
+            id: 'mikolaj',
+            title: 'Mikołaj',
+            desc: 'Świąteczna figurka Świętego Mikołaja',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Czerwony',
+            colors: [
+              { name: 'Zielony', hex: '#15803d' },
+              { name: 'Biały', hex: '#f5f5f4' },
+              { name: 'Czerwony', hex: '#dc2626' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><polygon points="32,8 20,28 44,28" fill="currentColor"/><circle cx="32" cy="8" r="4" fill="#f5f5f4"/><ellipse cx="32" cy="42" rx="15" ry="16" fill="currentColor"/><path d="M22 30 Q32 44 42 30" fill="#f5f5f4"/></svg>`
+          },
+          {
+            id: 'bombka',
+            title: 'Bombka',
+            desc: 'Nowoczesna bombka choinkowa',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Czerwony',
+            colors: [
+              { name: 'Zielony', hex: '#15803d' },
+              { name: 'Biały', hex: '#f5f5f4' },
+              { name: 'Czerwony', hex: '#dc2626' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><rect x="28" y="10" width="8" height="6" rx="2" fill="#d97706"/><circle cx="32" cy="38" r="20" fill="currentColor"/><circle cx="32" cy="38" r="14" fill="white" fill-opacity="0.15"/></svg>`
+          }
+        ]
       },
       easter: {
         name: 'Wielkanoc',
         icon: '🐣',
         title: 'Kolekcja Wiosenna 🐣',
-        desc: 'Pastelowe zające, geometryczne pisanki i wiosenny powiew w Twoim domu.',
-        themeClass: 'from-emerald-600 to-teal-700'
+        desc: 'Pastelowe zające w trzech rozmiarach i niespodzianki na wielkanocny stół.',
+        themeClass: 'from-emerald-600 to-teal-700',
+        products: [
+          {
+            id: 'zajaczek_maly',
+            title: 'Zajączek mały',
+            desc: 'Wysokość ok. 6 cm',
+            price: 5,
+            hasColors: true,
+            defaultColor: 'Różowy',
+            colors: [
+              { name: 'Różowy', hex: '#f472b6' },
+              { name: 'Żółty', hex: '#facc15' },
+              { name: 'Miętowy', hex: '#2dd4bf' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><ellipse cx="26" cy="18" rx="4" ry="12" fill="currentColor"/><ellipse cx="38" cy="18" rx="4" ry="12" fill="currentColor"/><ellipse cx="32" cy="42" rx="12" ry="14" fill="currentColor"/><circle cx="32" cy="30" r="8" fill="currentColor"/></svg>`
+          },
+          {
+            id: 'zajaczek_sredni',
+            title: 'Zajączek średni',
+            desc: 'Wysokość ok. 10 cm',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Żółty',
+            colors: [
+              { name: 'Różowy', hex: '#f472b6' },
+              { name: 'Żółty', hex: '#facc15' },
+              { name: 'Miętowy', hex: '#2dd4bf' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><ellipse cx="26" cy="16" rx="5" ry="14" fill="currentColor"/><ellipse cx="38" cy="16" rx="5" ry="14" fill="currentColor"/><ellipse cx="32" cy="42" rx="14" ry="16" fill="currentColor"/><circle cx="32" cy="28" r="9" fill="currentColor"/></svg>`
+          },
+          {
+            id: 'zajaczek_duzy',
+            title: 'Zajączek duży',
+            desc: 'Wysokość ok. 15 cm',
+            price: 15,
+            hasColors: true,
+            defaultColor: 'Miętowy',
+            colors: [
+              { name: 'Różowy', hex: '#f472b6' },
+              { name: 'Żółty', hex: '#facc15' },
+              { name: 'Miętowy', hex: '#2dd4bf' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><ellipse cx="25" cy="14" rx="6" ry="16" fill="currentColor"/><ellipse cx="39" cy="14" rx="6" ry="16" fill="currentColor"/><ellipse cx="32" cy="42" rx="16" ry="18" fill="currentColor"/><circle cx="32" cy="26" r="11" fill="currentColor"/></svg>`
+          },
+          {
+            id: 'jajko',
+            title: 'Jajko niespodzianka',
+            desc: 'Otwierana pisanka dekoracyjna',
+            price: 10,
+            hasColors: true,
+            defaultColor: 'Różowy',
+            colors: [
+              { name: 'Różowy', hex: '#f472b6' },
+              { name: 'Żółty', hex: '#facc15' },
+              { name: 'Miętowy', hex: '#2dd4bf' }
+            ],
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><ellipse cx="32" cy="36" rx="18" ry="24" fill="currentColor"/><path d="M14 36 Q32 30 50 36 Q32 42 14 36" fill="white" fill-opacity="0.25"/></svg>`
+          }
+        ]
       }
-    };
-
-    function getSeasonsState() {
-      const data = localStorage.getItem("bambu_seasons_active");
-      return data ? JSON.parse(data) : { autumn: true, christmas: false, easter: false };
-    }
-    function saveSeasonsState(state) {
-      localStorage.setItem("bambu_seasons_active", JSON.stringify(state));
-    }
-
-    let activeSeasonKey = 'autumn';
-
-    function renderSeasonSelector() {
-      const activeState = getSeasonsState();
-      const container = document.getElementById('season-selector-bar');
-      container.innerHTML = '';
-
-      Object.entries(SEASONS_CONFIG).forEach(([key, config]) => {
-        const isEnabled = activeState[key] === true;
-        const isCurrent = key === activeSeasonKey;
-
-        const btn = document.createElement('button');
-        if (isEnabled) {
-          btn.className = `px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${isCurrent ? 'bg-stone-900 text-white shadow-xs' : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'}`;
-          btn.innerHTML = `<span>${config.icon}</span> <span>${config.name}</span>`;
-          btn.onclick = () => switchSeason(key);
-        } else {
-          btn.className = `px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100/80 border border-stone-200 text-stone-400 flex items-center gap-1.5 cursor-not-allowed`;
-          btn.innerHTML = `<span>${config.icon}</span> <span>${config.name}</span> <span class="text-[10px] ml-0.5">🔒</span>`;
-          btn.title = "Kolekcja obecnie niedostępna";
-        }
-        container.appendChild(btn);
-      });
-
-      // Zaktualizuj baner
-      const currentConfig = SEASONS_CONFIG[activeSeasonKey];
-      document.getElementById('banner-title').textContent = currentConfig.title;
-      document.getElementById('banner-desc').textContent = currentConfig.desc;
-    }
-
-    function switchSeason(key) {
-      activeSeasonKey = key;
-      renderSeasonSelector();
-    }
-
-    // ==========================================
-    // SPECYFIKACJA MODELI & POJEMNOŚĆ STOŁU
-    // ==========================================
-    const PRICES = {
-      'Dynia': 10,
-      'Lisek': 5,
-      'Wiewiórka': 5,
-      'Taca': 10
     };
 
     const DEFAULT_SPECS = {
@@ -696,58 +616,339 @@
       'Lisek': { weight: 55, hours: 2.2, maxOnBed: 16 },
       'Wiewiórka': { weight: 50, hours: 2.0, maxOnBed: 14 },
       'Taca': { weight: 110, hours: 3.3, maxOnBed: 1 },
-      'Ogonek dyni': { weight: 2, hours: 0.15, maxOnBed: 40 }
+      'Ogonek dyni': { weight: 2, hours: 0.15, maxOnBed: 40 },
+      'Jelonek': { weight: 48, hours: 1.8, maxOnBed: 10 },
+      'Mikołaj': { weight: 52, hours: 2.1, maxOnBed: 10 },
+      'Bombka': { weight: 38, hours: 1.5, maxOnBed: 12 },
+      'Zajączek mały': { weight: 28, hours: 1.1, maxOnBed: 20 },
+      'Zajączek średni': { weight: 48, hours: 1.8, maxOnBed: 10 },
+      'Zajączek duży': { weight: 75, hours: 2.9, maxOnBed: 6 },
+      'Jajko niespodzianka': { weight: 45, hours: 1.7, maxOnBed: 12 }
     };
 
-    const DEFAULT_COSTS = {
-      filamentKg: 80,
-      energyKwh: 1.15
+    const ALL_PRICES = {
+      'Dynia': 10, 'Lisek': 5, 'Wiewiórka': 5, 'Taca': 10,
+      'Jelonek': 10, 'Mikołaj': 10, 'Bombka': 10,
+      'Zajączek mały': 5, 'Zajączek średni': 10, 'Zajączek duży': 15, 'Jajko niespodzianka': 10
     };
+
+    const DEFAULT_COSTS = { filamentKg: 80, energyKwh: 1.15 };
 
     const DEFAULT_SPOOLS = {
       'Pomarańczowy': 1000,
       'Zielony': 1000,
       'Żółty': 1000,
       'Biały': 1000,
-      'Brązowy': 1000
+      'Brązowy': 1000,
+      'Czerwony': 1000,
+      'Różowy': 1000,
+      'Miętowy': 1000
     };
 
     function getSpecs() {
-      const data = localStorage.getItem("bambu_specs_v3");
+      const data = localStorage.getItem("bambu_specs_v5");
       return data ? JSON.parse(data) : DEFAULT_SPECS;
     }
     function saveSpecs(specs) {
-      localStorage.setItem("bambu_specs_v3", JSON.stringify(specs));
+      localStorage.setItem("bambu_specs_v5", JSON.stringify(specs));
     }
 
     function getCosts() {
-      const data = localStorage.getItem("bambu_costs_v3");
+      const data = localStorage.getItem("bambu_costs_v5");
       return data ? JSON.parse(data) : DEFAULT_COSTS;
     }
     function saveCosts(costs) {
-      localStorage.setItem("bambu_costs_v3", JSON.stringify(costs));
+      localStorage.setItem("bambu_costs_v5", JSON.stringify(costs));
     }
 
     function getSpools() {
-      const data = localStorage.getItem("bambu_spools_v3");
+      const data = localStorage.getItem("bambu_spools_v5");
       return data ? JSON.parse(data) : DEFAULT_SPOOLS;
     }
     function saveSpools(spools) {
-      localStorage.setItem("bambu_spools_v3", JSON.stringify(spools));
+      localStorage.setItem("bambu_spools_v5", JSON.stringify(spools));
     }
 
     function getShelf() {
-      const data = localStorage.getItem("bambu_shelf_v3");
+      const data = localStorage.getItem("bambu_shelf_v5");
       return data ? JSON.parse(data) : {};
     }
     function saveShelf(shelf) {
-      localStorage.setItem("bambu_shelf_v3", JSON.stringify(shelf));
+      localStorage.setItem("bambu_shelf_v5", JSON.stringify(shelf));
+    }
+
+    function getSeasonsState() {
+      const data = localStorage.getItem("bambu_seasons_active_v5");
+      return data ? JSON.parse(data) : { autumn: true, christmas: false, easter: false };
+    }
+    function saveSeasonsState(state) {
+      localStorage.setItem("bambu_seasons_active_v5", JSON.stringify(state));
     }
 
     const ADMIN_PASSWORD = "bambu123";
+    let activeSeasonKey = 'autumn';
+    const productSelectedState = {};
+    const quantities = {};
+    let cart = [];
 
     // ==========================================
-    // ROUTING & AUTH
+    // RENDEROWANIE SKLEPU
+    // ==========================================
+    function renderSeasonSelector() {
+      const activeState = getSeasonsState();
+      const container = document.getElementById('season-selector-bar');
+      container.innerHTML = '';
+
+      if (!activeState[activeSeasonKey]) {
+        const firstEnabled = Object.keys(activeState).find(k => activeState[k]);
+        activeSeasonKey = firstEnabled || 'autumn';
+      }
+
+      Object.entries(CATALOG).forEach(([key, config]) => {
+        const isEnabled = activeState[key] === true;
+        const isCurrent = key === activeSeasonKey;
+
+        const btn = document.createElement('button');
+        if (isEnabled) {
+          btn.className = `px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${isCurrent ? 'bg-stone-900 text-white shadow-sm' : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'}`;
+          btn.innerHTML = `<span>${config.icon}</span> <span>${config.name}</span>`;
+          btn.onclick = () => switchSeason(key);
+        } else {
+          btn.className = `px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100 border border-stone-200 text-stone-400 flex items-center gap-1.5 cursor-not-allowed`;
+          btn.innerHTML = `<span>${config.icon}</span> <span>${config.name}</span> <span class="text-[10px]">🔒</span>`;
+          btn.title = "Kolekcja obecnie niedostępna";
+        }
+        container.appendChild(btn);
+      });
+
+      const currentConfig = CATALOG[activeSeasonKey];
+      document.getElementById('banner-title').textContent = currentConfig.title;
+      document.getElementById('banner-desc').textContent = currentConfig.desc;
+      
+      const banner = document.getElementById('season-banner');
+      banner.className = `p-6 rounded-3xl bg-gradient-to-br ${currentConfig.themeClass} text-white shadow-md relative overflow-hidden transition-all duration-300`;
+
+      renderProductsGrid();
+    }
+
+    function switchSeason(key) {
+      activeSeasonKey = key;
+      renderSeasonSelector();
+    }
+
+    function renderProductsGrid() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
+      const currentConfig = CATALOG[activeSeasonKey];
+
+      currentConfig.products.forEach(p => {
+        if (!productSelectedState[p.id]) {
+          const defCol = p.hasColors ? p.colors.find(c => c.name === p.defaultColor) : { name: 'Pomarańczowy', hex: '#c2410c' };
+          productSelectedState[p.id] = {
+            color: defCol.name,
+            hex: defCol.hex,
+            img: defCol.img || null
+          };
+        }
+        if (!quantities[p.id]) quantities[p.id] = 1;
+
+        const currentSel = productSelectedState[p.id];
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-3xl p-5 border border-stone-200 shadow-xs hover:shadow-md transition flex flex-col justify-between";
+
+        let colorPickerHtml = '';
+        if (p.hasColors) {
+          const swatches = p.colors.map(c => `
+            <button type="button" onclick="setProductColor('${p.id}', '${c.name}', '${c.hex}', '${c.img || ''}')" 
+              class="swatch-btn ${currentSel.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition" 
+              style="background-color: ${c.hex}; ${c.name === 'Biały' ? 'border: 1px solid #d6d3d1;' : ''}" 
+              title="${c.name}">
+            </button>
+          `).join('');
+
+          colorPickerHtml = `
+            <div class="mt-4">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
+                Kolor: <strong class="text-stone-800">${currentSel.color}</strong>
+              </span>
+              <div class="flex items-center gap-2">
+                ${swatches}
+              </div>
+            </div>
+          `;
+        } else {
+          colorPickerHtml = `
+            <div class="mt-4">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor figurki</span>
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200">
+                <span class="w-3.5 h-3.5 rounded-full bg-[#c2410c]"></span>
+                <span class="text-xs font-bold text-orange-950">Pomarańczowy</span>
+              </div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden">
+              ${p.renderVisual(currentSel)}
+            </div>
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-heading font-bold text-base text-stone-900">${p.title}</h3>
+                <p class="text-xs text-stone-500 mt-0.5">${p.desc}</p>
+              </div>
+              <span class="font-heading font-extrabold text-lg text-stone-900">${p.price.toFixed(2)} zł</span>
+            </div>
+            ${colorPickerHtml}
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-stone-100 flex items-center gap-2.5">
+            <div class="flex items-center border border-stone-200 rounded-2xl bg-stone-50 p-1">
+              <button onclick="changeQty('${p.id}', -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-${p.id}" class="w-8 text-center text-xs font-bold text-stone-900">${quantities[p.id]}</span>
+              <button onclick="changeQty('${p.id}', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+            </div>
+            <button onclick="addToCart('${p.id}', '${p.title}', ${p.price})" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-2xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
+              + Dodaj do koszyka
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setProductColor(productId, colorName, hexCode, imgPath) {
+      productSelectedState[productId] = { color: colorName, hex: hexCode, img: imgPath || null };
+      renderProductsGrid();
+    }
+
+    function changeQty(productId, delta) {
+      quantities[productId] = Math.max(1, (quantities[productId] || 1) + delta);
+      const label = document.getElementById(`qty-${productId}`);
+      if (label) label.textContent = quantities[productId];
+    }
+
+    function addToCart(productId, title, unitPrice) {
+      const selectedColor = productSelectedState[productId] ? productSelectedState[productId].color : 'Pomarańczowy';
+      const count = quantities[productId] || 1;
+
+      const existingIndex = cart.findIndex(item => item.title === title && item.color === selectedColor);
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += count;
+      } else {
+        cart.push({ title, color: selectedColor, unitPrice, qty: count });
+      }
+
+      quantities[productId] = 1;
+      const label = document.getElementById(`qty-${productId}`);
+      if (label) label.textContent = 1;
+      updateCartUI();
+    }
+
+    function changeCartItemQty(index, delta) {
+      cart[index].qty += delta;
+      if (cart[index].qty <= 0) cart.splice(index, 1);
+      updateCartUI();
+      renderCartDrawer();
+      if (cart.length === 0) closeCheckout();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+      renderCartDrawer();
+      if (cart.length === 0) closeCheckout();
+    }
+
+    function updateCartUI() {
+      const totalPieces = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+
+      document.getElementById('cart-count').textContent = totalPieces;
+      document.getElementById('cart-total').textContent = totalPrice.toFixed(2) + ' zł';
+      document.getElementById('modal-total').textContent = totalPrice.toFixed(2) + ' zł';
+
+      const bar = document.getElementById('sticky-bar');
+      if (totalPieces > 0) bar.classList.remove('hidden');
+      else bar.classList.add('hidden');
+    }
+
+    function openCheckout() {
+      renderCartDrawer();
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+    function closeCheckout() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function renderCartDrawer() {
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+      cart.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'py-3 flex justify-between items-center';
+        row.innerHTML = `
+          <div>
+            <div class="font-bold text-stone-900">${item.title} (${item.color})</div>
+            <div class="text-stone-500">${item.unitPrice.toFixed(2)} zł / szt.</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center border border-stone-200 rounded-lg bg-stone-50 px-1 py-0.5">
+              <button onclick="changeCartItemQty(${index}, -1)" class="w-5 h-5 font-bold">-</button>
+              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <button onclick="changeCartItemQty(${index}, 1)" class="w-5 h-5 font-bold">+</button>
+            </div>
+            <span class="font-bold text-stone-900 w-14 text-right">${(item.unitPrice * item.qty).toFixed(2)} zł</span>
+            <button onclick="removeFromCart(${index})" class="text-rose-600 font-bold ml-1">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    async function submitOrder(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = "Wysyłanie...";
+
+      const customerName = document.getElementById("form-name").value;
+      const customerContact = document.getElementById("form-contact").value;
+      const customerNotes = document.getElementById("form-notes").value;
+      const orderId = Math.floor(100 + Math.random() * 900).toString();
+
+      const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
+
+      try {
+        const { error } = await supabaseClient
+          .from('orders')
+          .insert([{
+            id: orderId,
+            customer: customerName,
+            contact: customerContact,
+            notes: customerNotes,
+            status: "W kolejce",
+            items: itemsPayload
+          }]);
+
+        if (error) throw error;
+
+        closeCheckout();
+        document.getElementById('catalog-view').classList.add('hidden');
+        document.getElementById('sticky-bar').classList.add('hidden');
+        document.getElementById('order-id').textContent = orderId;
+        document.getElementById('success-view').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        alert("Błąd składania zamówienia: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "Złóż zamówienie";
+      }
+    }
+
+    // ==========================================
+    // ROUTING & AUTH PANELU
     // ==========================================
     function route() {
       const hash = window.location.hash;
@@ -929,6 +1130,12 @@
       document.getElementById('edit-order-id-label').textContent = orderId;
       document.getElementById('edit-order-notes').value = order.notes || "";
 
+      const titleSelect = document.getElementById('edit-add-title');
+      titleSelect.innerHTML = Object.keys(ALL_PRICES).map(t => `<option value="${t}">${t} (${ALL_PRICES[t]} zł)</option>`).join('');
+
+      const colorSelect = document.getElementById('edit-add-color');
+      colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
+
       renderEditItemsList();
       document.getElementById('edit-order-modal').classList.remove('hidden');
     }
@@ -1050,7 +1257,7 @@
         if (o.status === "Zrealizowane") {
           const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
           items.forEach(item => {
-            const price = PRICES[item.title] || 10;
+            const price = ALL_PRICES[item.title] || 10;
             const spec = specs[item.title] || { weight: 45, hours: 1.5 };
 
             totalRevenue += price * item.qty;
@@ -1254,7 +1461,7 @@
     }
 
     // ==========================================
-    // PLANER STOŁU (ALGORYTM POJEMNOŚCI + OGONKI)
+    // PLANER STOŁU
     // ==========================================
     function renderBatcherView() {
       const specs = getSpecs();
@@ -1360,7 +1567,6 @@
 
       if (selectedColor) {
         const availableItems = JSON.parse(JSON.stringify(colorGroups[selectedColor]));
-        
         let bedLoad = 0;
         const bedItems = [];
         let totalGrams = 0;
@@ -1518,9 +1724,6 @@
     // ==========================================
     // PÓŁKA BUFOROWA
     // ==========================================
-    const MODELS = ['Dynia', 'Lisek', 'Wiewiórka', 'Taca'];
-    const COLORS = ['Pomarańczowy', 'Zielony', 'Żółty', 'Biały'];
-
     function renderShelfView() {
       const shelf = getShelf();
       const container = document.getElementById('shelf-items-list');
@@ -1543,25 +1746,30 @@
       `;
       container.appendChild(stemRow);
 
-      MODELS.forEach(model => {
-        COLORS.forEach(color => {
+      const allModelNames = Object.keys(ALL_PRICES);
+      const allColorNames = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy');
+
+      allModelNames.forEach(model => {
+        allColorNames.forEach(color => {
           const key = `${model}:::${color}`;
           const count = shelf[key] || 0;
 
-          const row = document.createElement('div');
-          row.className = `p-2 rounded-xl border flex justify-between items-center ${count > 0 ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200'}`;
-          row.innerHTML = `
-            <div>
-              <span class="font-bold text-xs text-stone-900">${model}</span>
-              <span class="text-[10px] text-stone-500 ml-1">(${color})</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">-</button>
-              <span class="w-6 text-center text-xs font-bold ${count > 0 ? 'text-amber-900' : 'text-stone-400'}">${count}</span>
-              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">+</button>
-            </div>
-          `;
-          container.appendChild(row);
+          if (count > 0 || ['Dynia', 'Lisek', 'Wiewiórka', 'Taca'].includes(model)) {
+            const row = document.createElement('div');
+            row.className = `p-2 rounded-xl border flex justify-between items-center ${count > 0 ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200'}`;
+            row.innerHTML = `
+              <div>
+                <span class="font-bold text-xs text-stone-900">${model}</span>
+                <span class="text-[10px] text-stone-500 ml-1">(${color})</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">-</button>
+                <span class="w-6 text-center text-xs font-bold ${count > 0 ? 'text-amber-900' : 'text-stone-400'}">${count}</span>
+                <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">+</button>
+              </div>
+            `;
+            container.appendChild(row);
+          }
         });
       });
     }
@@ -1676,164 +1884,10 @@
       };
       saveSeasonsState(newSeasonsState);
 
-      alert("Zapisano ustawienia kolekcji, kosztów i stołów!");
+      alert("Zapisano ustawienia kolekcji, kosztów i parametrów stołu!");
       updateHubStats();
       renderBatcherView();
       renderSeasonSelector();
-    }
-
-
-    // ==========================================
-    // SKLEP & KOSZYK (OBSŁUGA ZWIERZĄT TYLKO POMARAŃCZOWYCH)
-    // ==========================================
-    const state = {
-      dynia: { color: 'Pomarańczowy', hex: '#c2410c' },
-      lisek: { color: 'Pomarańczowy', hex: '#c2410c' },
-      wiewiorka: { color: 'Pomarańczowy', hex: '#c2410c' },
-      taca: { color: 'Zielony', hex: '#15803d' }
-    };
-
-    const quantities = { dynia: 1, lisek: 1, wiewiorka: 1, taca: 1 };
-    let cart = [];
-
-    function changeQty(productId, delta) {
-      quantities[productId] = Math.max(1, quantities[productId] + delta);
-      document.getElementById(`qty-${productId}`).textContent = quantities[productId];
-    }
-
-    function setProductColor(productId, colorName, hexCode, btnElement) {
-      state[productId].color = colorName;
-      state[productId].hex = hexCode;
-
-      const svg = document.getElementById(`svg-${productId}`);
-      if (svg) svg.style.color = hexCode;
-
-      const label = document.getElementById(`label-${productId}`);
-      if (label) label.textContent = colorName;
-
-      const parent = btnElement.parentElement;
-      parent.querySelectorAll('.swatch-btn').forEach(btn => {
-        btn.classList.remove('active', 'ring-2', 'ring-stone-900');
-      });
-      btnElement.classList.add('active', 'ring-2', 'ring-stone-900');
-    }
-
-    function addToCartWithQty(title, productId, unitPrice) {
-      const selectedColor = state[productId].color;
-      const count = quantities[productId];
-
-      const existingIndex = cart.findIndex(item => item.title === title && item.color === selectedColor);
-      if (existingIndex > -1) {
-        cart[existingIndex].qty += count;
-      } else {
-        cart.push({ title, color: selectedColor, unitPrice, qty: count });
-      }
-
-      quantities[productId] = 1;
-      document.getElementById(`qty-${productId}`).textContent = 1;
-      updateCartUI();
-    }
-
-    function changeCartItemQty(index, delta) {
-      cart[index].qty += delta;
-      if (cart[index].qty <= 0) cart.splice(index, 1);
-      updateCartUI();
-      renderCartDrawer();
-      if (cart.length === 0) closeCheckout();
-    }
-
-    function removeFromCart(index) {
-      cart.splice(index, 1);
-      updateCartUI();
-      renderCartDrawer();
-      if (cart.length === 0) closeCheckout();
-    }
-
-    function updateCartUI() {
-      const totalPieces = cart.reduce((sum, item) => sum + item.qty, 0);
-      const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
-
-      document.getElementById('cart-count').textContent = totalPieces;
-      document.getElementById('cart-total').textContent = totalPrice.toFixed(2) + ' zł';
-      document.getElementById('modal-total').textContent = totalPrice.toFixed(2) + ' zł';
-
-      const bar = document.getElementById('sticky-bar');
-      if (totalPieces > 0) bar.classList.remove('hidden');
-      else bar.classList.add('hidden');
-    }
-
-    function openCheckout() {
-      renderCartDrawer();
-      document.getElementById('checkout-modal').classList.remove('hidden');
-    }
-
-    function closeCheckout() {
-      document.getElementById('checkout-modal').classList.add('hidden');
-    }
-
-    function renderCartDrawer() {
-      const container = document.getElementById('cart-items');
-      container.innerHTML = '';
-      cart.forEach((item, index) => {
-        const row = document.createElement('div');
-        row.className = 'py-3 flex justify-between items-center';
-        row.innerHTML = `
-          <div>
-            <div class="font-bold text-stone-900">${item.title} (${item.color})</div>
-            <div class="text-stone-500">${item.unitPrice.toFixed(2)} zł / szt.</div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="flex items-center border border-stone-300 rounded-lg bg-stone-50 px-1 py-0.5">
-              <button onclick="changeCartItemQty(${index}, -1)" class="w-5 h-5 font-bold">-</button>
-              <span class="w-5 text-center font-bold">${item.qty}</span>
-              <button onclick="changeCartItemQty(${index}, 1)" class="w-5 h-5 font-bold">+</button>
-            </div>
-            <span class="font-bold text-stone-900 w-14 text-right">${(item.unitPrice * item.qty).toFixed(2)} zł</span>
-            <button onclick="removeFromCart(${index})" class="text-rose-600 font-bold ml-1">✕</button>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    async function submitOrder(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.textContent = "Wysyłanie...";
-
-      const customerName = document.getElementById("form-name").value;
-      const customerContact = document.getElementById("form-contact").value;
-      const customerNotes = document.getElementById("form-notes").value;
-      const orderId = Math.floor(100 + Math.random() * 900).toString();
-
-      const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
-
-      try {
-        const { error } = await supabaseClient
-          .from('orders')
-          .insert([{
-            id: orderId,
-            customer: customerName,
-            contact: customerContact,
-            notes: customerNotes,
-            status: "W kolejce",
-            items: itemsPayload
-          }]);
-
-        if (error) throw error;
-
-        closeCheckout();
-        document.getElementById('catalog-view').classList.add('hidden');
-        document.getElementById('sticky-bar').classList.add('hidden');
-        document.getElementById('order-id').textContent = orderId;
-        document.getElementById('success-view').classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err) {
-        alert("Błąd składania zamówienia: " + err.message);
-        btn.disabled = false;
-        btn.textContent = "Złóż zamówienie 🍁";
-      }
     }
   </script>
 </body>
