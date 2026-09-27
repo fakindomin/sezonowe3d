@@ -8,157 +8,164 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Outfit', sans-serif; }
-    h1, h2, h3, .font-serif-autumn { font-family: 'Fraunces', serif; }
-    
     .color-chip.active {
-      border-color: #78350f;
-      background-color: #78350f;
+      border-color: #1c1917;
+      background-color: #1c1917;
       color: #ffffff;
-      box-shadow: 0 4px 12px -2px rgba(120, 53, 15, 0.35);
-    }
-    .color-chip.active .chip-indicator {
-      box-shadow: 0 0 0 2px #fffbf7;
     }
   </style>
 </head>
-<body class="bg-[#faf6f0] text-stone-800 pb-28">
+<body class="bg-[#faf7f2] text-stone-800 pb-28">
 
   <!-- ========================================== -->
   <!-- 1. SKLEP DLA KLIENTA                      -->
   <!-- ========================================== -->
   <div id="client-app">
-    <header class="bg-[#fffdfa]/90 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-4 py-3.5 shadow-sm">
+    <header class="bg-white/95 backdrop-blur-md border-b border-stone-200 sticky top-0 z-30 px-4 py-3 shadow-xs">
       <div class="max-w-md mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center text-amber-50 text-lg shadow-md shadow-orange-900/20">
-            🍁
+        <div class="flex items-center gap-3">
+          <!-- NOWE MINIMALISTYCZNE LOGO GŁOWICY -->
+          <div class="w-10 h-10 rounded-xl bg-stone-950 flex items-center justify-center p-1 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" fill="none">
+              <defs>
+                <linearGradient id="brassGradH" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#fde047"/>
+                  <stop offset="45%" stop-color="#eab308"/>
+                  <stop offset="100%" stop-color="#a16207"/>
+                </linearGradient>
+                <linearGradient id="blockGradH" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#334155"/>
+                  <stop offset="100%" stop-color="#1e293b"/>
+                </linearGradient>
+                <linearGradient id="filamentGradH" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="100%" stop-color="#0284c7"/>
+                </linearGradient>
+              </defs>
+              <rect x="94" y="24" width="12" height="20" rx="3" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+              <line x1="100" y1="24" x2="100" y2="44" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+              <rect x="62" y="44" width="76" height="6" rx="3" fill="#334155"/>
+              <rect x="68" y="53" width="64" height="6" rx="3" fill="#334155"/>
+              <rect x="74" y="62" width="52" height="6" rx="3" fill="#334155"/>
+              <rect x="70" y="71" width="60" height="34" rx="6" fill="url(#blockGradH)" stroke="#475569" stroke-width="2"/>
+              <circle cx="116" cy="88" r="4" fill="#0f172a" stroke="#475569" stroke-width="1.5"/>
+              <path d="M 81 105 L 119 105 L 110 130 L 90 130 Z" fill="url(#brassGradH)"/>
+              <rect x="95" y="130" width="10" height="6" rx="2" fill="#fef08a"/>
+              <circle cx="100" cy="140" r="2.8" fill="#e0f2fe"/>
+              <path d="M 100 142 L 100 154 L 148 154" fill="none" stroke="url(#filamentGradH)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="50" y1="162" x2="150" y2="162" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+            </svg>
           </div>
           <div>
-            <h1 class="font-bold text-lg text-stone-900 leading-none">sezonowe3d.pl</h1>
-            <p class="text-[11px] font-medium text-amber-800/70 mt-0.5">Rękodzieło i dekoracje</p>
+            <h1 class="font-bold text-base text-stone-900 leading-none tracking-tight">sezonowe3d.pl</h1>
+            <p class="text-[10px] text-stone-500 font-medium mt-0.5">Pracownia Druku 3D</p>
           </div>
         </div>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100/70 text-amber-900 border border-amber-300/60">
-          Pracownia otwarta
+        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          Otwarte
         </span>
       </div>
     </header>
 
-    <main class="max-w-md mx-auto px-4 pt-5 space-y-4" id="catalog-view">
-      <div class="relative overflow-hidden bg-gradient-to-br from-amber-100/90 via-orange-50 to-[#f6ecdc] p-4 rounded-3xl border border-amber-900/10 shadow-sm">
-        <div class="relative z-10">
-          <span class="text-[10px] font-bold tracking-widest uppercase text-amber-800 block mb-1">Kolekcja Sezonowa</span>
-          <h2 class="text-2xl font-bold text-stone-900 tracking-tight">Jesienne Dekoracje</h2>
-          <p class="text-xs text-stone-600 mt-1 max-w-[260px]">Wybierz figurki, dobierz kolory oraz liczbę sztuk.</p>
-        </div>
-        <span class="absolute -right-3 -bottom-3 text-6xl opacity-20 rotate-12 select-none">🍂</span>
+    <main class="max-w-md mx-auto px-4 pt-4 space-y-4" id="catalog-view">
+      <div class="bg-stone-900 text-stone-100 p-4 rounded-2xl">
+        <h2 class="text-xl font-bold">Kolekcja Sezonowa</h2>
+        <p class="text-xs text-stone-400 mt-0.5">Wybierz figurki, dobierz kolory i dodaj do koszyka.</p>
       </div>
 
-      <div class="grid grid-cols-1 gap-4" id="products-list">
+      <div class="grid grid-cols-1 gap-3.5" id="products-list">
         
-        <!-- 1. DYNIA (10 zł) -->
-        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-dynia">
-          <div class="flex gap-4">
-            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-              <svg id="svg-dynia" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
-                <path d="M30 18c0-6 4-10 8-11-1 3-1 6-3 8" fill="none" stroke="#2d5a27" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- 1. DYNIA -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-xs">
+          <div class="flex gap-3.5">
+            <div class="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 p-2">
+              <svg id="svg-dynia" viewBox="0 0 64 64" class="w-full h-full" style="color: #c2410c;">
+                <path d="M30 18c0-6 4-10 8-11-1 3-1 6-3 8" fill="none" stroke="#78350f" stroke-width="3.5" stroke-linecap="round"/>
                 <ellipse cx="32" cy="38" rx="20" ry="17" fill="currentColor"/>
                 <ellipse cx="32" cy="38" rx="13" ry="17" fill="black" fill-opacity="0.08"/>
                 <ellipse cx="32" cy="38" rx="6" ry="17" fill="black" fill-opacity="0.08"/>
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-base text-stone-900 leading-tight">Dynia dekoracyjna</h3>
-              <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
+              <div class="flex justify-between items-start">
+                <h3 class="font-bold text-sm text-stone-900">Dynia dekoracyjna</h3>
+                <span class="text-sm font-bold text-stone-900">10,00 zł</span>
+              </div>
+              <p class="text-[11px] text-stone-500 mt-0.5">Osobny brązowy ogonek w zestawie</p>
 
-              <div class="mt-2.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-dynia" class="text-stone-900 font-bold">Rudy</span></span>
+              <div class="mt-2">
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" onclick="setProductColor('dynia', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                  </button>
-                  <button type="button" onclick="setProductColor('dynia', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                  </button>
-                  <button type="button" onclick="setProductColor('dynia', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                  </button>
-                  <button type="button" onclick="setProductColor('dynia', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                  </button>
+                  <button type="button" onclick="setProductColor('dynia', 'Rudy', '#c2410c', this)" class="color-chip active px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Rudy</button>
+                  <button type="button" onclick="setProductColor('dynia', 'Zielony', '#15803d', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Zielony</button>
+                  <button type="button" onclick="setProductColor('dynia', 'Żółty', '#d97706', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Żółty</button>
+                  <button type="button" onclick="setProductColor('dynia', 'Biały', '#e5e5e5', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Biały</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="mt-4 flex items-center gap-2">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('dynia', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-dynia" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('dynia', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+          <div class="mt-3 pt-3 border-t border-stone-100 flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-xl bg-stone-50 p-0.5">
+              <button onclick="changeQty('dynia', -1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">-</button>
+              <span id="qty-dynia" class="w-7 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('dynia', 1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">+</button>
             </div>
-            <button onclick="addToCartWithQty('Dynia', 'dynia', 10)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-              <span>+ Dodaj do koszyka</span>
+            <button onclick="addToCartWithQty('Dynia', 'dynia', 10)" class="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition">
+              + Dodaj do koszyka
             </button>
           </div>
         </div>
 
-        <!-- 2. LISEK (5 zł) -->
-        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-lisek">
-          <div class="flex gap-4">
-            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-              <svg id="svg-lisek" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
+        <!-- 2. LISEK -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-xs">
+          <div class="flex gap-3.5">
+            <div class="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 p-2">
+              <svg id="svg-lisek" viewBox="0 0 64 64" class="w-full h-full" style="color: #c2410c;">
                 <polygon points="12,18 24,32 16,36" fill="currentColor"/>
                 <polygon points="52,18 40,32 48,36" fill="currentColor"/>
                 <polygon points="32,24 16,36 32,54 48,36" fill="currentColor"/>
                 <polygon points="32,24 24,32 40,32" fill="black" fill-opacity="0.12"/>
-                <polygon points="28,48 32,54 36,48" fill="#292524"/>
+                <polygon points="28,48 32,54 36,48" fill="#1c1917"/>
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-base text-stone-900 leading-tight">Lisek geometryczny</h3>
-              <div class="text-sm font-bold text-amber-900 mt-0.5">5,00 zł</div>
+              <div class="flex justify-between items-start">
+                <h3 class="font-bold text-sm text-stone-900">Lisek geometryczny</h3>
+                <span class="text-sm font-bold text-stone-900">5,00 zł</span>
+              </div>
+              <p class="text-[11px] text-stone-500 mt-0.5">Figurka low-poly</p>
 
-              <div class="mt-2.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-lisek" class="text-stone-900 font-bold">Rudy</span></span>
+              <div class="mt-2">
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" onclick="setProductColor('lisek', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                  </button>
-                  <button type="button" onclick="setProductColor('lisek', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                  </button>
-                  <button type="button" onclick="setProductColor('lisek', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                  </button>
-                  <button type="button" onclick="setProductColor('lisek', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                  </button>
+                  <button type="button" onclick="setProductColor('lisek', 'Rudy', '#c2410c', this)" class="color-chip active px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Rudy</button>
+                  <button type="button" onclick="setProductColor('lisek', 'Zielony', '#15803d', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Zielony</button>
+                  <button type="button" onclick="setProductColor('lisek', 'Żółty', '#d97706', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Żółty</button>
+                  <button type="button" onclick="setProductColor('lisek', 'Biały', '#e5e5e5', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Biały</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="mt-4 flex items-center gap-2">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('lisek', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-lisek" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('lisek', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+          <div class="mt-3 pt-3 border-t border-stone-100 flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-xl bg-stone-50 p-0.5">
+              <button onclick="changeQty('lisek', -1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">-</button>
+              <span id="qty-lisek" class="w-7 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('lisek', 1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">+</button>
             </div>
-            <button onclick="addToCartWithQty('Lisek', 'lisek', 5)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-              <span>+ Dodaj do koszyka</span>
+            <button onclick="addToCartWithQty('Lisek', 'lisek', 5)" class="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition">
+              + Dodaj do koszyka
             </button>
           </div>
         </div>
 
-        <!-- 3. WIEWIÓRKA (5 zł) -->
-        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-wiewiorka">
-          <div class="flex gap-4">
-            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-              <svg id="svg-wiewiorka" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #c2410c;">
+        <!-- 3. WIEWIÓRKA -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-xs">
+          <div class="flex gap-3.5">
+            <div class="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 p-2">
+              <svg id="svg-wiewiorka" viewBox="0 0 64 64" class="w-full h-full" style="color: #c2410c;">
                 <path d="M42 46c8 0 14-8 14-16s-6-14-12-14c-4 0-6 4-6 4s1 6-2 10c-3 4-8 5-8 5" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
                 <ellipse cx="26" cy="40" rx="9" ry="12" fill="currentColor"/>
                 <circle cx="24" cy="24" r="7" fill="currentColor"/>
@@ -166,117 +173,71 @@
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-base text-stone-900 leading-tight">Wiewiórka</h3>
-              <div class="text-sm font-bold text-amber-900 mt-0.5">5,00 zł</div>
+              <div class="flex justify-between items-start">
+                <h3 class="font-bold text-sm text-stone-900">Wiewiórka</h3>
+                <span class="text-sm font-bold text-stone-900">5,00 zł</span>
+              </div>
+              <p class="text-[11px] text-stone-500 mt-0.5">Figurka dekoracyjna</p>
 
-              <div class="mt-2.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-wiewiorka" class="text-stone-900 font-bold">Rudy</span></span>
+              <div class="mt-2">
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" onclick="setProductColor('wiewiorka', 'Zielony', '#2d5a27', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                  </button>
-                  <button type="button" onclick="setProductColor('wiewiorka', 'Rudy', '#c2410c', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                  </button>
-                  <button type="button" onclick="setProductColor('wiewiorka', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                  </button>
-                  <button type="button" onclick="setProductColor('wiewiorka', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                  </button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Rudy', '#c2410c', this)" class="color-chip active px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Rudy</button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Zielony', '#15803d', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Zielony</button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Żółty', '#d97706', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Żółty</button>
+                  <button type="button" onclick="setProductColor('wiewiorka', 'Biały', '#e5e5e5', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Biały</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="mt-4 flex items-center gap-2">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('wiewiorka', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-wiewiorka" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('wiewiorka', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+          <div class="mt-3 pt-3 border-t border-stone-100 flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-xl bg-stone-50 p-0.5">
+              <button onclick="changeQty('wiewiorka', -1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">-</button>
+              <span id="qty-wiewiorka" class="w-7 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('wiewiorka', 1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">+</button>
             </div>
-            <button onclick="addToCartWithQty('Wiewiórka', 'wiewiorka', 5)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-              <span>+ Dodaj do koszyka</span>
+            <button onclick="addToCartWithQty('Wiewiórka', 'wiewiorka', 5)" class="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition">
+              + Dodaj do koszyka
             </button>
           </div>
         </div>
 
-        <!-- 4. TACA OKRĄGŁA (10 zł) -->
-        <div class="bg-[#fffdfa] rounded-3xl p-4 border border-amber-900/10 shadow-sm flex flex-col justify-between" id="card-taca">
-          <div class="flex gap-4">
-            <div class="w-24 h-24 rounded-2xl bg-[#f5ede2] border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-              <svg id="svg-taca" viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm transition-all duration-300" style="color: #2d5a27;">
+        <!-- 4. TACA OKRĄGŁA -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-xs">
+          <div class="flex gap-3.5">
+            <div class="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 p-2">
+              <svg id="svg-taca" viewBox="0 0 64 64" class="w-full h-full" style="color: #15803d;">
                 <circle cx="32" cy="32" r="24" fill="currentColor"/>
                 <circle cx="32" cy="32" r="19" fill="black" fill-opacity="0.08"/>
                 <circle cx="32" cy="32" r="16" fill="currentColor" fill-opacity="0.95"/>
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-base text-stone-900 leading-tight">Okrągła tacka</h3>
-              <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
+              <div class="flex justify-between items-start">
+                <h3 class="font-bold text-sm text-stone-900">Okrągła tacka</h3>
+                <span class="text-sm font-bold text-stone-900">10,00 zł</span>
+              </div>
+              <p class="text-[11px] text-stone-500 mt-0.5">Podstawka pod figurki</p>
 
-              <div class="mt-2.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">Kolor: <span id="label-taca" class="text-stone-900 font-bold">Zielony</span></span>
+              <div class="mt-2">
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" onclick="setProductColor('taca', 'Zielony', '#2d5a27', this)" class="color-chip active px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#2d5a27]"></span> Zielony
-                  </button>
-                  <button type="button" onclick="setProductColor('taca', 'Rudy', '#c2410c', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Rudy
-                  </button>
-                  <button type="button" onclick="setProductColor('taca', 'Żółty', '#d97706', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Żółty
-                  </button>
-                  <button type="button" onclick="setProductColor('taca', 'Biały', '#fdfbf7', this)" class="color-chip px-2.5 py-1 rounded-xl border border-stone-200 bg-[#faf6f0] text-[11px] font-medium flex items-center gap-1.5 transition">
-                    <span class="chip-indicator w-2.5 h-2.5 rounded-full bg-[#fdfbf7] border border-stone-300"></span> Biały
-                  </button>
+                  <button type="button" onclick="setProductColor('taca', 'Zielony', '#15803d', this)" class="color-chip active px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Zielony</button>
+                  <button type="button" onclick="setProductColor('taca', 'Rudy', '#c2410c', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Rudy</button>
+                  <button type="button" onclick="setProductColor('taca', 'Żółty', '#d97706', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Żółty</button>
+                  <button type="button" onclick="setProductColor('taca', 'Biały', '#e5e5e5', this)" class="color-chip px-2 py-0.5 rounded-lg border border-stone-200 text-xs font-medium">Biały</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="mt-4 flex items-center gap-2">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('taca', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-taca" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('taca', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+          <div class="mt-3 pt-3 border-t border-stone-100 flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-xl bg-stone-50 p-0.5">
+              <button onclick="changeQty('taca', -1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">-</button>
+              <span id="qty-taca" class="w-7 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeQty('taca', 1)" class="w-7 h-7 font-bold text-stone-700 hover:bg-stone-200 rounded-lg">+</button>
             </div>
-            <button onclick="addToCartWithQty('Taca', 'taca', 10)" class="flex-1 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-              <span>+ Dodaj do koszyka</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 5. ORZESZKI (10 zł) -->
-        <div class="bg-gradient-to-br from-[#f8f1e5] via-[#faf5ec] to-[#f2e6d2] rounded-3xl p-4 border-2 border-dashed border-amber-900/25 shadow-sm flex flex-col justify-between">
-          <div class="flex gap-4">
-            <div class="w-24 h-24 rounded-2xl bg-amber-200/40 border border-amber-900/10 flex items-center justify-center shrink-0 p-3">
-              <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow-sm">
-                <path d="M18 28c0-8 6-16 14-16s14 8 14 16c-3-1-7 0-9 2-3-2-7-2-10 0-3-2-6-2-9-2z" fill="#2d5a27"/>
-                <path d="M20 28c0 10 5 22 12 22s12-12 12-22" fill="#5c2c16"/>
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-base text-stone-900 leading-tight">Orzeszki laskowe (9 szt.)</h3>
-              <div class="text-sm font-bold text-amber-900 mt-0.5">10,00 zł</div>
-
-              <div class="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#fffdfa] border border-amber-900/10 shadow-xs">
-                <span class="w-3 h-3 rounded-full bg-[#2d5a27]"></span>
-                <span class="text-stone-400 text-xs">+</span>
-                <span class="w-3 h-3 rounded-full bg-[#5c2c16]"></span>
-                <span class="text-[11px] font-semibold text-stone-700">Zielono-Brązowy</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4 flex items-center gap-2">
-            <div class="flex items-center border border-amber-900/15 rounded-2xl bg-[#faf6f0] p-1">
-              <button onclick="changeQty('orzeszki', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-orzeszki" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
-              <button onclick="changeQty('orzeszki', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
-            </div>
-            <button onclick="addHazelnutsToCartWithQty()" class="flex-1 py-2.5 px-4 bg-[#5c2c16] hover:bg-[#4a2311] text-amber-50 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.98] shadow-sm">
-              <span>+ Dodaj zestaw</span>
+            <button onclick="addToCartWithQty('Taca', 'taca', 10)" class="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition">
+              + Dodaj do koszyka
             </button>
           </div>
         </div>
@@ -284,72 +245,63 @@
       </div>
     </main>
 
-    <!-- Pływający pasek koszyka -->
+    <!-- Pasek koszyka -->
     <div id="sticky-bar" class="fixed bottom-3 inset-x-3 max-w-md mx-auto hidden z-40">
-      <div class="bg-stone-900 text-amber-50 p-3.5 rounded-2xl shadow-xl shadow-stone-900/30 flex items-center justify-between border border-stone-700/80">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center font-bold text-sm shadow-inner">
-            🛒
-          </div>
-          <div>
-            <div class="text-xs text-stone-300"><span id="cart-count">0</span> szt. w koszyku</div>
-            <div class="text-base font-bold text-amber-200" id="cart-total">0,00 zł</div>
-          </div>
+      <div class="bg-stone-900 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between">
+        <div>
+          <div class="text-xs text-stone-300"><span id="cart-count">0</span> szt. w koszyku</div>
+          <div class="text-sm font-bold text-amber-300" id="cart-total">0,00 zł</div>
         </div>
-        <button onclick="openCheckout()" class="bg-amber-100 hover:bg-white text-stone-900 px-5 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 flex items-center gap-1 shadow-sm">
-          Przejdź do kasy →
+        <button onclick="openCheckout()" class="bg-white text-stone-900 px-4 py-2 rounded-xl font-bold text-xs">
+          Kasa →
         </button>
       </div>
     </div>
 
-    <!-- Szuflada kasy -->
-    <div id="checkout-modal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
-      <div class="bg-[#fffdfa] rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4 border-t border-amber-900/10">
-        <div class="flex items-center justify-between border-b border-amber-900/10 pb-3">
-          <h3 class="font-bold text-lg text-stone-900">Twoje zamówienie</h3>
-          <button onclick="closeCheckout()" class="text-stone-400 hover:text-stone-700 text-sm font-semibold p-1">✕ Zamknij</button>
+    <!-- Modal Kasy -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex flex-col justify-end">
+      <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-3">
+          <h3 class="font-bold text-base text-stone-900">Twój Koszyk</h3>
+          <button onclick="closeCheckout()" class="text-stone-400 hover:text-stone-700 text-sm font-bold">✕ Zamknij</button>
         </div>
 
-        <div id="cart-items" class="divide-y divide-amber-900/5 text-sm"></div>
+        <div id="cart-items" class="divide-y divide-stone-100 text-xs"></div>
 
-        <div class="flex justify-between items-center pt-2 font-bold text-base text-stone-900 border-t border-amber-900/10">
+        <div class="flex justify-between items-center pt-2 font-bold text-sm text-stone-900 border-t border-stone-200">
           <span>Do zapłaty:</span>
-          <span id="modal-total" class="text-amber-800 text-lg">0,00 zł</span>
+          <span id="modal-total" class="text-stone-900 text-base">0,00 zł</span>
         </div>
 
-        <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 pt-2">
+        <form onsubmit="submitOrder(event)" class="space-y-3 pt-2">
           <div>
             <label class="block text-xs font-semibold text-stone-700 mb-1">Imię i Nazwisko / Nick *</label>
-            <input id="form-name" required type="text" placeholder="np. Kasia Kowalska" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+            <input id="form-name" required type="text" placeholder="np. Kasia Kowalska" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
           <div>
             <label class="block text-xs font-semibold text-stone-700 mb-1">Telefon lub e-mail *</label>
-            <input id="form-contact" required type="text" placeholder="np. 600 700 800" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+            <input id="form-contact" required type="text" placeholder="np. 600 700 800" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-stone-700 mb-1">Uwagi do zamówienia (opcjonalnie)</label>
-            <input id="form-notes" type="text" placeholder="np. zależy mi na odbiorze do piątku" class="w-full text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Uwagi do zamówienia</label>
+            <input id="form-notes" type="text" placeholder="np. odbiór w czwartek" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
 
-          <button id="submit-btn" type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 text-amber-50 font-bold py-3.5 rounded-2xl shadow-lg shadow-orange-950/20 text-sm transition active:scale-[0.99]">
-            Złóż zamówienie 🍁
+          <button id="submit-btn" type="submit" class="w-full mt-3 bg-stone-900 hover:bg-stone-800 text-white font-bold py-3 rounded-xl text-xs">
+            Złóż zamówienie
           </button>
         </form>
       </div>
     </div>
 
     <!-- Sukces klienta -->
-    <div id="success-view" class="max-w-md mx-auto px-4 pt-8 hidden text-center space-y-6">
-      <div class="w-16 h-16 bg-amber-100 text-amber-800 border border-amber-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner">
-        🍁
-      </div>
+    <div id="success-view" class="max-w-md mx-auto px-4 pt-12 hidden text-center space-y-4">
+      <div class="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-xl mx-auto">✓</div>
       <div>
-        <span class="text-xs uppercase tracking-wider font-bold text-amber-900/60">Przyjęte do realizacji!</span>
-        <h2 class="text-2xl font-bold mt-1 text-stone-900">Numer: #ZAM-<span id="order-id">418</span></h2>
-        <p class="text-xs text-stone-600 mt-1">Dziękujemy za złożenie zamówienia w naszej pracowni</p>
+        <h2 class="text-xl font-bold text-stone-900">Zamówienie przyjęte!</h2>
+        <p class="text-xs text-stone-600 mt-1">Numer: #ZAM-<span id="order-id"></span></p>
       </div>
-
-      <button onclick="location.reload()" class="w-full py-3 bg-[#f0e6d6] hover:bg-[#e6d8c4] text-stone-800 font-semibold rounded-2xl text-xs transition">
+      <button onclick="location.reload()" class="w-full py-2.5 bg-stone-200 hover:bg-stone-300 font-semibold rounded-xl text-xs">
         ← Wróć do sklepu
       </button>
     </div>
@@ -360,19 +312,13 @@
   <!-- 2. LOGOWANIE ADMINA                       -->
   <!-- ========================================== -->
   <div id="admin-login" class="max-w-xs mx-auto px-4 pt-20 hidden">
-    <div class="bg-[#fffdfa] p-6 rounded-3xl border border-amber-900/20 shadow-xl text-center space-y-4">
-      <div class="w-12 h-12 rounded-2xl bg-stone-900 text-amber-100 flex items-center justify-center mx-auto text-xl">
-        🔒
-      </div>
-      <div>
-        <h2 class="font-bold text-lg text-stone-900">Panel Administratora</h2>
-        <p class="text-xs text-stone-500 mt-1">Podaj hasło dostępu</p>
-      </div>
+    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm text-center space-y-4">
+      <div class="font-bold text-base text-stone-900">Panel Warsztatowy</div>
       <form onsubmit="checkAdminPassword(event)" class="space-y-3">
-        <input id="admin-pass-input" type="password" placeholder="Hasło" class="w-full text-center text-sm bg-[#faf6f0] border border-amber-900/20 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-amber-700 focus:outline-none">
-        <p id="login-error" class="text-xs text-red-600 hidden font-medium">Nieprawidłowe hasło!</p>
-        <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-amber-50 font-bold py-2.5 rounded-xl text-xs">
-          Zaloguj się
+        <input id="admin-pass-input" type="password" placeholder="Hasło" class="w-full text-center text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+        <p id="login-error" class="text-xs text-red-600 hidden">Nieprawidłowe hasło!</p>
+        <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-2 rounded-xl text-xs">
+          Zaloguj
         </button>
       </form>
     </div>
@@ -380,23 +326,20 @@
 
 
   <!-- ========================================== -->
-  <!-- 3. GŁÓWNY PANEL ADMINA                    -->
+  <!-- 3. GŁÓWNY PANEL ADMINA (NARZĘDZIOWY)       -->
   <!-- ========================================== -->
-  <div id="admin-app" class="max-w-2xl mx-auto px-4 pt-5 pb-16 hidden space-y-5">
+  <div id="admin-app" class="max-w-xl mx-auto px-4 pt-4 pb-16 hidden space-y-4">
     
-    <header class="flex items-center justify-between border-b border-amber-900/10 pb-4">
-      <div class="flex items-center gap-2">
-        <span class="w-8 h-8 rounded-xl bg-stone-900 text-amber-100 flex items-center justify-center font-bold text-xs">⚙️</span>
-        <div>
-          <h2 class="font-bold text-base text-stone-900">Admin sezonowe3d</h2>
-          <p class="text-[10px] text-stone-500" id="current-view-title">Menu główne</p>
-        </div>
+    <header class="flex items-center justify-between border-b border-stone-200 pb-3">
+      <div>
+        <h2 class="font-bold text-sm text-stone-900">Warsztat sezonowe3d</h2>
+        <p class="text-[10px] text-stone-500" id="current-view-title">Menu główne</p>
       </div>
       <div class="flex items-center gap-2">
-        <button id="btn-back-hub" onclick="switchAdminTab('hub')" class="hidden text-xs font-semibold px-3 py-1.5 rounded-xl bg-amber-100 text-amber-900 border border-amber-200">
-          ← Wróć do menu
+        <button id="btn-back-hub" onclick="switchAdminTab('hub')" class="hidden text-xs font-semibold px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 border border-stone-300">
+          ← Wróć
         </button>
-        <button onclick="logoutAdmin()" class="text-xs font-semibold px-3 py-1.5 rounded-xl border border-stone-300 hover:bg-stone-200">
+        <button onclick="logoutAdmin()" class="text-xs font-semibold px-2.5 py-1 rounded-lg border border-stone-300 hover:bg-stone-100">
           Wyloguj
         </button>
       </div>
@@ -404,223 +347,230 @@
 
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: MENU GŁÓWNE (KAFELKI + BILANS) -->
+    <!-- WIDOK A: HUB GŁÓWNY -->
     <div id="admin-tab-hub" class="space-y-4">
       
-      <!-- PEŁNY BILANS FINANSOWY -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
-          <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-800 block">Przychód (Zrealizowane)</span>
-          <div class="text-2xl font-bold mt-1 text-emerald-700" id="stat-revenue">0,00 zł</div>
-          <span class="text-[10px] text-stone-400" id="stat-completed-pieces">0 szt. figurek</span>
+      <!-- BILANS FINANSOWY -->
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="p-3 rounded-2xl bg-white border border-stone-200 shadow-2xs">
+          <span class="text-[10px] font-bold text-stone-500 uppercase block">Przychód</span>
+          <div class="text-base font-bold text-stone-900 mt-0.5" id="stat-revenue">0 zł</div>
+          <span class="text-[9px] text-stone-400" id="stat-completed-pieces">0 szt.</span>
         </div>
-
-        <div class="p-4 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm">
-          <span class="text-[10px] uppercase font-bold tracking-wider text-rose-800 block">Koszty produkcji</span>
-          <div class="text-2xl font-bold mt-1 text-rose-700" id="stat-costs">0,00 zł</div>
-          <span class="text-[10px] text-stone-400" id="stat-cost-breakdown">Plastik + Prąd</span>
+        <div class="p-3 rounded-2xl bg-white border border-stone-200 shadow-2xs">
+          <span class="text-[10px] font-bold text-stone-500 uppercase block">Koszty</span>
+          <div class="text-base font-bold text-rose-700 mt-0.5" id="stat-costs">0 zł</div>
+          <span class="text-[9px] text-stone-400" id="stat-cost-breakdown">Plastik + Prąd</span>
         </div>
-
-        <div class="p-4 rounded-3xl bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 shadow-sm border border-stone-700">
-          <span class="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">Zysk na czysto</span>
-          <div class="text-2xl font-bold mt-1 text-amber-200" id="stat-profit">0,00 zł</div>
-          <span class="text-[10px] text-stone-400">Do podziału na 2 osoby</span>
+        <div class="p-3 rounded-2xl bg-stone-900 text-white shadow-2xs">
+          <span class="text-[10px] font-bold text-amber-300 uppercase block">Czysty Zysk</span>
+          <div class="text-base font-bold text-amber-200 mt-0.5" id="stat-profit">0 zł</div>
+          <span class="text-[9px] text-stone-400">Na 2 osoby</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        <button onclick="switchAdminTab('orders')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
-          <div class="flex items-center justify-between w-full">
-            <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-sm">📦</span>
-            <span id="badge-active-orders" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-orange-600 text-white">0</span>
+      <!-- KAFELKI MENU -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <button onclick="switchAdminTab('orders')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <div class="flex justify-between w-full">
+            <span class="text-lg">📦</span>
+            <span id="badge-active-orders" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-stone-900 text-white">0</span>
           </div>
           <div>
-            <h4 class="font-bold text-xs text-stone-900">Zamówienia</h4>
-            <p class="text-[9px] text-stone-400">Obieg & Edycja</p>
+            <div class="font-bold text-xs text-stone-900">Zamówienia</div>
+            <div class="text-[9px] text-stone-400">Statusy & Edycja</div>
           </div>
         </button>
 
-        <button onclick="switchAdminTab('batcher')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
-          <div class="flex items-center justify-between w-full">
-            <span class="w-7 h-7 rounded-xl bg-orange-100 text-orange-900 flex items-center justify-center text-sm">🖨️</span>
-            <span id="badge-missing-parts" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900">0</span>
+        <button onclick="switchAdminTab('batcher')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <div class="flex justify-between w-full">
+            <span class="text-lg">🖨️</span>
+            <span id="badge-missing-parts" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-900">0</span>
           </div>
           <div>
-            <h4 class="font-bold text-xs text-stone-900">Planer</h4>
-            <p class="text-[9px] text-stone-400">Stoły P1S</p>
+            <div class="font-bold text-xs text-stone-900">Planer Stołu</div>
+            <div class="text-[9px] text-stone-400">P1S + Ogonki</div>
           </div>
         </button>
 
-        <button onclick="switchAdminTab('shelf')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
-          <div class="flex items-center justify-between w-full">
-            <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-sm">🪑</span>
-            <span id="badge-shelf-count" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-800">0</span>
+        <button onclick="switchAdminTab('shelf')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <div class="flex justify-between w-full">
+            <span class="text-lg">🪑</span>
+            <span id="badge-shelf-count" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-800">0</span>
           </div>
           <div>
-            <h4 class="font-bold text-xs text-stone-900">Półka</h4>
-            <p class="text-[9px] text-stone-400">Nadwyżki</p>
+            <div class="font-bold text-xs text-stone-900">Półka Bufor</div>
+            <div class="text-[9px] text-stone-400">Nadwyżki</div>
           </div>
         </button>
 
-        <button onclick="switchAdminTab('spools')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
-          <div class="flex items-center justify-between w-full">
-            <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center text-sm">🧵</span>
-            <span id="badge-spool-alert" class="hidden w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+        <button onclick="switchAdminTab('spools')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <div class="flex justify-between w-full">
+            <span class="text-lg">🧵</span>
+            <span id="badge-spool-alert" class="hidden w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
           </div>
           <div>
-            <h4 class="font-bold text-xs text-stone-900">Szpule</h4>
-            <p class="text-[9px] text-stone-400">Stany w AMS</p>
+            <div class="font-bold text-xs text-stone-900">Szpule AMS</div>
+            <div class="text-[9px] text-stone-400">Stany gramatur</div>
           </div>
         </button>
 
-        <button onclick="switchAdminTab('settings')" class="p-3.5 rounded-3xl bg-[#fffdfa] border border-amber-900/10 shadow-sm hover:shadow-md text-left transition flex flex-col justify-between h-28">
-          <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-800 flex items-center justify-center text-sm">⚙️</span>
+        <button onclick="switchAdminTab('settings')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <span class="text-lg">⚙️</span>
           <div>
-            <h4 class="font-bold text-xs text-stone-900">Ustawienia</h4>
-            <p class="text-[9px] text-stone-400">Koszty & Wagi</p>
+            <div class="font-bold text-xs text-stone-900">Ustawienia</div>
+            <div class="text-[9px] text-stone-400">Koszty & Stoły</div>
           </div>
         </button>
       </div>
     </div>
 
 
-    <!-- WIDOK B: ZAMÓWIENIA (DUŻE PRZYCISKI W PIONIE) -->
-    <div id="admin-tab-orders" class="space-y-4 hidden">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="font-bold text-lg text-stone-900">Zarządzanie Zamówieniami</h3>
-          <p class="text-xs text-stone-500">Zarządzaj statusem, edytuj ilości lub anuluj zlecenia</p>
-        </div>
-        <button onclick="fetchOrdersFromCloud()" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#faf6f0] border border-stone-200 hover:bg-stone-200">
+    <!-- WIDOK B: ZAMÓWIENIA -->
+    <div id="admin-tab-orders" class="space-y-3 hidden">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-sm text-stone-900">Lista Zamówień</h3>
+        <button onclick="fetchOrdersFromCloud()" class="text-xs font-semibold px-2 py-1 rounded bg-stone-100 border border-stone-300">
           🔄 Odśwież
         </button>
       </div>
-
-      <div id="orders-list-view" class="space-y-4"></div>
+      <div id="orders-list-view" class="space-y-3"></div>
     </div>
 
 
     <!-- WIDOK C: PLANER STOŁU I BRAKI -->
-    <div id="admin-tab-batcher" class="space-y-5 hidden">
-      <div id="batch-recommendation" class="bg-gradient-to-br from-stone-900 to-stone-800 text-amber-50 p-5 rounded-3xl shadow-lg border border-stone-700 space-y-3"></div>
+    <div id="admin-tab-batcher" class="space-y-4 hidden">
+      
+      <!-- OSOBNY DEDYKOWANY STÓŁ NA BRĄZOWE OGONKI -->
+      <div id="batch-stem-box" class="p-4 rounded-2xl bg-stone-800 text-white space-y-2 border border-stone-700"></div>
 
-      <div class="bg-[#fffdfa] p-4 rounded-3xl border border-amber-900/10 shadow-sm space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="font-bold text-sm text-stone-900">Braki do wydruku (Kolejka stołów)</h4>
-          <span id="tab-missing-count" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">0 szt.</span>
+      <!-- REKOMENDOWANY STÓŁ Z MODELAMI (DO 95% POJEMNOŚCI) -->
+      <div id="batch-recommendation" class="p-4 rounded-2xl bg-stone-900 text-white space-y-3"></div>
+
+      <!-- SUROWY SPIS WSZYSTKICH BRAKÓW -->
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2">
+        <div class="flex justify-between items-center">
+          <h4 class="font-bold text-xs text-stone-800 uppercase tracking-wider">Kolejka braków (Sztuki)</h4>
+          <span id="tab-missing-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-100">0 szt.</span>
         </div>
-        <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"></div>
+        <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs"></div>
       </div>
     </div>
 
 
-    <!-- WIDOK D: PÓŁKA Z NADWYŻKAMI -->
-    <div id="admin-tab-shelf" class="space-y-4 hidden">
-      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
+    <!-- WIDOK D: PÓŁKA BUFOROWA -->
+    <div id="admin-tab-shelf" class="space-y-3 hidden">
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
         <div>
-          <h3 class="font-bold text-lg text-stone-900">Półka z nadwyżkami (Bufor)</h3>
-          <p class="text-xs text-stone-500">Gotowe elementy wydrukowane na zapas. Zmniejszają kolejkę druku w nowych zamówieniach.</p>
+          <h3 class="font-bold text-sm text-stone-900">Półka z nadwyżkami</h3>
+          <p class="text-[11px] text-stone-500">Wydrukowane elementy czekające na wykorzystanie.</p>
         </div>
-
-        <div id="shelf-items-list" class="space-y-2.5"></div>
+        <div id="shelf-items-list" class="space-y-1.5"></div>
       </div>
     </div>
 
 
-    <!-- WIDOK E: STAN SZPULE FILAMENTU -->
-    <div id="admin-tab-spools" class="space-y-4 hidden">
-      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-4">
+    <!-- WIDOK E: SZPULE AMS -->
+    <div id="admin-tab-spools" class="space-y-3 hidden">
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
         <div>
-          <h3 class="font-bold text-lg text-stone-900">Magazyn Szpul (Bambu AMS)</h3>
-          <p class="text-xs text-stone-500">Ostrzeżenie pojawia się automatycznie poniżej 150g.</p>
+          <h3 class="font-bold text-sm text-stone-900">Stan szpul w AMS</h3>
+          <p class="text-[11px] text-stone-500">Alert pojawia się automatycznie poniżej 150g.</p>
         </div>
-
-        <div id="spools-list-container" class="space-y-3"></div>
+        <div id="spools-list-container" class="space-y-2"></div>
       </div>
     </div>
 
 
-    <!-- WIDOK F: USTAWIENIA PARAMETRÓW DRUKU I KOSZTÓW -->
+    <!-- WIDOK F: USTAWIENIA (POJEMNOŚĆ STOŁU I KOSZTY) -->
     <div id="admin-tab-settings" class="space-y-4 hidden">
-      <div class="bg-[#fffdfa] p-5 rounded-3xl border border-amber-900/10 shadow-sm space-y-5">
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-4">
+        
         <div>
-          <h3 class="font-bold text-lg text-stone-900">Koszty produkcji (Kalkulator Zysku)</h3>
-          <p class="text-xs text-stone-500">Podaj ceny, aby system obliczał realny zysk netto ze sprzedaży.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div class="p-3 bg-[#faf6f0] rounded-2xl border border-stone-200">
-            <label class="block font-bold text-stone-800 mb-1">Cena filamentu za 1 kg (zł):</label>
-            <input type="number" id="setting-cost-filament" step="0.5" class="w-full px-3 py-2 rounded-xl border border-amber-900/20 bg-white font-bold text-stone-900">
-            <span class="text-[10px] text-stone-400 mt-1 block">np. 80 zł (daje 0,08 zł za gram)</span>
-          </div>
-          <div class="p-3 bg-[#faf6f0] rounded-2xl border border-stone-200">
-            <label class="block font-bold text-stone-800 mb-1">Cena prądu za 1 kWh (zł):</label>
-            <input type="number" id="setting-cost-energy" step="0.05" class="w-full px-3 py-2 rounded-xl border border-amber-900/20 bg-white font-bold text-stone-900">
-            <span class="text-[10px] text-stone-400 mt-1 block">P1S zużywa ~0,11 kWh na godzinę</span>
+          <h3 class="font-bold text-sm text-stone-900">Stawki kosztów</h3>
+          <div class="grid grid-cols-2 gap-2 text-xs mt-2">
+            <div>
+              <label class="block text-stone-600 mb-0.5">Filament 1 kg (zł):</label>
+              <input type="number" id="setting-cost-filament" step="0.5" class="w-full px-2 py-1.5 rounded-lg border border-stone-300 font-bold">
+            </div>
+            <div>
+              <label class="block text-stone-600 mb-0.5">Prąd 1 kWh (zł):</label>
+              <input type="number" id="setting-cost-energy" step="0.05" class="w-full px-2 py-1.5 rounded-lg border border-stone-300 font-bold">
+            </div>
           </div>
         </div>
 
-        <div class="border-t border-amber-900/10 pt-4">
-          <h3 class="font-bold text-base text-stone-900">Parametry Wydruków (Bambu Studio)</h3>
-          <p class="text-xs text-stone-500 mb-3">Czas w godzinach z przecinkiem, np. <span class="font-bold text-amber-800">2,7</span> godziny.</p>
-          <div id="specs-editor" class="space-y-3 divide-y divide-amber-900/10 text-xs"></div>
+        <div class="border-t border-stone-200 pt-3">
+          <h3 class="font-bold text-sm text-stone-900">Pojemność Stołu P1S i Parametry</h3>
+          <p class="text-[11px] text-stone-500 mb-2">Podaj ile MAKSYMALNIE sztuk wchodzi na pusty stół Bambu P1S ze slicera.</p>
+          <div id="specs-editor" class="space-y-2.5 text-xs"></div>
         </div>
 
-        <button onclick="saveSettingsAll()" class="w-full py-3.5 bg-stone-900 hover:bg-stone-800 text-amber-50 rounded-2xl font-bold text-xs transition">
-          Zapisz wszystkie parametry i koszty
+        <button onclick="saveSettingsAll()" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs">
+          Zapisz ustawienia
         </button>
       </div>
     </div>
 
   </div>
 
-  <!-- MODAL EDYCJI ZAMÓWIENIA -->
-  <div id="edit-order-modal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
-    <div class="bg-[#fffdfa] rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4 border-t border-amber-900/10">
-      <div class="flex items-center justify-between border-b border-amber-900/10 pb-3">
-        <h3 class="font-bold text-base text-stone-900">Edycja: #ZAM-<span id="edit-order-id-label"></span></h3>
-        <button onclick="closeEditModal()" class="text-stone-400 hover:text-stone-700 text-sm font-semibold p-1">✕ Anuluj</button>
+  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU (OBSŁUGA NIEUDANYCH) -->
+  <div id="print-result-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="border-b border-stone-200 pb-2">
+        <h3 class="font-bold text-base text-stone-900">Raport ze stołu: Co się udało?</h3>
+        <p class="text-xs text-stone-500">Zmniejsz ilość, jeśli element uległ uszkodzeniu (brak wróci do kolejki stołu).</p>
       </div>
 
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-semibold text-stone-700 mb-1">Pozycje w zamówieniu:</label>
-          <div id="edit-items-list" class="space-y-2 border border-stone-200 rounded-2xl p-2.5 bg-[#faf6f0]"></div>
-        </div>
+      <div id="print-result-items" class="space-y-2.5 text-xs"></div>
+
+      <div class="pt-2 flex gap-2">
+        <button onclick="confirmPrintResult()" class="w-full py-3 bg-stone-900 text-white font-bold rounded-xl text-xs">
+          Zatwierdź wynik (Odlicz filament ze szpuli)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDYCJI ZAMÓWIENIA -->
+  <div id="edit-order-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-3">
+      <div class="flex justify-between items-center border-b border-stone-200 pb-2">
+        <h3 class="font-bold text-sm text-stone-900">Edycja: #ZAM-<span id="edit-order-id-label"></span></h3>
+        <button onclick="closeEditModal()" class="text-stone-400 font-bold text-sm">✕</button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <div id="edit-items-list" class="space-y-1.5 border border-stone-200 rounded-xl p-2 bg-stone-50"></div>
 
         <div class="border-t border-stone-200 pt-2">
-          <label class="block font-semibold text-stone-700 mb-1">+ Dodaj nową pozycję:</label>
+          <label class="block font-semibold text-stone-700 mb-1">+ Dodaj pozycję:</label>
           <div class="grid grid-cols-12 gap-1.5">
-            <select id="edit-add-title" class="col-span-6 bg-white border border-stone-300 rounded-xl px-2 py-1.5 text-xs font-semibold">
+            <select id="edit-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold">
               <option value="Dynia">Dynia (10 zł)</option>
               <option value="Lisek">Lisek (5 zł)</option>
               <option value="Wiewiórka">Wiewiórka (5 zł)</option>
               <option value="Taca">Taca (10 zł)</option>
-              <option value="Orzeszki laskowe (9 szt.)">Orzeszki (10 zł)</option>
             </select>
-            <select id="edit-add-color" class="col-span-4 bg-white border border-stone-300 rounded-xl px-2 py-1.5 text-xs">
+            <select id="edit-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5">
               <option value="Rudy">Rudy</option>
               <option value="Zielony">Zielony</option>
               <option value="Żółty">Żółty</option>
               <option value="Biały">Biały</option>
-              <option value="Zielono-Brązowy">Zielono-Brązowy</option>
             </select>
-            <button type="button" onclick="addPositionToEditOrder()" class="col-span-2 bg-stone-900 text-white rounded-xl font-bold text-xs flex items-center justify-center">+</button>
+            <button type="button" onclick="addPositionToEditOrder()" class="col-span-2 bg-stone-900 text-white rounded-lg font-bold">+</button>
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-stone-700 mb-1">Uwagi do zamówienia:</label>
-          <input id="edit-order-notes" type="text" class="w-full bg-[#faf6f0] border border-stone-300 rounded-xl px-3 py-2 text-xs">
+          <label class="block font-semibold text-stone-700 mb-0.5">Uwagi do zamówienia:</label>
+          <input id="edit-order-notes" type="text" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5">
         </div>
       </div>
 
-      <div class="flex gap-2 pt-2">
-        <button onclick="saveOrderEdits()" class="flex-1 py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs">
-          Zapisz zmiany w zamówieniu
-        </button>
-      </div>
+      <button onclick="saveOrderEdits()" class="w-full py-2.5 bg-stone-900 text-white font-bold rounded-xl text-xs mt-2">
+        Zapisz zmiany
+      </button>
     </div>
   </div>
 
@@ -636,23 +586,26 @@
     let currentEditingOrderId = null;
     let currentEditingItems = [];
 
+    // Tymczasowy obiekt obsługi wsadów stołu
+    let activeBatchPayload = null;
+
     // ==========================================
-    // BAZA: CENY, PARAMETRY, KOSZTY, PÓŁKA I SZPULE
+    // SPECYFIKACJA MODELI & POJEMNOŚĆ STOŁU
     // ==========================================
     const PRICES = {
       'Dynia': 10,
       'Lisek': 5,
       'Wiewiórka': 5,
-      'Taca': 10,
-      'Orzeszki laskowe (9 szt.)': 10
+      'Taca': 10
     };
 
+    // maxOnBed = maksymalna liczba sztuk na pustym stole P1S
     const DEFAULT_SPECS = {
-      'Dynia': { weight: 42, hours: 1.7 },
-      'Lisek': { weight: 55, hours: 2.2 },
-      'Wiewiórka': { weight: 50, hours: 2.0 },
-      'Taca': { weight: 110, hours: 3.3 },
-      'Orzeszki laskowe (9 szt.)': { weight: 60, hours: 3.5 }
+      'Dynia': { weight: 42, hours: 1.7, maxOnBed: 8 },
+      'Lisek': { weight: 55, hours: 2.2, maxOnBed: 16 },
+      'Wiewiórka': { weight: 50, hours: 2.0, maxOnBed: 14 },
+      'Taca': { weight: 110, hours: 3.3, maxOnBed: 1 },
+      'Ogonek dyni': { weight: 2, hours: 0.15, maxOnBed: 40 }
     };
 
     const DEFAULT_COSTS = {
@@ -669,35 +622,35 @@
     };
 
     function getSpecs() {
-      const data = localStorage.getItem("bambu_specs");
+      const data = localStorage.getItem("bambu_specs_v2");
       return data ? JSON.parse(data) : DEFAULT_SPECS;
     }
     function saveSpecs(specs) {
-      localStorage.setItem("bambu_specs", JSON.stringify(specs));
+      localStorage.setItem("bambu_specs_v2", JSON.stringify(specs));
     }
 
     function getCosts() {
-      const data = localStorage.getItem("bambu_costs");
+      const data = localStorage.getItem("bambu_costs_v2");
       return data ? JSON.parse(data) : DEFAULT_COSTS;
     }
     function saveCosts(costs) {
-      localStorage.setItem("bambu_costs", JSON.stringify(costs));
+      localStorage.setItem("bambu_costs_v2", JSON.stringify(costs));
     }
 
     function getSpools() {
-      const data = localStorage.getItem("bambu_spools");
+      const data = localStorage.getItem("bambu_spools_v2");
       return data ? JSON.parse(data) : DEFAULT_SPOOLS;
     }
     function saveSpools(spools) {
-      localStorage.setItem("bambu_spools", JSON.stringify(spools));
+      localStorage.setItem("bambu_spools_v2", JSON.stringify(spools));
     }
 
     function getShelf() {
-      const data = localStorage.getItem("bambu_shelf");
+      const data = localStorage.getItem("bambu_shelf_v2");
       return data ? JSON.parse(data) : {};
     }
     function saveShelf(shelf) {
-      localStorage.setItem("bambu_shelf", JSON.stringify(shelf));
+      localStorage.setItem("bambu_shelf_v2", JSON.stringify(shelf));
     }
 
     const ADMIN_PASSWORD = "bambu123";
@@ -774,13 +727,13 @@
           title.textContent = "Planer Stołu P1S";
           renderBatcherView();
         } else if (tabName === 'shelf') {
-          title.textContent = "Półka z nadwyżkami";
+          title.textContent = "Półka Buforowa";
           renderShelfView();
         } else if (tabName === 'spools') {
           title.textContent = "Szpule Filamentu";
           renderSpoolsView();
         } else if (tabName === 'settings') {
-          title.textContent = "Ustawienia Wydruków i Kosztów";
+          title.textContent = "Ustawienia Stołu i Kosztów";
           renderSettingsView();
         }
       }
@@ -827,7 +780,7 @@
     }
 
     async function deleteOrderPermanently(orderId) {
-      if (confirm(`Czy na pewno trwale usunąć zamówienie #ZAM-${orderId} z bazy danych?`)) {
+      if (confirm(`Trwale usunąć zamówienie #ZAM-${orderId} z bazy?`)) {
         try {
           const { error } = await supabaseClient
             .from('orders')
@@ -842,9 +795,6 @@
       }
     }
 
-    // ==========================================
-    // LOGIKA ANULOWANIA ZAMÓWIENIA
-    // ==========================================
     async function cancelOrderWithLogic(orderId) {
       const order = cloudOrders.find(o => o.id === orderId);
       if (!order) return;
@@ -853,9 +803,8 @@
 
       if (order.status === "Do spakowania") {
         const putOnShelf = confirm(
-          `To zamówienie (#ZAM-${orderId}) jest oznaczone jako WYDRUKOWANE.\n\nCzy chcesz przenieść te elementy do magazynu na Półkę buforową?`
+          `Zamówienie (#ZAM-${orderId}) jest oznaczone jako WYDRUKOWANE.\n\nCzy przenieść gotowe elementy na Półkę?`
         );
-
         if (putOnShelf) {
           const shelf = getShelf();
           items.forEach(item => {
@@ -866,7 +815,7 @@
           updateHubStats();
         }
       } else {
-        if (!confirm(`Czy na pewno chcesz anulować zamówienie #ZAM-${orderId}? Elementy znikną z Planera stołu.`)) {
+        if (!confirm(`Anulować zamówienie #ZAM-${orderId}? Elementy znikną z Planera stołu.`)) {
           return;
         }
       }
@@ -875,7 +824,7 @@
     }
 
     // ==========================================
-    // LOGIKA EDYCJI ZAMÓWIENIA
+    // EDYCJA ZAMÓWIENIA
     // ==========================================
     function openEditOrderModal(orderId) {
       const order = cloudOrders.find(o => o.id === orderId);
@@ -909,19 +858,19 @@
 
       currentEditingItems.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = "flex items-center justify-between py-1.5 border-b border-stone-200 last:border-0";
+        row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
         row.innerHTML = `
           <div>
-            <span class="font-bold text-stone-800 text-xs">${item.title}</span>
+            <span class="font-bold text-stone-800">${item.title}</span>
             <span class="text-stone-500 text-[11px]">(${item.color})</span>
           </div>
           <div class="flex items-center gap-2">
-            <div class="flex items-center border border-stone-300 rounded-xl bg-white px-1">
-              <button type="button" onclick="changeEditItemQty(${index}, -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">-</button>
-              <span class="w-6 text-center font-bold text-xs">${item.qty}</span>
-              <button type="button" onclick="changeEditItemQty(${index}, 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">+</button>
+            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+              <button type="button" onclick="changeEditItemQty(${index}, -1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">-</button>
+              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <button type="button" onclick="changeEditItemQty(${index}, 1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">+</button>
             </div>
-            <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold p-1 text-sm">✕</button>
+            <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold p-1">✕</button>
           </div>
         `;
         container.appendChild(row);
@@ -978,7 +927,7 @@
     }
 
     // ==========================================
-    // LOGIKA ADMINA & STATYSTYKI FINANSOWE
+    // STATYSTYKI & FINANSE
     // ==========================================
     function updateHubStats() {
       const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
@@ -1016,6 +965,13 @@
             totalPiecesCompleted += item.qty;
             totalGramsPrinted += spec.weight * item.qty;
             totalHoursPrinted += (spec.hours || 1.5) * item.qty;
+
+            // Ogonek dla dyni
+            if (item.title === 'Dynia') {
+              const stemSpec = specs['Ogonek dyni'] || { weight: 2, hours: 0.15 };
+              totalGramsPrinted += stemSpec.weight * item.qty;
+              totalHoursPrinted += stemSpec.hours * item.qty;
+            }
           });
         }
       });
@@ -1025,13 +981,13 @@
       const totalCosts = costFilament + costEnergy;
       const netProfit = totalRevenue - totalCosts;
 
-      document.getElementById('stat-revenue').textContent = `${totalRevenue.toFixed(2)} zł`;
-      document.getElementById('stat-completed-pieces').textContent = `${totalPiecesCompleted} szt. figurek`;
+      document.getElementById('stat-revenue').textContent = `${totalRevenue.toFixed(0)} zł`;
+      document.getElementById('stat-completed-pieces').textContent = `${totalPiecesCompleted} szt.`;
 
-      document.getElementById('stat-costs').textContent = `${totalCosts.toFixed(2)} zł`;
-      document.getElementById('stat-cost-breakdown').textContent = `Filament: ${costFilament.toFixed(1)} zł | Prąd: ${costEnergy.toFixed(1)} zł`;
+      document.getElementById('stat-costs').textContent = `${totalCosts.toFixed(0)} zł`;
+      document.getElementById('stat-cost-breakdown').textContent = `Filament: ${costFilament.toFixed(0)}zł | Prąd: ${costEnergy.toFixed(0)}zł`;
 
-      document.getElementById('stat-profit').textContent = `${netProfit.toFixed(2)} zł`;
+      document.getElementById('stat-profit').textContent = `${netProfit.toFixed(0)} zł`;
 
       const spools = getSpools();
       const alertContainer = document.getElementById('spool-alert-container');
@@ -1042,10 +998,10 @@
         if (grams <= 150) {
           hasLowSpool = true;
           const alert = document.createElement('div');
-          alert.className = 'p-3 bg-red-100 border border-red-300 text-red-900 rounded-2xl text-xs flex items-center justify-between shadow-xs';
+          alert.className = 'p-2.5 bg-red-100 border border-red-300 text-red-900 rounded-xl text-xs flex items-center justify-between';
           alert.innerHTML = `
-            <span>⚠️ <strong>Kończy się filament: ${color}!</strong> Pozostało tylko ~${grams}g.</span>
-            <button onclick="switchAdminTab('spools')" class="font-bold underline ml-2">Sprawdź szpule</button>
+            <span>⚠️ <strong>Kończy się filament: ${color}!</strong> (${grams}g).</span>
+            <button onclick="switchAdminTab('spools')" class="font-bold underline ml-2">Sprawdź</button>
           `;
           alertContainer.appendChild(alert);
         }
@@ -1057,14 +1013,14 @@
     }
 
     // ==========================================
-    // WIDOK ZAMÓWIEŃ (DUŻE, PIONOWE PRZYCISKI)
+    // WIDOK ZAMÓWIEŃ
     // ==========================================
     function renderOrdersView() {
       const container = document.getElementById('orders-list-view');
       container.innerHTML = "";
 
       if (cloudOrders.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-stone-400">Brak zamówień w chmurze Supabase.</div>`;
+        container.innerHTML = `<div class="p-6 text-center text-stone-400">Brak zamówień w bazie.</div>`;
         return;
       }
 
@@ -1098,27 +1054,27 @@
         }
 
         let itemsHtml = items.map(item => `
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf6f0] border border-stone-200 text-xs text-stone-800 font-medium">
-            <strong class="font-bold text-amber-900">${item.qty}x</strong> ${item.title} (${item.color})
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-100 border border-stone-200 text-xs text-stone-800">
+            <strong>${item.qty}x</strong> ${item.title} (${item.color})
           </span>
         `).join(" ");
 
         let repeatBadge = isRepeat ? `
-          <div class="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-red-100 text-red-800 border border-red-200 text-xs font-bold">
-            ⚠️ Powracający klient: Zamówienie złożone ${orderCount} raz!
+          <div class="mt-1 text-[11px] font-bold text-red-600">
+            ⚠️ Klient zamawia ${orderCount}. raz
           </div>
         ` : '';
 
         let notesHtml = order.notes && order.notes.trim() !== "" ? `
-          <div class="mt-2 text-xs bg-amber-50 border border-amber-200/80 rounded-2xl p-3 text-amber-900">
+          <div class="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-xl p-2 text-amber-900">
             💬 <strong>Uwagi:</strong> ${order.notes}
           </div>
         ` : '';
 
         let shelfNotice = shelfHints.length > 0 ? `
-          <div class="mt-2 text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl p-3 flex items-center justify-between">
-            <span>✨ <strong>Półka:</strong> Dostępne na stanie – nie drukuj! (${shelfHints.join(", ")})</span>
-            <button onclick="switchAdminTab('shelf')" class="underline font-bold ml-2">Wydaj</button>
+          <div class="mt-2 text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-2 flex justify-between items-center">
+            <span>✨ <strong>Półka:</strong> ${shelfHints.join(", ")}</span>
+            <button onclick="switchAdminTab('shelf')" class="font-bold underline ml-2">Półka</button>
           </div>
         ` : '';
 
@@ -1128,33 +1084,33 @@
         if (status === "W kolejce") {
           badgeColor = 'bg-amber-100 text-amber-900';
           actionBlock = `
-            <div class="mt-4 pt-3 border-t border-amber-900/10 space-y-2">
-              <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl text-xs font-bold shadow-md shadow-orange-950/15 transition active:scale-[0.99] flex items-center justify-center gap-1.5">
-                <span>Wydrukowane (Przekaż do spakowania) →</span>
+            <div class="mt-3 pt-2.5 border-t border-stone-200 space-y-2">
+              <button onclick="updateOrderStatus('${order.id}', 'Do spakowania')" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold">
+                Wydrukowane (Przekaż do spakowania) →
               </button>
               <div class="grid grid-cols-2 gap-2">
-                <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 bg-[#faf6f0] hover:bg-stone-200 border border-stone-300 text-stone-800 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
-                  ✏️ Edytuj zamówienie
+                <button onclick="openEditOrderModal('${order.id}')" class="py-2 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 rounded-xl text-xs font-semibold">
+                  ✏️ Edytuj
                 </button>
-                <button onclick="cancelOrderWithLogic('${order.id}')" class="py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
-                  ✕ Anuluj zamówienie
+                <button onclick="cancelOrderWithLogic('${order.id}')" class="py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold">
+                  ✕ Anuluj
                 </button>
               </div>
             </div>
           `;
         } else if (isToPack) {
-          badgeColor = 'bg-orange-100 text-orange-900 border border-orange-300';
+          badgeColor = 'bg-orange-100 text-orange-900';
           actionBlock = `
-            <div class="mt-4 pt-3 border-t border-amber-900/10 space-y-2">
-              <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md shadow-emerald-950/15 transition active:scale-[0.99] flex items-center justify-center gap-1.5">
-                <span>✓ Wydane / Odebrane (Zakończ zamówienie)</span>
+            <div class="mt-3 pt-2.5 border-t border-stone-200 space-y-2">
+              <button onclick="updateOrderStatus('${order.id}', 'Zrealizowane')" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold">
+                ✓ Wydane / Odebrane (Zakończ)
               </button>
               <div class="grid grid-cols-2 gap-2">
-                <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 bg-[#faf6f0] hover:bg-stone-200 border border-stone-300 text-stone-800 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
-                  ✏️ Edytuj zamówienie
+                <button onclick="openEditOrderModal('${order.id}')" class="py-2 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 rounded-xl text-xs font-semibold">
+                  ✏️ Edytuj
                 </button>
-                <button onclick="cancelOrderWithLogic('${order.id}')" class="py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1">
-                  ✕ Anuluj zamówienie
+                <button onclick="cancelOrderWithLogic('${order.id}')" class="py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold">
+                  ✕ Anuluj
                 </button>
               </div>
             </div>
@@ -1162,47 +1118,44 @@
         } else if (isCanceled) {
           badgeColor = 'bg-rose-100 text-rose-800 line-through';
           actionBlock = `
-            <div class="mt-4 pt-3 border-t border-amber-900/10 flex items-center justify-between">
-              <span class="text-xs text-rose-600 font-bold">Zamówienie zostało anulowane</span>
-              <button onclick="deleteOrderPermanently('${order.id}')" class="text-xs font-semibold text-rose-700 hover:text-rose-900 underline">
-                Trwale usuń z bazy
+            <div class="mt-3 pt-2 border-t border-stone-200 flex justify-between items-center text-xs">
+              <span class="text-rose-600 font-bold">Anulowane</span>
+              <button onclick="deleteOrderPermanently('${order.id}')" class="text-stone-400 hover:text-stone-700 underline text-[11px]">
+                Usuń z bazy
               </button>
             </div>
           `;
         } else {
           badgeColor = 'bg-emerald-100 text-emerald-800';
           actionBlock = `
-            <div class="mt-4 pt-3 border-t border-amber-900/10 flex items-center justify-between text-xs">
-              <span class="text-emerald-700 font-bold">Zrealizowane pomyślnie ✓</span>
+            <div class="mt-3 pt-2 border-t border-stone-200 flex justify-between items-center text-xs">
+              <span class="text-emerald-700 font-bold">Zrealizowane ✓</span>
               <button onclick="deleteOrderPermanently('${order.id}')" class="text-stone-400 hover:text-stone-700 underline text-[11px]">
-                Usuń wpis z bazy
+                Usuń z bazy
               </button>
             </div>
           `;
         }
 
         const card = document.createElement("div");
-        card.className = `p-5 rounded-3xl border transition ${isDone || isCanceled ? 'bg-stone-100/90 border-stone-200 opacity-65' : 'bg-[#fffdfa] border-amber-900/15 shadow-sm'}`;
+        card.className = `p-4 rounded-2xl border ${isDone || isCanceled ? 'bg-stone-100 border-stone-200 opacity-60' : 'bg-white border-stone-200 shadow-2xs'}`;
         card.innerHTML = `
           <div>
-            <div class="flex items-start justify-between gap-2">
+            <div class="flex justify-between items-start">
               <div>
-                <span class="font-bold text-stone-900 text-base">#ZAM-${order.id}</span>
-                <h4 class="font-bold text-sm text-stone-800 mt-0.5">${order.customer}</h4>
-                <p class="text-xs text-stone-500">${order.contact}</p>
+                <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
+                <span class="font-semibold text-stone-800 text-xs ml-1">${order.customer}</span>
+                <span class="text-xs text-stone-500 block">${order.contact}</span>
               </div>
-              <span class="text-xs px-3 py-1 rounded-full font-bold ${badgeColor}">${status}</span>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold ${badgeColor}">${status}</span>
             </div>
             ${repeatBadge}
             ${notesHtml}
             ${shelfNotice}
           </div>
 
-          <div class="mt-3.5">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1.5">Zamówione figurki:</span>
-            <div class="flex flex-wrap gap-1.5">
-              ${itemsHtml}
-            </div>
+          <div class="mt-2.5 flex flex-wrap gap-1">
+            ${itemsHtml}
           </div>
 
           ${actionBlock}
@@ -1212,12 +1165,16 @@
     }
 
     // ==========================================
-    // PLANER STOŁU
+    // PLANER STOŁU (ALGORYTM POJEMNOŚCI STOŁU + OGONKI)
     // ==========================================
     function renderBatcherView() {
       const specs = getSpecs();
+      const shelf = getShelf();
+
+      // Zliczamy braki z zamówień "W kolejce"
       const missing = {};
       let totalPieces = 0;
+      let totalStemDemand = 0;
 
       cloudOrders.forEach(order => {
         if (order.status === "W kolejce") {
@@ -1226,12 +1183,57 @@
             const key = `${item.color}:::${item.title}`;
             missing[key] = (missing[key] || 0) + item.qty;
             totalPieces += item.qty;
+
+            // Każda dynia wymaga 1 ogonka
+            if (item.title === 'Dynia') {
+              totalStemDemand += item.qty;
+            }
           });
         }
       });
 
       document.getElementById('tab-missing-count').textContent = `${totalPieces} szt.`;
 
+      // 1. DEDYKOWANY STÓŁ NA BRĄZOWE OGONKI
+      const stemBox = document.getElementById('batch-stem-box');
+      const stemShelfCount = shelf['Ogonek dyni:::Brązowy'] || 0;
+      const stemsNeeded = Math.max(0, totalStemDemand - stemShelfCount);
+
+      const stemSpec = specs['Ogonek dyni'] || { weight: 2, hours: 0.15, maxOnBed: 40 };
+      const stemHours = (stemsNeeded * stemSpec.hours).toFixed(1).replace(".", ",");
+      const stemWeight = stemsNeeded * stemSpec.weight;
+
+      stemBox.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Dedykowany stół (Brązowy)</span>
+            <h4 class="text-sm font-bold text-white mt-0.5">Ogonki do dyń (zawsze osobny stół)</h4>
+            <p class="text-xs text-stone-300 mt-1">
+              Potrzeba: <strong>${totalStemDemand} szt.</strong> (Na półce: ${stemShelfCount} szt.)
+            </p>
+          </div>
+          <span class="text-xs font-bold px-2 py-1 rounded bg-stone-700 text-amber-300">
+            Braki: ${stemsNeeded} szt.
+          </span>
+        </div>
+        ${stemsNeeded > 0 ? `
+          <div class="text-xs text-stone-300 flex gap-4 pt-1">
+            <span>⏱️ Czas: <strong>${stemHours} godz.</strong></span>
+            <span>⚖️ Filament: <strong>~${stemWeight}g (Brązowy)</strong></span>
+          </div>
+          <div class="pt-2">
+            <button onclick="applyStemBatchPrint(${stemsNeeded},${stemWeight})" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
+              ✓ Oznacz ogonki jako wydrukowane (-${stemWeight}g Brązowy)
+            </button>
+          </div>
+        ` : `
+          <div class="text-xs text-emerald-400 font-semibold pt-1">
+            Wszystkie ogonki zabezpieczone na półce! Nie trzeba drukować.
+          </div>
+        `}
+      `;
+
+      // 2. SUROWY SPIS BRAKÓW
       const colorGroups = {};
       Object.keys(missing).forEach(k => {
         const [color, title] = k.split(":::");
@@ -1242,134 +1244,248 @@
       const grid = document.getElementById('tab-missing-grid');
       grid.innerHTML = "";
       if (Object.keys(colorGroups).length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-4 text-stone-400 text-center">Brak oczekujących elementów na stół! 🎉</div>`;
+        grid.innerHTML = `<div class="col-span-full py-2 text-stone-400 text-center">Brak figurek w kolejce!</div>`;
       } else {
         for (const [col, list] of Object.entries(colorGroups)) {
           const card = document.createElement("div");
-          card.className = "p-2.5 rounded-2xl border border-stone-200 bg-[#faf6f0]";
+          card.className = "p-2 rounded-xl border border-stone-200 bg-stone-50";
           let itemsHtml = list.map(i => `<div class="font-bold text-stone-800 text-[11px]">${i.qty}x ${i.title}</div>`).join("");
           card.innerHTML = `
-            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900/60 block mb-1">${col}</span>
+            <span class="text-[9px] font-bold uppercase text-stone-500 block mb-0.5">${col}</span>
             ${itemsHtml}
           `;
           grid.appendChild(card);
         }
       }
 
+      // 3. REKOMENDOWANY STÓŁ (ALGORYTM POJEMNOŚCI DO 95%)
       const batchContainer = document.getElementById("batch-recommendation");
-      let bestColor = null;
-      let maxQty = 0;
+      let selectedColor = null;
+      let maxItemCount = 0;
 
       for (const [col, list] of Object.entries(colorGroups)) {
         const sum = list.reduce((acc, cur) => acc + cur.qty, 0);
-        if (sum > maxQty) {
-          maxQty = sum;
-          bestColor = col;
+        if (sum > maxItemCount) {
+          maxItemCount = sum;
+          selectedColor = col;
         }
       }
 
-      if (bestColor) {
-        const itemsToPrint = colorGroups[bestColor];
+      if (selectedColor) {
+        const availableItems = JSON.parse(JSON.stringify(colorGroups[selectedColor]));
+        
+        let bedLoad = 0; // w procentach (maks. 95%)
+        const bedItems = [];
         let totalGrams = 0;
         let totalHours = 0;
-        let itemsStr = [];
 
-        itemsToPrint.forEach(i => {
-          const spec = specs[i.title] || { weight: 45, hours: 1.5 };
-          totalGrams += spec.weight * i.qty;
-          totalHours += (spec.hours || 1.5) * i.qty;
-          itemsStr.push(`${i.qty}x ${i.title}`);
-        });
+        for (const item of availableItems) {
+          const modelSpec = specs[item.title] || { weight: 45, hours: 1.5, maxOnBed: 8 };
+          const itemCostPercent = 100 / (modelSpec.maxOnBed || 8);
+
+          let qtyToTake = 0;
+          for (let i = 0; i < item.qty; i++) {
+            if (bedLoad + itemCostPercent <= 95) {
+              bedLoad += itemCostPercent;
+              qtyToTake++;
+            } else {
+              break;
+            }
+          }
+
+          if (qtyToTake > 0) {
+            bedItems.push({ title: item.title, qty: qtyToTake, max: qtyToTake });
+            totalGrams += qtyToTake * modelSpec.weight;
+            totalHours += qtyToTake * (modelSpec.hours || 1.5);
+          }
+
+          if (bedLoad >= 90) break; // stół optymalnie zapełniony
+        }
+
+        // Zapis do aktywnego bufora do raportu końcowego
+        activeBatchPayload = {
+          color: selectedColor,
+          items: bedItems,
+          totalGrams: totalGrams
+        };
 
         const formattedHours = totalHours.toFixed(1).replace(".", ",");
+        const itemsSummary = bedItems.map(i => `${i.qty}x ${i.title}`).join(", ");
 
         batchContainer.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-orange-600 text-white">Rekomendowany Stół</span>
-            <span class="text-xs text-stone-400">1 kolor = brak strat filamentu</span>
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-orange-400">Rekomendowany Wsad Stołu</span>
+              <h4 class="text-base font-bold text-white mt-0.5">Kolor: ${selectedColor.toUpperCase()}</h4>
+            </div>
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-stone-800 text-stone-200">
+              Zapełnienie: ~${Math.round(bedLoad)}%
+            </span>
           </div>
-          <h4 class="text-lg font-bold">Wsad: ${bestColor.toUpperCase()} (${itemsStr.join(", ")})</h4>
-          <div class="flex flex-wrap gap-4 text-xs text-stone-300">
-            <div>⏱️ Czas: <strong class="text-amber-300 font-bold">${formattedHours} godziny</strong></div>
-            <div>⚖️ Filament: <strong class="text-amber-300 font-bold">~${totalGrams}g (${bestColor})</strong></div>
+
+          <div class="text-xs text-stone-200 font-medium">
+            Elementy: <strong>${itemsSummary}</strong>
           </div>
-          <div class="pt-2 flex flex-wrap gap-2">
-            <button onclick="applyBatchPrint('${bestColor}', ${totalGrams})" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs transition">
-              ✓ Oznacz wsad i odejmij filament ze szpuli
+
+          <div class="text-xs text-stone-400 flex gap-4">
+            <span>⏱️ Czas stołu: <strong class="text-white">${formattedHours} godz.</strong></span>
+            <span>⚖️ Filament: <strong class="text-white">~${totalGrams}g</strong></span>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button onclick="openPrintResultModal(true)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs">
+              ✓ Wszystko udane
+            </button>
+            <button onclick="openPrintResultModal(false)" class="py-2.5 px-3 bg-stone-800 hover:bg-stone-700 text-amber-400 border border-stone-600 rounded-xl font-bold text-xs">
+              ⚠️ Coś nie wyszło
             </button>
           </div>
         `;
       } else {
-        batchContainer.innerHTML = `
-          <div class="text-sm font-medium text-stone-300 py-2">
-            Wszystkie oczekujące zamówienia są już wydrukowane! 💤
+        activeBatchPayload = null;
+        batchContainer.innerHTML = `<div class="text-xs text-stone-400 py-2">Wszystkie stoły zrealizowane! Brak oczekujących modeli.</div>`;
+      }
+    }
+
+    // Obsługa wsadu ogonków
+    function applyStemBatchPrint(stemsCount, grams) {
+      const spools = getSpools();
+      spools['Brązowy'] = Math.max(0, (spools['Brązowy'] || 1000) - grams);
+      saveSpools(spools);
+
+      // Odkładamy na stan półki ogonków
+      const shelf = getShelf();
+      shelf['Ogonek dyni:::Brązowy'] = (shelf['Ogonek dyni:::Brązowy'] || 0) + stemsCount;
+      saveShelf(shelf);
+
+      updateHubStats();
+      renderBatcherView();
+      alert(`Wydrukowano ${stemsCount} szt. ogonków! Odliczono ~${grams}g Brązowego.`);
+    }
+
+    // ==========================================
+    // OBSŁUGA WYNIKÓW DRUKU (RAPORT NIEUDANYCH)
+    // ==========================================
+    function openPrintResultModal(isFullSuccess) {
+      if (!activeBatchPayload || activeBatchPayload.items.length === 0) return;
+
+      if (isFullSuccess) {
+        // Wszystko udane - od razu zatwierdź
+        finalizeBatchPrint(activeBatchPayload.items);
+        return;
+      }
+
+      // Częściowo nieudane - otwórz modal do edycji
+      const container = document.getElementById('print-result-items');
+      container.innerHTML = "";
+
+      activeBatchPayload.items.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center p-2.5 bg-stone-100 rounded-xl";
+        row.innerHTML = `
+          <div>
+            <div class="font-bold text-stone-900">${item.title}</div>
+            <div class="text-[11px] text-stone-500">Planowano na stole: ${item.max} szt.</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-stone-700">Udane:</span>
+            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+              <button onclick="changeResultItemQty(${index}, -1)" class="w-6 h-6 font-bold text-stone-700">-</button>
+              <span id="result-qty-${index}" class="w-6 text-center font-bold">${item.qty}</span>
+              <button onclick="changeResultItemQty(${index}, 1)" class="w-6 h-6 font-bold text-stone-700">+</button>
+            </div>
           </div>
         `;
-      }
+        container.appendChild(row);
+      });
+
+      document.getElementById('print-result-modal').classList.remove('hidden');
     }
 
-    function applyBatchPrint(color, grams) {
+    function changeResultItemQty(index, delta) {
+      const item = activeBatchPayload.items[index];
+      item.qty = Math.max(0, Math.min(item.max, item.qty + delta));
+      document.getElementById(`result-qty-${index}`).textContent = item.qty;
+    }
+
+    function confirmPrintResult() {
+      document.getElementById('print-result-modal').classList.add('hidden');
+      finalizeBatchPrint(activeBatchPayload.items);
+    }
+
+    function finalizeBatchPrint(successfulItems) {
+      // 1. Zdejmij filament ze szpuli (za CAŁY planowany stół, bo plastik poszedł)
       const spools = getSpools();
-      if (color === 'Zielono-Brązowy') {
-        spools['Zielony'] = Math.max(0, (spools['Zielony'] || 1000) - Math.round(grams / 2));
-        spools['Brązowy'] = Math.max(0, (spools['Brązowy'] || 1000) - Math.round(grams / 2));
-      } else if (spools[color] !== undefined) {
-        spools[color] = Math.max(0, spools[color] - grams);
-      }
+      const col = activeBatchPayload.color;
+      spools[col] = Math.max(0, (spools[col] || 1000) - activeBatchPayload.totalGrams);
       saveSpools(spools);
+
+      // 2. Udane elementy lądują na półce buforowej lub zamykają zamówienia
+      const shelf = getShelf();
+      successfulItems.forEach(item => {
+        if (item.qty > 0) {
+          const key = `${item.title}:::${col}`;
+          shelf[key] = (shelf[key] || 0) + item.qty;
+        }
+      });
+      saveShelf(shelf);
+
+      alert(`Stół (${col}) rozliczony! Zużycie filamentu: ~${activeBatchPayload.totalGrams}g.\nUdane sztuki dodane do stanu.`);
       updateHubStats();
-      alert(`Wsad (${color}) zrealizowany! Odliczono ~${grams}g ze szpuli.`);
+      renderBatcherView();
     }
 
     // ==========================================
-    // PÓŁKA Z NADWYŻKAMI
+    // PÓŁKA BUFOROWA
     // ==========================================
-    const ALL_MODELS = ['Dynia', 'Lisek', 'Wiewiórka', 'Taca'];
-    const ALL_COLORS = ['Zielony', 'Rudy', 'Żółty', 'Biały'];
+    const MODELS = ['Dynia', 'Lisek', 'Wiewiórka', 'Taca'];
+    const COLORS = ['Zielony', 'Rudy', 'Żółty', 'Biały'];
 
     function renderShelfView() {
       const shelf = getShelf();
       const container = document.getElementById('shelf-items-list');
       container.innerHTML = '';
 
-      ALL_MODELS.forEach(model => {
-        ALL_COLORS.forEach(color => {
+      // Osobna pozycja na brązowe ogonki
+      const stemKey = 'Ogonek dyni:::Brązowy';
+      const stemCount = shelf[stemKey] || 0;
+      const stemRow = document.createElement('div');
+      stemRow.className = `p-2 rounded-xl border flex justify-between items-center ${stemCount > 0 ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200'}`;
+      stemRow.innerHTML = `
+        <div>
+          <span class="font-bold text-xs text-stone-900">Ogonek dyni</span>
+          <span class="text-[10px] text-stone-500 ml-1">(Brązowy)</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="changeShelfQty('${stemKey}', -1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">-</button>
+          <span class="w-6 text-center text-xs font-bold ${stemCount > 0 ? 'text-amber-900' : 'text-stone-400'}">${stemCount}</span>
+          <button onclick="changeShelfQty('${stemKey}', 1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">+</button>
+        </div>
+      `;
+      container.appendChild(stemRow);
+
+      // Wszystkie pozostałe figurki
+      MODELS.forEach(model => {
+        COLORS.forEach(color => {
           const key = `${model}:::${color}`;
           const count = shelf[key] || 0;
 
           const row = document.createElement('div');
-          row.className = `p-2.5 rounded-2xl border flex items-center justify-between ${count > 0 ? 'bg-amber-50/60 border-amber-200' : 'bg-[#faf6f0] border-stone-200'}`;
+          row.className = `p-2 rounded-xl border flex justify-between items-center ${count > 0 ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200'}`;
           row.innerHTML = `
             <div>
               <span class="font-bold text-xs text-stone-900">${model}</span>
-              <span class="text-[11px] text-stone-500 ml-1">(${color})</span>
+              <span class="text-[10px] text-stone-500 ml-1">(${color})</span>
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">-</button>
+            <div class="flex items-center gap-1.5">
+              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">-</button>
               <span class="w-6 text-center text-xs font-bold ${count > 0 ? 'text-amber-900' : 'text-stone-400'}">${count}</span>
-              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">+</button>
+              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">+</button>
             </div>
           `;
           container.appendChild(row);
         });
       });
-
-      const hazelnutKey = `Orzeszki laskowe (9 szt.):::Zielono-Brązowy`;
-      const hazelnutCount = shelf[hazelnutKey] || 0;
-      const hRow = document.createElement('div');
-      hRow.className = `p-2.5 rounded-2xl border flex items-center justify-between ${hazelnutCount > 0 ? 'bg-amber-50/60 border-amber-200' : 'bg-[#faf6f0] border-stone-200'}`;
-      hRow.innerHTML = `
-        <div>
-          <span class="font-bold text-xs text-stone-900">Orzeszki laskowe (9 szt.)</span>
-          <span class="text-[11px] text-stone-500 ml-1">(Zielono-Brązowy)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="changeShelfQty('${hazelnutKey}', -1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">-</button>
-          <span class="w-6 text-center text-xs font-bold ${hazelnutCount > 0 ? 'text-amber-900' : 'text-stone-400'}">${hazelnutCount}</span>
-          <button onclick="changeShelfQty('${hazelnutKey}', 1)" class="w-6 h-6 rounded-lg bg-white border border-stone-300 font-bold text-xs hover:bg-stone-100">+</button>
-        </div>
-      `;
-      container.appendChild(hRow);
     }
 
     function changeShelfQty(key, delta) {
@@ -1392,17 +1508,16 @@
       Object.entries(spools).forEach(([color, grams]) => {
         const isLow = grams <= 150;
         const row = document.createElement('div');
-        row.className = `p-3 rounded-2xl border flex items-center justify-between ${isLow ? 'bg-red-50 border-red-200' : 'bg-[#faf6f0] border-stone-200'}`;
+        row.className = `p-2.5 rounded-xl border flex justify-between items-center ${isLow ? 'bg-red-50 border-red-200' : 'bg-stone-50 border-stone-200'}`;
         row.innerHTML = `
           <div>
-            <div class="font-bold text-stone-900 text-sm flex items-center gap-1.5">
-              ${color}
-              ${isLow ? '<span class="text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded">ZAMÓW!</span>' : ''}
+            <div class="font-bold text-stone-900 text-xs flex items-center gap-1">
+              ${color} ${isLow ? '<span class="text-[9px] bg-red-600 text-white font-bold px-1 rounded">ZAMÓW</span>' : ''}
             </div>
-            <div class="text-xs text-stone-500">Pozostało w AMS: <strong class="text-stone-800">${grams} g</strong></div>
+            <div class="text-[11px] text-stone-500">Waga: <strong>${grams} g</strong></div>
           </div>
-          <button onclick="resetSpool('${color}')" class="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 font-semibold text-xs shadow-xs">
-            + Nowa szpula (1000g)
+          <button onclick="resetSpool('${color}')" class="px-2.5 py-1 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-semibold">
+            + Nowa (1000g)
           </button>
         `;
         container.appendChild(row);
@@ -1410,7 +1525,7 @@
     }
 
     function resetSpool(color) {
-      if (confirm(`Czy na pewno założyłeś nową szpulę ${color} (1000g)?`)) {
+      if (confirm(`Założono nową szpulę ${color} (1000g)?`)) {
         const spools = getSpools();
         spools[color] = 1000;
         saveSpools(spools);
@@ -1432,21 +1547,23 @@
       Object.keys(specs).forEach(name => {
         const item = specs[name];
         const row = document.createElement("div");
-        row.className = "pt-3 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2";
-        const hoursDisplay = (item.hours !== undefined ? item.hours : 2.0).toString().replace(".", ",");
+        row.className = "p-2 bg-stone-50 rounded-xl border border-stone-200 space-y-1.5";
+        const hoursDisplay = (item.hours !== undefined ? item.hours : 1.5).toString().replace(".", ",");
 
         row.innerHTML = `
-          <div class="font-bold text-stone-900 text-sm">${name}</div>
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1">
-              <span class="text-stone-500">Waga:</span>
-              <input type="number" id="spec-weight-${name}" value="${item.weight}" class="w-16 px-2 py-1 rounded-lg border border-amber-900/20 bg-[#faf6f0] text-center font-bold">
-              <span class="text-stone-400">g</span>
+          <div class="font-bold text-stone-900">${name}</div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <span class="text-[10px] text-stone-500 block">Waga (g):</span>
+              <input type="number" id="spec-weight-${name}" value="${item.weight}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white">
             </div>
-            <div class="flex items-center gap-1">
-              <span class="text-stone-500">Czas:</span>
-              <input type="text" id="spec-time-${name}" value="${hoursDisplay}" class="w-20 px-2 py-1 rounded-lg border border-amber-900/20 bg-[#faf6f0] text-center font-bold">
-              <span class="text-stone-400">godz.</span>
+            <div>
+              <span class="text-[10px] text-stone-500 block">Czas (godz):</span>
+              <input type="text" id="spec-time-${name}" value="${hoursDisplay}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-stone-500 block">Maks/stół:</span>
+              <input type="number" id="spec-max-${name}" value="${item.maxOnBed || 8}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white text-orange-700">
             </div>
           </div>
         `;
@@ -1460,7 +1577,8 @@
         const w = parseInt(document.getElementById(`spec-weight-${name}`).value) || 0;
         const timeValRaw = document.getElementById(`spec-time-${name}`).value.replace(",", ".");
         const h = parseFloat(timeValRaw) || 1.0;
-        specs[name] = { weight: w, hours: h };
+        const m = parseInt(document.getElementById(`spec-max-${name}`).value) || 8;
+        specs[name] = { weight: w, hours: h, maxOnBed: m };
       });
       saveSpecs(specs);
 
@@ -1468,22 +1586,23 @@
       const eKwh = parseFloat(document.getElementById('setting-cost-energy').value) || 1.15;
       saveCosts({ filamentKg: fKg, energyKwh: eKwh });
 
-      alert("Parametry druku oraz koszty produkcji zostały zaktualizowane!");
+      alert("Zapisano parametry i pojemności stołów!");
       updateHubStats();
+      renderBatcherView();
     }
 
 
     // ==========================================
-    // SKLEP & KOSZYK (INSERT DO SUPABASE)
+    // SKLEP & KOSZYK (BEZ ŻOŁĘDZI)
     // ==========================================
     const state = {
       dynia: { color: 'Rudy', hex: '#c2410c' },
       lisek: { color: 'Rudy', hex: '#c2410c' },
       wiewiorka: { color: 'Rudy', hex: '#c2410c' },
-      taca: { color: 'Zielony', hex: '#2d5a27' }
+      taca: { color: 'Zielony', hex: '#15803d' }
     };
 
-    const quantities = { dynia: 1, lisek: 1, wiewiorka: 1, taca: 1, orzeszki: 1 };
+    const quantities = { dynia: 1, lisek: 1, wiewiorka: 1, taca: 1 };
     let cart = [];
 
     function changeQty(productId, delta) {
@@ -1497,9 +1616,6 @@
 
       const svg = document.getElementById(`svg-${productId}`);
       if (svg) svg.style.color = hexCode;
-
-      const label = document.getElementById(`label-${productId}`);
-      if (label) label.textContent = colorName;
 
       const parent = btnElement.parentElement;
       parent.querySelectorAll('.color-chip').forEach(chip => chip.classList.remove('active'));
@@ -1519,24 +1635,6 @@
 
       quantities[productId] = 1;
       document.getElementById(`qty-${productId}`).textContent = 1;
-      updateCartUI();
-    }
-
-    function addHazelnutsToCartWithQty() {
-      const count = quantities['orzeszki'];
-      const title = 'Orzeszki laskowe (9 szt.)';
-      const color = 'Zielono-Brązowy';
-      const unitPrice = 10;
-
-      const existingIndex = cart.findIndex(item => item.title === title);
-      if (existingIndex > -1) {
-        cart[existingIndex].qty += count;
-      } else {
-        cart.push({ title, color, unitPrice, qty: count });
-      }
-
-      quantities['orzeszki'] = 1;
-      document.getElementById('qty-orzeszki').textContent = 1;
       updateCartUI();
     }
 
@@ -1582,21 +1680,20 @@
       container.innerHTML = '';
       cart.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex justify-between items-center';
+        row.className = 'py-2.5 flex justify-between items-center';
         row.innerHTML = `
           <div>
-            <div class="font-medium text-stone-900">${item.title}</div>
-            <div class="text-xs text-stone-500">Kolor: <span class="font-semibold text-stone-700">${item.color}</span></div>
-            <div class="text-xs text-stone-400 mt-0.5">${item.unitPrice.toFixed(2)} zł / szt.</div>
+            <div class="font-bold text-stone-900">${item.title} (${item.color})</div>
+            <div class="text-stone-500">${item.unitPrice.toFixed(2)} zł / szt.</div>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="flex items-center border border-amber-900/15 rounded-xl bg-[#faf6f0] px-1 py-0.5 text-xs">
-              <button onclick="changeCartItemQty(${index}, -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-lg">-</button>
-              <span class="w-6 text-center font-bold text-stone-900">${item.qty}</span>
-              <button onclick="changeCartItemQty(${index}, 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-200 rounded-lg">+</button>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-lg bg-stone-50 px-1 py-0.5">
+              <button onclick="changeCartItemQty(${index}, -1)" class="w-5 h-5 font-bold">-</button>
+              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <button onclick="changeCartItemQty(${index}, 1)" class="w-5 h-5 font-bold">+</button>
             </div>
-            <span class="font-bold text-stone-900 w-16 text-right">${(item.unitPrice * item.qty).toFixed(2)} zł</span>
-            <button onclick="removeFromCart(${index})" class="text-amber-800 hover:text-red-700 text-xs font-semibold ml-1">✕</button>
+            <span class="font-bold text-stone-900 w-14 text-right">${(item.unitPrice * item.qty).toFixed(2)} zł</span>
+            <button onclick="removeFromCart(${index})" class="text-rose-600 font-bold ml-1">✕</button>
           </div>
         `;
         container.appendChild(row);
@@ -1639,7 +1736,7 @@
       } catch (err) {
         alert("Błąd składania zamówienia: " + err.message);
         btn.disabled = false;
-        btn.textContent = "Złóż zamówienie 🍁";
+        btn.textContent = "Złóż zamówienie";
       }
     }
   </script>
