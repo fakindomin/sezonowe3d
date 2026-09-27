@@ -172,12 +172,12 @@
   <div id="admin-app" class="max-w-xl mx-auto px-4 pt-4 pb-16 hidden space-y-4">
     
     <!-- BANER O NOWYM ZAMÓWIENIU -->
-    <div id="new-order-banner" class="hidden p-3.5 rounded-2xl bg-amber-500 text-stone-950 font-bold text-xs flex items-center justify-between shadow-md border border-amber-600">
+    <div id="new-order-banner" class="hidden p-3.5 rounded-2xl bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-between shadow-md border border-amber-500">
       <div class="flex items-center gap-2">
         <span class="text-base">🔔</span>
         <span>Nowe zamówienie wpadło do bazy! (<span id="banner-new-order-id">#ZAM-...</span>)</span>
       </div>
-      <button onclick="dismissNewOrderBanner()" class="text-stone-950 hover:text-black font-extrabold px-2 py-1 rounded bg-amber-400 hover:bg-amber-300 text-xs">
+      <button onclick="dismissNewOrderBanner()" class="text-stone-950 hover:text-black font-extrabold px-2 py-1 rounded bg-amber-300 hover:bg-amber-200 text-xs">
         ✕ Zamknij
       </button>
     </div>
@@ -274,10 +274,9 @@
       </div>
     </div>
 
-    <!-- WIDOK B: ZAMÓWIENIA (DWIE KATEGORIE) -->
+    <!-- WIDOK B: ZAMÓWIENIA -->
     <div id="admin-tab-orders" class="space-y-3 hidden">
       <div class="flex justify-between items-center gap-2">
-        <!-- PRZEŁĄCZNIK DWÓCH KATEGORII -->
         <div class="flex bg-stone-200 p-0.5 rounded-xl text-xs font-bold">
           <button id="tab-btn-pending" onclick="switchOrdersCategory('pending')" class="px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs">
             Do zrealizowania (<span id="count-pending-orders">0</span>)
@@ -385,7 +384,7 @@
 
   </div>
 
-  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA (CHECKLISTA) -->
+  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA -->
   <div id="packing-modal" class="fixed inset-0 bg-stone-950/70 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[92vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-start border-b border-stone-200 pb-3">
@@ -525,10 +524,9 @@
     let manualOrderItems = [];
     let activeBatchPayload = null;
 
-    let ordersActiveCategory = 'pending'; // 'pending' lub 'completed'
+    let ordersActiveCategory = 'pending';
     let currentPackingOrder = null;
 
-    // Pamięć lokalna odhaczonych sztuk (sztuka po sztuce): { "orderId:::itemIndex": checkedCount }
     function getPackingProgress() {
       const data = localStorage.getItem("bambu_packing_progress_v1");
       return data ? JSON.parse(data) : {};
@@ -538,7 +536,7 @@
     }
 
     // ==========================================
-    // PEŁNA BAZA KOLEKCJI ZE ZDJĘCIAMI I WYMIARAMI
+    // BAZA KOLEKCJI ZE ZDJĘCIAMI I WYMIARAMI
     // ==========================================
     const CATALOG = {
       autumn: {
@@ -573,9 +571,7 @@
             price: 5,
             hasColors: false,
             defaultColor: 'Pomarańczowy',
-            renderVisual: () => {
-              return `<img src="lisek.webp" alt="Lisek geometryczny" class="w-full h-full object-contain drop-shadow-sm">`;
-            }
+            renderVisual: () => `<img src="lisek.webp" alt="Lisek geometryczny" class="w-full h-full object-contain drop-shadow-sm">`
           },
           {
             id: 'wiewiorka',
@@ -584,9 +580,7 @@
             price: 5,
             hasColors: false,
             defaultColor: 'Pomarańczowy',
-            renderVisual: () => {
-              return `<img src="wiewiorka.webp" alt="Wiewiórka" class="w-full h-full object-contain drop-shadow-sm">`;
-            }
+            renderVisual: () => `<img src="wiewiorka.webp" alt="Wiewiórka" class="w-full h-full object-contain drop-shadow-sm">`
           },
           {
             id: 'taca',
@@ -806,9 +800,6 @@
     const quantities = {};
     let cart = [];
 
-    // ==========================================
-    // RENDEROWANIE SKLEPU
-    // ==========================================
     function renderSeasonSelector() {
       const activeState = getSeasonsState();
       const container = document.getElementById('season-selector-bar');
@@ -1023,7 +1014,7 @@
     }
 
     // ==========================================
-    // SKŁADANIE ZAMÓWIENIA
+    // SKŁADANIE ZAMÓWIENIA + WYSYŁKA EMAIL (KOMPATYBILNA Z TEMPLATE)
     // ==========================================
     async function submitOrder(e) {
       e.preventDefault();
@@ -1054,15 +1045,22 @@
 
         if (error) throw error;
 
+        // Wysłanie maila z obsługą zmiennych szablonu
         try {
-          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          const emailParams = {
             order_id: orderId,
             customer_name: customerName,
             customer_contact: customerContact,
             order_items: itemsFormattedText,
             customer_notes: customerNotes || "(brak uwag)",
-            order_total: totalPrice
-          });
+            order_total: totalPrice,
+            // Fallback pod domyślny szablon EmailJS (Contact Us):
+            name: `${customerName} (${customerContact})`,
+            notes: customerNotes || "(brak)",
+            message: `Nowe zamówienie #ZAM-${orderId}\nKwota: ${totalPrice} zł\n\nPozycje:\n${itemsFormattedText}\n\nUwagi: ${customerNotes || 'Brak'}`
+          };
+
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams);
         } catch (mailErr) {
           console.warn("Błąd wysyłki e-mail:", mailErr);
         }
@@ -1081,7 +1079,7 @@
     }
 
     // ==========================================
-    // ROUTING & AUTH PANELU
+    // ROUTING & AUTH
     // ==========================================
     function route() {
       const hash = window.location.hash;
@@ -1168,7 +1166,7 @@
     }
 
     // ==========================================
-    // SUPABASE CRUD & REALTIME
+    // SUPABASE CRUD & REALTIME POWIADOMIENIE
     // ==========================================
     let isRealtimeInitialized = false;
 
@@ -1177,7 +1175,7 @@
       isRealtimeInitialized = true;
 
       supabaseClient
-        .channel('schema-db-changes')
+        .channel('public:orders')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'orders' },
@@ -1188,7 +1186,11 @@
             fetchOrdersFromCloud();
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log("Realtime nasłuchuje nowych zamówień");
+          }
+        });
     }
 
     function dismissNewOrderBanner() {
@@ -1248,7 +1250,7 @@
     }
 
     // ==========================================
-    // NOWA LOGIKA: DWIE KATEGORIE & KAFELKI Z STATUSAMI
+    // DWIE KATEGORIE & KAFELKI Z STATUSAMI
     // ==========================================
     function switchOrdersCategory(cat) {
       ordersActiveCategory = cat;
@@ -1383,7 +1385,7 @@
     }
 
     // ==========================================
-    // NOWY PANEL PAKOWANIA (ODHACZANIE SZTUKA PO SZTUCE)
+    // TRYB PAKOWANIA (ODHACZANIE SZTUKA PO SZTUCE)
     // ==========================================
     function openPackingModal(orderId) {
       currentPackingOrder = cloudOrders.find(o => o.id === orderId);
@@ -1589,7 +1591,7 @@
     }
 
     // ==========================================
-    // PLANER STOŁU (DEDYKOWANA LOGIKA ZASPOKAJANIA ZAMÓWIEŃ)
+    // PLANER STOŁU
     // ==========================================
     function renderBatcherView() {
       const specs = getSpecs();
@@ -1785,7 +1787,7 @@
     }
 
     // ==========================================
-    // OBSŁUGA WYNIKÓW DRUKU (ZASPOKAJANIE ZAMÓWIEŃ -> NADWYŻKI NA PÓŁKĘ)
+    // OBSŁUGA WYNIKÓW DRUKU
     // ==========================================
     function openPrintResultModal(isFullSuccess) {
       if (!activeBatchPayload || activeBatchPayload.items.length === 0) return;
@@ -1845,7 +1847,6 @@
       successfulItems.forEach(item => {
         let remaining = item.qty;
 
-        // 1. Zaspokajanie braków w zamówieniach od najstarszego
         for (const order of activeOrders) {
           if (remaining <= 0) break;
           const oItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
@@ -1866,7 +1867,6 @@
           });
         }
 
-        // 2. Nadwyżka trafia na półkę
         if (remaining > 0) {
           const key = `${item.title}:::${col}`;
           shelf[key] = (shelf[key] || 0) + remaining;
@@ -1883,7 +1883,7 @@
     }
 
     // ==========================================
-    // PÓŁKA BUFOROWA (TYLKO NADWYŻKI)
+    // PÓŁKA BUFOROWA
     // ==========================================
     function renderShelfView() {
       const shelf = getShelf();
@@ -1946,7 +1946,7 @@
     }
 
     // ==========================================
-    // RĘCZNE ZAMÓWIENIE (ADMIN)
+    // RĘCZNE ZAMÓWIENIE
     // ==========================================
     function openManualOrderModal() {
       manualOrderItems = [];
