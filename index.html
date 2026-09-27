@@ -286,7 +286,7 @@
       <div id="batch-recommendation" class="p-4 rounded-2xl bg-stone-900 text-white space-y-3"></div>
       <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2">
         <div class="flex justify-between items-center">
-          <h4 class="font-bold text-xs text-stone-800 uppercase tracking-wider">Kolejka braków (Sztuki)</h4>
+          <h4 class="font-bold text-xs text-stone-800 uppercase tracking-wider">Kolekcja braków (Sztuki)</h4>
           <span id="tab-missing-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-100">0 szt.</span>
         </div>
         <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs"></div>
@@ -440,6 +440,7 @@
             price: 10,
             hasColors: true,
             defaultColor: 'Pomarańczowy',
+            // UJEDNOLICONA KOLEJNOŚĆ KOLORÓW
             colors: [
               { name: 'Pomarańczowy', hex: '#c2410c', img: 'dynia_orange.webp' },
               { name: 'Zielony', hex: '#15803d', img: 'dynia_green.webp' },
@@ -479,15 +480,16 @@
             desc: '240 × 240 × 20 mm',
             price: 10,
             hasColors: true,
-            defaultColor: 'Zielony',
+            defaultColor: 'Pomarańczowy',
+            // UJEDNOLICONA KOLEJNOŚĆ KOLORÓW (TAKA SAMA JAK W DYNI)
             colors: [
-              { name: 'Zielony', hex: '#15803d', img: 'tacka_green.webp' },
               { name: 'Pomarańczowy', hex: '#c2410c', img: 'tacka_orange.webp' },
+              { name: 'Zielony', hex: '#15803d', img: 'tacka_green.webp' },
               { name: 'Żółty', hex: '#facc15', img: 'tacka_yellow.webp' },
               { name: 'Biały', hex: '#f5f5f4', img: 'tacka_white.webp' }
             ],
             renderVisual: (sel) => {
-              const src = sel.img || 'tacka_green.webp';
+              const src = sel.img || 'tacka_orange.webp';
               return `<img src="${src}" alt="Okrągła tacka" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
             }
           }
