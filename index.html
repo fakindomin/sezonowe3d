@@ -446,7 +446,7 @@
 
   </div>
 
-  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA (POBIERANIE Z PÓŁKI) -->
+  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA -->
   <div id="packing-modal" class="fixed inset-0 bg-stone-950/70 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[92vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-start border-b border-stone-200 pb-3">
@@ -484,7 +484,7 @@
     </div>
   </div>
 
-  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU (WSZYSTKO TRAFIA NA PÓŁKĘ) -->
+  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU -->
   <div id="print-result-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
       <div class="border-b border-stone-200 pb-2">
@@ -612,6 +612,7 @@
         title: 'Kolekcja Jesienna 🍂',
         desc: 'Ciepłe dekoracje dyniowe i leśne figurki drukowane w precyzyjnej technologii FDM.',
         themeClass: 'from-orange-600 to-amber-700',
+        btnClass: 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-sm',
         products: [
           {
             id: 'dynia',
@@ -675,6 +676,7 @@
         title: 'Kolekcja Świąteczna 🎄',
         desc: 'Eleganckie ozdoby świąteczne, figurki i dekoracje w klasycznej palecie barw.',
         themeClass: 'from-red-800 to-emerald-900',
+        btnClass: 'bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-800 hover:to-rose-800 text-white shadow-sm',
         products: [
           {
             id: 'jelonek',
@@ -726,6 +728,7 @@
         title: 'Kolekcja Wiosenna 🐣',
         desc: 'Pastelowe zające w trzech rozmiarach i niespodzianki na wielkanocny stół.',
         themeClass: 'from-emerald-600 to-teal-700',
+        btnClass: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm',
         products: [
           {
             id: 'zajaczek_maly',
@@ -970,6 +973,8 @@
           `;
         }
 
+        const seasonBtnClass = currentConfig.btnClass || 'bg-stone-900 hover:bg-stone-800 text-white';
+
         card.innerHTML = `
           <div>
             <div class="w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden">
@@ -991,7 +996,7 @@
               <span id="qty-${p.id}" class="w-8 text-center text-xs font-bold text-stone-900">${quantities[p.id]}</span>
               <button onclick="changeQty('${p.id}', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
             </div>
-            <button onclick="addToCart('${p.id}', '${p.title}', ${p.price})" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-2xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
+            <button id="btn-add-${p.id}" onclick="addToCart('${p.id}', '${p.title}', ${p.price})" class="flex-1 py-3 ${seasonBtnClass} rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
               + Dodaj do koszyka
             </button>
           </div>
@@ -1026,6 +1031,21 @@
       const label = document.getElementById(`qty-${productId}`);
       if (label) label.textContent = 1;
       updateCartUI();
+
+      // EFEKT MRUGNIĘCIA PRZYCISKU (FEEDBACK DLA UŻYTKOWNIKA)
+      const btn = document.getElementById(`btn-add-${productId}`);
+      if (btn) {
+        const originalText = btn.innerHTML;
+        const originalClasses = btn.className;
+
+        btn.innerHTML = `✓ Dodano!`;
+        btn.className = `flex-1 py-3 bg-emerald-600 text-white rounded-2xl text-xs font-extrabold shadow-md scale-105 transition-all duration-150`;
+
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.className = originalClasses;
+        }, 700);
+      }
     }
 
     function changeCartItemQty(index, delta) {
@@ -1384,7 +1404,6 @@
           const currentPacked = (progress[key] || 0);
           packedCount += currentPacked;
 
-          // Ile leży na półce (poza tym co już spakowane)
           const shelfKey = `${item.title}:::${item.color}`;
           const onShelf = shelf[shelfKey] || 0;
           const neededMore = Math.max(0, item.qty - currentPacked);
@@ -1490,7 +1509,7 @@
     }
 
     // ==========================================
-    // TRYB PAKOWANIA (ODHACZANIE TYLKO GDY TOWAR JEST NA PÓŁCE)
+    // TRYB PAKOWANIA
     // ==========================================
     function openPackingModal(orderId) {
       currentPackingOrder = cloudOrders.find(o => o.id === orderId);
@@ -1548,13 +1567,12 @@
         let pieceButtonsHtml = '';
         for (let i = 1; i <= item.qty; i++) {
           const isPieceChecked = i <= currentChecked;
-          // Można kliknąć tylko wtedy, gdy sztuka jest już spakowana LUB jest fizycznie dostępna na półce
           const isAvailableToTake = (i === currentChecked + 1 && onShelf > 0);
           const isEnabled = isPieceChecked || isAvailableToTake;
 
           pieceButtonsHtml += `
             <button type="button" 
-              onclick="${isEnabled ? `togglePackingPiece(${itemIdx}, ${i})` : `alert('Brak na półce: najpierw wydrukuj ten model!')`}" 
+              onclick="${isEnabled ? `togglePackingPiece(${itemIdx},${i})` : `alert('Brak na półce: najpierw wydrukuj ten model!')`}" 
               class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${isPieceChecked ? 'bg-emerald-600 text-white shadow-xs' : (isAvailableToTake ? 'bg-white border-2 border-emerald-400 text-emerald-800 hover:bg-emerald-50 cursor-pointer' : 'bg-stone-200 border border-stone-300 text-stone-400 opacity-60 cursor-not-allowed')}">
               ${isPieceChecked ? '✓' : i}
             </button>
@@ -1605,11 +1623,9 @@
       const shelfKey = `${item.title}:::${item.color}`;
 
       if (current >= pieceNumber) {
-        // Cofnięcie odhaczenia -> zwrot 1 sztuki na Półkę
         progress[key] = pieceNumber - 1;
         shelf[shelfKey] = (shelf[shelfKey] || 0) + 1;
       } else {
-        // Odhaczenie nowej sztuki -> pobranie 1 sztuki z Półki
         if ((shelf[shelfKey] || 0) <= 0) {
           alert(`Brak sztuk "${item.title} (${item.color})" na półce buforowej!`);
           return;
@@ -1643,7 +1659,6 @@
         return;
       }
 
-      // Zwrot spakowanych elementów z powrotem na półkę
       const progress = getPackingProgress();
       const shelf = getShelf();
       const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
@@ -1760,7 +1775,7 @@
     }
 
     // ==========================================
-    // PLANER STOŁU (PEŁNY WYBÓR OPERATORA)
+    // PLANER STOŁU
     // ==========================================
     function initBatchBuilderSelectors() {
       const modelSel = document.getElementById('batch-select-model');
@@ -1835,13 +1850,11 @@
 
       const { title, color, actualQty, plannedQty, unitWeight } = activeBatchPayload;
 
-      // 1. Zawsze odliczamy filament za to co poszło na stół
       const totalGramsUsed = plannedQty * unitWeight;
       const spools = getSpools();
       spools[color] = Math.max(0, (spools[color] || 1000) - totalGramsUsed);
       saveSpools(spools);
 
-      // 2. Wszystkie udane sztuki wpadają w 100% na PÓŁKĘ
       if (actualQty > 0) {
         const shelf = getShelf();
         const key = `${title}:::${color}`;
@@ -1961,94 +1974,6 @@
       renderBatcherView();
       renderShelfView();
       alert(`Wydrukowano ${stemsCount} szt. ogonków! Trafiły na Półkę buforową.`);
-    }
-
-    // ==========================================
-    // PÓŁKA BUFOROWA (BEZ SUWAKA / SCROLLA)
-    // ==========================================
-    function renderShelfView() {
-      const shelf = getShelf();
-      const container = document.getElementById('shelf-items-list');
-      container.innerHTML = '';
-
-      const titleSelect = document.getElementById('shelf-add-title');
-      if (titleSelect) {
-        titleSelect.innerHTML = Object.keys(ALL_PRICES).concat(['Ogonek dyni']).map(t => `<option value="${t}">${t}</option>`).join('');
-      }
-
-      const colorSelect = document.getElementById('shelf-add-color');
-      if (colorSelect) {
-        colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).map(c => `<option value="${c}">${c}</option>`).join('');
-      }
-
-      const activeKeys = Object.keys(shelf).filter(k => (shelf[k] || 0) > 0);
-
-      if (activeKeys.length === 0) {
-        container.innerHTML = `
-          <div class="py-8 text-center text-stone-400 bg-stone-50 rounded-xl border border-dashed border-stone-200">
-            Półka jest obecnie pusta. Wszystko co wydrukujesz w Planerze trafi tutaj.
-          </div>
-        `;
-        return;
-      }
-
-      activeKeys.forEach(key => {
-        const [title, color] = key.split(':::');
-        const count = shelf[key] || 0;
-
-        const row = document.createElement('div');
-        row.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center";
-        row.innerHTML = `
-          <div>
-            <span class="font-bold text-xs text-stone-900">${title}</span>
-            <span class="text-[11px] text-stone-500 ml-1">(${color})</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
-              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">-</button>
-              <span class="w-8 text-center text-xs font-bold text-stone-900">${count}</span>
-              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">+</button>
-            </div>
-            <button onclick="removeShelfItem('${key}')" class="text-rose-600 hover:text-rose-800 font-bold p-1">✕</button>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function addItemDirectlyToShelf() {
-      const title = document.getElementById('shelf-add-title').value;
-      const color = document.getElementById('shelf-add-color').value;
-      const key = `${title}:::${color}`;
-
-      const shelf = getShelf();
-      shelf[key] = (shelf[key] || 0) + 1;
-      saveShelf(shelf);
-
-      updateHubStats();
-      renderShelfView();
-      renderOrdersView();
-    }
-
-    function changeShelfQty(key, delta) {
-      const shelf = getShelf();
-      const current = shelf[key] || 0;
-      shelf[key] = Math.max(0, current + delta);
-      if (shelf[key] === 0) delete shelf[key];
-
-      saveShelf(shelf);
-      updateHubStats();
-      renderShelfView();
-      renderOrdersView();
-    }
-
-    function removeShelfItem(key) {
-      const shelf = getShelf();
-      delete shelf[key];
-      saveShelf(shelf);
-      updateHubStats();
-      renderShelfView();
-      renderOrdersView();
     }
 
     // ==========================================
