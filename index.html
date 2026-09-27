@@ -283,7 +283,6 @@
     <!-- WIDOK B: ZAMÓWIENIA (TRZY KATEGORIE) -->
     <div id="admin-tab-orders" class="space-y-3 hidden">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <!-- PRZEŁĄCZNIK 3 KATEGORII -->
         <div class="flex bg-stone-200 p-0.5 rounded-xl text-xs font-bold w-full sm:w-auto overflow-x-auto">
           <button id="tab-btn-pending" onclick="switchOrdersCategory('pending')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs whitespace-nowrap">
             Do zrealizowania (<span id="count-pending-orders">0</span>)
@@ -394,7 +393,7 @@
 
   </div>
 
-  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA (Z OPCJĄ ANULOWANIA) -->
+  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA -->
   <div id="packing-modal" class="fixed inset-0 bg-stone-950/70 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[92vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-start border-b border-stone-200 pb-3">
@@ -424,7 +423,6 @@
           <button onclick="closePackingModal()" class="py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl text-xs">
             Wróć
           </button>
-          <!-- PRZYCISK ANULOWANIA ZAMÓWIENIA W SZCZEGÓŁACH -->
           <button onclick="cancelCurrentOrderFromModal()" class="py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl text-xs border border-rose-200">
             ✕ Anuluj zamówienie
           </button>
@@ -1030,7 +1028,7 @@
     }
 
     // ==========================================
-    // SKŁADANIE ZAMÓWIENIA + NIEZAWODNA WYSYŁKA EMAILJS
+    // SKŁADANIE ZAMÓWIENIA + PEŁNA WYSYŁKA EMAILJS
     // ==========================================
     async function submitOrder(e) {
       e.preventDefault();
@@ -1044,8 +1042,11 @@
       const orderId = Math.floor(100 + Math.random() * 900).toString();
 
       const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
+      const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0).toFixed(2);
+      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${i.title} (${i.color})`).join("\n");
 
       try {
+        // 1. Zapis w bazie Supabase
         const { error: dbError } = await supabaseClient
           .from('orders')
           .insert([{
@@ -1059,11 +1060,25 @@
 
         if (dbError) throw dbError;
 
+        // 2. Wysłanie pełnego powiadomienia e-mail
         try {
+          const emailParams = {
+            order_id: orderId,
+            customer_name: customerName,
+            customer_contact: customerContact,
+            order_items: itemsFormattedText,
+            customer_notes: customerNotes || "(brak uwag)",
+            order_total: totalPrice,
+            // Parametry uniwersalne pod standardowe zmienne:
+            to_name: "Pracownia",
+            name: `${customerName} (${customerContact})`,
+            message: `Wpadło nowe zamówienie #ZAM-${orderId}!\n\nKlient: ${customerName}\nKontakt: ${customerContact}\nDo zapłaty: ${totalPrice} zł\n\nZamówione pozycje:\n${itemsFormattedText}\n\nUwagi:\n${customerNotes || 'Brak'}`
+          };
+
           const res = await emailjs.send(
             EMAILJS_SERVICE_ID,
             EMAILJS_TEMPLATE_ID,
-            { to_name: "Pracownia", message: "Nowe zamówienie wpłynęło do sklepu!" },
+            emailParams,
             EMAILJS_PUBLIC_KEY
           );
           console.log("Powiadomienie e-mail wysłane!", res.status);
@@ -1368,7 +1383,6 @@
             <span class="text-xs text-stone-400 font-medium">Zlecenie zakończone</span>
           `;
         } else {
-          // KATEGORIA ANULOWANE: PRZYWRÓĆ LUB USUŃ TRWALE
           footerActions = `
             <button onclick="restoreOrder('${order.id}')" class="flex-1 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xs">
               Przywróć zamówienie ↺
@@ -1541,7 +1555,6 @@
         return;
       }
 
-      // Zerujemy stan odhaczenia w pamięci podręcznej dla tego zamówienia
       const progress = getPackingProgress();
       const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
       items.forEach((_, idx) => {
