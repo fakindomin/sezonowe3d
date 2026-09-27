@@ -188,7 +188,7 @@
 
     <div id="spool-alert-container" class="space-y-2"></div>
 
-    <!-- WIDOK A: HUB GŁÓWNY (Z BANEREM POWIADOMIENIA) -->
+    <!-- WIDOK A: HUB GŁÓWNY -->
     <div id="admin-tab-hub" class="space-y-4">
       
       <!-- BANER O NOWYM ZAMÓWIENIU -->
@@ -244,7 +244,7 @@
           </div>
           <div>
             <div class="font-bold text-xs text-stone-900">Planer Stołu</div>
-            <div class="text-[9px] text-stone-400">P1S + Ogonki</div>
+            <div class="text-[9px] text-stone-400">Wybór wsadów P1S</div>
           </div>
         </button>
 
@@ -255,7 +255,7 @@
           </div>
           <div>
             <div class="font-bold text-xs text-stone-900">Półka Bufor</div>
-            <div class="text-[9px] text-stone-400">Nadwyżki</div>
+            <div class="text-[9px] text-stone-400">Stan fizyczny</div>
           </div>
         </button>
 
@@ -274,7 +274,7 @@
           <span class="text-lg">⚙️</span>
           <div>
             <div class="font-bold text-xs text-stone-900">Ustawienia</div>
-            <div class="text-[9px] text-stone-400">Kolekcje & Stoły</div>
+            <div class="text-[9px] text-stone-400">Kolekcje & Koszty</div>
           </div>
         </button>
       </div>
@@ -308,13 +308,50 @@
       <div id="orders-list-view" class="space-y-3"></div>
     </div>
 
-    <!-- WIDOK C: PLANER STOŁU I BRAKI -->
+    <!-- WIDOK C: PLANER STOŁU I WYBÓR WSADÓW -->
     <div id="admin-tab-batcher" class="space-y-4 hidden">
       <div id="batch-stem-box" class="p-4 rounded-2xl bg-stone-800 text-white space-y-2 border border-stone-700"></div>
-      <div id="batch-recommendation" class="p-4 rounded-2xl bg-stone-900 text-white space-y-3"></div>
+
+      <!-- KREATOR WYBORU STOŁU DO DRUKU -->
+      <div class="p-4 rounded-2xl bg-stone-900 text-white space-y-3">
+        <div class="flex justify-between items-center border-b border-stone-800 pb-2">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-orange-400">Panel operatora P1S</span>
+            <h4 class="text-sm font-bold text-white">Wybierz wsad stołu do druku</h4>
+          </div>
+          <span class="text-[11px] text-stone-400">Trafia na Półkę</span>
+        </div>
+
+        <div class="grid grid-cols-12 gap-2 text-xs">
+          <div class="col-span-6 sm:col-span-5">
+            <label class="block text-stone-400 mb-1">Model figurki:</label>
+            <select id="batch-select-model" onchange="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold"></select>
+          </div>
+          <div class="col-span-6 sm:col-span-4">
+            <label class="block text-stone-400 mb-1">Kolor filamentu:</label>
+            <select id="batch-select-color" onchange="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold"></select>
+          </div>
+          <div class="col-span-12 sm:col-span-3">
+            <label class="block text-stone-400 mb-1">Liczba na stół:</label>
+            <input type="number" id="batch-select-qty" min="1" max="40" value="8" onchange="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold text-center">
+          </div>
+        </div>
+
+        <div id="batch-calc-summary" class="text-xs text-stone-300 bg-stone-800/80 p-2.5 rounded-xl border border-stone-700 flex justify-between items-center">
+          <span>⏱️ Czas stołu: <strong id="batch-calc-time" class="text-white">-</strong></span>
+          <span>⚖️ Filament: <strong id="batch-calc-grams" class="text-white">-</strong></span>
+        </div>
+
+        <div class="pt-1">
+          <button onclick="openCustomPrintResultModal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md">
+            Rozpocznij druk stołu (Raport po zakończeniu) →
+          </button>
+        </div>
+      </div>
+
       <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2">
         <div class="flex justify-between items-center">
-          <h4 class="font-bold text-xs text-stone-800 uppercase tracking-wider">Kolejka braków (Sztuki)</h4>
+          <h4 class="font-bold text-xs text-stone-800 uppercase tracking-wider">Zapotrzebowanie z zamówień (Sztuki)</h4>
           <span id="tab-missing-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-100">0 szt.</span>
         </div>
         <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs"></div>
@@ -327,7 +364,7 @@
         <div class="flex justify-between items-start border-b border-stone-100 pb-3">
           <div>
             <h3 class="font-bold text-sm text-stone-900">Półka z nadwyżkami (Stan fizyczny)</h3>
-            <p class="text-[11px] text-stone-500">Czysto informacyjny podgląd odłożonych sztuk. Nie wpływa na zamówienia.</p>
+            <p class="text-[11px] text-stone-500">Wszystkie wydrukowane elementy wpadają tutaj. Z półki pobierasz je podczas pakowania.</p>
           </div>
           <button onclick="clearWholeShelf()" class="text-rose-600 hover:text-rose-700 font-semibold text-xs px-2.5 py-1 rounded-lg border border-rose-200 bg-rose-50">
             Zeruj półkę 🗑️
@@ -336,7 +373,7 @@
 
         <!-- RĘCZNE DODAWANIE DO PÓŁKI -->
         <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2 text-xs">
-          <label class="block font-bold text-stone-700">+ Dodaj element na półkę:</label>
+          <label class="block font-bold text-stone-700">+ Dodaj element na półkę ręcznie:</label>
           <div class="grid grid-cols-12 gap-1.5">
             <select id="shelf-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
             <select id="shelf-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5"></select>
@@ -344,7 +381,6 @@
           </div>
         </div>
 
-        <!-- LISTA ELEMENTÓW NA PÓŁCE (BEZ SUWAKA / SCROLLA) -->
         <div id="shelf-items-list" class="space-y-1.5 pt-1"></div>
       </div>
     </div>
@@ -410,7 +446,7 @@
 
   </div>
 
-  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA -->
+  <!-- MODAL PAKOWANIA / SZCZEGÓŁÓW ZAMÓWIENIA (POBIERANIE Z PÓŁKI) -->
   <div id="packing-modal" class="fixed inset-0 bg-stone-950/70 backdrop-blur-xs z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[92vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-start border-b border-stone-200 pb-3">
@@ -448,17 +484,17 @@
     </div>
   </div>
 
-  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU -->
+  <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU (WSZYSTKO TRAFIA NA PÓŁKĘ) -->
   <div id="print-result-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
       <div class="border-b border-stone-200 pb-2">
         <h3 class="font-heading font-bold text-base text-stone-900">Raport ze stołu: Co się udało?</h3>
-        <p class="text-xs text-stone-500">Zmniejsz ilość, jeśli element uległ uszkodzeniu.</p>
+        <p class="text-xs text-stone-500">Zatwierdzone sztuki trafią bezpośrednio na Półkę buforową.</p>
       </div>
       <div id="print-result-items" class="space-y-2.5 text-xs"></div>
       <div class="pt-2">
-        <button onclick="confirmPrintResult()" class="w-full py-3 bg-stone-900 text-white font-bold rounded-xl text-xs">
-          Zatwierdź wynik (Odlicz filament ze szpuli)
+        <button onclick="confirmPrintResultToShelf()" class="w-full py-3 bg-stone-900 text-white font-bold rounded-xl text-xs">
+          Zatwierdź wynik (Wrzuć na Półkę i odlicz filament)
         </button>
       </div>
     </div>
@@ -822,6 +858,7 @@
         saveShelf({});
         updateHubStats();
         renderShelfView();
+        renderOrdersView();
       }
     }
 
@@ -1053,7 +1090,7 @@
     }
 
     // ==========================================
-    // SKŁADANIE ZAMÓWIENIA + PEŁNA WYSYŁKA EMAILJS
+    // SKŁADANIE ZAMÓWIENIA + WYSYŁKA EMAILJS
     // ==========================================
     async function submitOrder(e) {
       e.preventDefault();
@@ -1194,6 +1231,7 @@
           renderOrdersView();
         } else if (tabName === 'batcher') {
           title.textContent = "Planer Stołu P1S";
+          initBatchBuilderSelectors();
           renderBatcherView();
         } else if (tabName === 'shelf') {
           title.textContent = "Półka Buforowa";
@@ -1290,7 +1328,7 @@
     }
 
     // ==========================================
-    // TRZY KATEGORIE & KAFELKI (CZYSTY STAN 1:1 Z CHECKLISTY)
+    // TRZY KATEGORIE & KAFELKI Z INFORMACJĄ O MOŻLIWOŚCI SKOMPLETOWANIA
     // ==========================================
     function switchOrdersCategory(cat) {
       ordersActiveCategory = cat;
@@ -1312,6 +1350,7 @@
       const container = document.getElementById('orders-list-view');
       container.innerHTML = "";
 
+      const shelf = getShelf();
       const progress = getPackingProgress();
       const now = new Date().getTime();
 
@@ -1337,15 +1376,24 @@
         const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
         const totalPieces = items.reduce((sum, i) => sum + i.qty, 0);
 
-        // Licznik oparty WYŁĄCZNIE na tym, co odhaczono fizycznie w oknie
-        let checkedCount = 0;
+        let packedCount = 0;
+        let readyOnShelfCount = 0;
+
         items.forEach((item, idx) => {
           const key = `${order.id}:::${idx}`;
-          checkedCount += (progress[key] || 0);
+          const currentPacked = (progress[key] || 0);
+          packedCount += currentPacked;
+
+          // Ile leży na półce (poza tym co już spakowane)
+          const shelfKey = `${item.title}:::${item.color}`;
+          const onShelf = shelf[shelfKey] || 0;
+          const neededMore = Math.max(0, item.qty - currentPacked);
+          readyOnShelfCount += (currentPacked + Math.min(onShelf, neededMore));
         });
 
-        const isFullyReady = checkedCount >= totalPieces && totalPieces > 0;
-        const hasSomeReady = checkedCount > 0 && !isFullyReady;
+        const isFullyPacked = packedCount >= totalPieces && totalPieces > 0;
+        const canBeFullyPackedFromShelf = readyOnShelfCount >= totalPieces && totalPieces > 0;
+        const hasSomeOnShelf = readyOnShelfCount > 0;
 
         const orderTime = order.created_at ? new Date(order.created_at).getTime() : 0;
         const isRecent = (now - orderTime) < (2 * 60 * 60 * 1000) && ordersActiveCategory === 'pending';
@@ -1354,14 +1402,17 @@
         let cardBorderClass = 'border-stone-200 bg-white';
 
         if (ordersActiveCategory === 'pending') {
-          if (isFullyReady) {
-            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Gotowe w całości (${totalPieces}/${totalPieces})</span>`;
+          if (isFullyPacked) {
+            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Spakowane w całości (${totalPieces}/${totalPieces})</span>`;
             cardBorderClass = 'border-emerald-300 bg-emerald-50/20';
-          } else if (hasSomeReady) {
-            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">📦 Spakowano: ${checkedCount} z ${totalPieces} szt.</span>`;
-            cardBorderClass = 'border-amber-300 bg-white';
+          } else if (canBeFullyPackedFromShelf) {
+            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300">🟢 Możliwe do skompletowania (${totalPieces}/${totalPieces})</span>`;
+            cardBorderClass = 'border-emerald-200 bg-white';
+          } else if (hasSomeOnShelf || packedCount > 0) {
+            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">🟡 Częściowo na półce: ${readyOnShelfCount} z ${totalPieces} szt.</span>`;
+            cardBorderClass = 'border-amber-200 bg-white';
           } else {
-            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200">⏳ Czeka na wydruk (0/${totalPieces})</span>`;
+            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200">⚪ Brak na stanie (0/${totalPieces})</span>`;
           }
         } else if (ordersActiveCategory === 'completed') {
           badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-500">Zrealizowane ✓</span>`;
@@ -1373,10 +1424,11 @@
 
         const itemsSummary = items.map((item, idx) => {
           const key = `${order.id}:::${idx}`;
-          const isDone = (progress[key] || 0) >= item.qty;
+          const currentPacked = (progress[key] || 0);
+          const isDone = currentPacked >= item.qty;
           return `
             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${isDone ? 'bg-emerald-100 text-emerald-900 border border-emerald-200' : 'bg-stone-100 text-stone-700 border border-stone-200'}">
-              ${isDone ? '✓' : '•'} <strong>${item.qty}x</strong> ${item.title} (${item.color})
+              ${isDone ? '✓' : '•'} <strong>${currentPacked}/${item.qty}x</strong> ${item.title} (${item.color})
             </span>
           `;
         }).join(" ");
@@ -1438,7 +1490,7 @@
     }
 
     // ==========================================
-    // TRYB PAKOWANIA
+    // TRYB PAKOWANIA (ODHACZANIE TYLKO GDY TOWAR JEST NA PÓŁCE)
     // ==========================================
     function openPackingModal(orderId) {
       currentPackingOrder = cloudOrders.find(o => o.id === orderId);
@@ -1472,6 +1524,7 @@
       const container = document.getElementById('pack-modal-checklist');
       container.innerHTML = '';
 
+      const shelf = getShelf();
       const progress = getPackingProgress();
       const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
 
@@ -1484,6 +1537,9 @@
         const currentChecked = progress[key] || 0;
         totalChecked += currentChecked;
 
+        const shelfKey = `${item.title}:::${item.color}`;
+        const onShelf = shelf[shelfKey] || 0;
+
         const isFullyDone = currentChecked >= item.qty;
 
         const row = document.createElement('div');
@@ -1492,9 +1548,14 @@
         let pieceButtonsHtml = '';
         for (let i = 1; i <= item.qty; i++) {
           const isPieceChecked = i <= currentChecked;
+          // Można kliknąć tylko wtedy, gdy sztuka jest już spakowana LUB jest fizycznie dostępna na półce
+          const isAvailableToTake = (i === currentChecked + 1 && onShelf > 0);
+          const isEnabled = isPieceChecked || isAvailableToTake;
+
           pieceButtonsHtml += `
-            <button type="button" onclick="togglePackingPiece(${itemIdx}, ${i})" 
-              class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${isPieceChecked ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white border border-stone-300 text-stone-500 hover:bg-stone-100'}">
+            <button type="button" 
+              onclick="${isEnabled ? `togglePackingPiece(${itemIdx}, ${i})` : `alert('Brak na półce: najpierw wydrukuj ten model!')`}" 
+              class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${isPieceChecked ? 'bg-emerald-600 text-white shadow-xs' : (isAvailableToTake ? 'bg-white border-2 border-emerald-400 text-emerald-800 hover:bg-emerald-50 cursor-pointer' : 'bg-stone-200 border border-stone-300 text-stone-400 opacity-60 cursor-not-allowed')}">
               ${isPieceChecked ? '✓' : i}
             </button>
           `;
@@ -1505,6 +1566,7 @@
             <div>
               <span class="font-bold text-xs ${isFullyDone ? 'text-emerald-950' : 'text-stone-900'}">${item.title}</span>
               <span class="text-[11px] text-stone-500 ml-1">(${item.color})</span>
+              <span class="text-[10px] ml-2 px-1.5 py-0.5 rounded ${onShelf > 0 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-stone-200 text-stone-600'}">Półka: ${onShelf} szt.</span>
             </div>
             <span class="text-xs font-extrabold ${isFullyDone ? 'text-emerald-700' : 'text-stone-600'}">
               ${currentChecked} / ${item.qty} szt.
@@ -1523,28 +1585,44 @@
       if (totalChecked >= totalPieces && totalPieces > 0) {
         fulfillBtn.disabled = false;
         fulfillBtn.className = "w-full py-3.5 rounded-2xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-md active:scale-[0.99] cursor-pointer";
-        fulfillBtn.textContent = "Wydaj zamówienie ✓ (Wszystko gotowe)";
+        fulfillBtn.textContent = "Wydaj zamówienie ✓ (Wszystko spakowane)";
       } else {
         fulfillBtn.disabled = true;
         fulfillBtn.className = "w-full py-3.5 rounded-2xl font-bold text-xs bg-stone-200 text-stone-400 cursor-not-allowed";
-        fulfillBtn.textContent = `Wydaj zamówienie (Skompletowano: ${totalChecked}/${totalPieces})`;
+        fulfillBtn.textContent = `Wydaj zamówienie (Spakowano: ${totalChecked}/${totalPieces})`;
       }
     }
 
     function togglePackingPiece(itemIdx, pieceNumber) {
       if (!currentPackingOrder) return;
       const progress = getPackingProgress();
+      const shelf = getShelf();
       const key = `${currentPackingOrder.id}:::${itemIdx}`;
       const current = progress[key] || 0;
 
+      const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
+      const item = items[itemIdx];
+      const shelfKey = `${item.title}:::${item.color}`;
+
       if (current >= pieceNumber) {
+        // Cofnięcie odhaczenia -> zwrot 1 sztuki na Półkę
         progress[key] = pieceNumber - 1;
+        shelf[shelfKey] = (shelf[shelfKey] || 0) + 1;
       } else {
+        // Odhaczenie nowej sztuki -> pobranie 1 sztuki z Półki
+        if ((shelf[shelfKey] || 0) <= 0) {
+          alert(`Brak sztuk "${item.title} (${item.color})" na półce buforowej!`);
+          return;
+        }
         progress[key] = pieceNumber;
+        shelf[shelfKey] = Math.max(0, (shelf[shelfKey] || 0) - 1);
+        if (shelf[shelfKey] === 0) delete shelf[shelfKey];
       }
 
+      saveShelf(shelf);
       savePackingProgress(progress);
       renderPackingChecklist();
+      updateHubStats();
     }
 
     async function fulfillCurrentOrder() {
@@ -1565,11 +1643,22 @@
         return;
       }
 
+      // Zwrot spakowanych elementów z powrotem na półkę
       const progress = getPackingProgress();
+      const shelf = getShelf();
       const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
-      items.forEach((_, idx) => {
-        delete progress[`${orderId}:::${idx}`];
+
+      items.forEach((item, idx) => {
+        const key = `${orderId}:::${idx}`;
+        const packed = progress[key] || 0;
+        if (packed > 0) {
+          const shelfKey = `${item.title}:::${item.color}`;
+          shelf[shelfKey] = (shelf[shelfKey] || 0) + packed;
+          delete progress[key];
+        }
       });
+
+      saveShelf(shelf);
       savePackingProgress(progress);
 
       closePackingModal();
@@ -1603,7 +1692,6 @@
       });
       document.getElementById('badge-missing-parts').textContent = missingPieces;
 
-      // Półka liczy wyłącznie elementy ze stanu półki
       const shelf = getShelf();
       const totalShelfItems = Object.values(shelf).reduce((acc, qty) => acc + (qty || 0), 0);
       document.getElementById('badge-shelf-count').textContent = totalShelfItems;
@@ -1672,8 +1760,104 @@
     }
 
     // ==========================================
-    // PLANER STOŁU
+    // PLANER STOŁU (PEŁNY WYBÓR OPERATORA)
     // ==========================================
+    function initBatchBuilderSelectors() {
+      const modelSel = document.getElementById('batch-select-model');
+      const colorSel = document.getElementById('batch-select-color');
+
+      if (modelSel && modelSel.options.length === 0) {
+        modelSel.innerHTML = Object.keys(ALL_PRICES).map(t => `<option value="${t}">${t}</option>`).join('');
+      }
+      if (colorSel && colorSel.options.length === 0) {
+        colorSel.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+      updateBatchBuilder();
+    }
+
+    function updateBatchBuilder() {
+      const model = document.getElementById('batch-select-model').value || 'Dynia';
+      const qty = parseInt(document.getElementById('batch-select-qty').value) || 1;
+      const specs = getSpecs();
+      const spec = specs[model] || { weight: 45, hours: 1.5 };
+
+      const totalH = (qty * (spec.hours || 1.5)).toFixed(1).replace(".", ",");
+      const totalG = qty * spec.weight;
+
+      document.getElementById('batch-calc-time').textContent = `${totalH} godz.`;
+      document.getElementById('batch-calc-grams').textContent = `~${totalG}g`;
+    }
+
+    function openCustomPrintResultModal() {
+      const model = document.getElementById('batch-select-model').value;
+      const color = document.getElementById('batch-select-color').value;
+      const qty = parseInt(document.getElementById('batch-select-qty').value) || 1;
+      const specs = getSpecs();
+      const spec = specs[model] || { weight: 45, hours: 1.5 };
+
+      activeBatchPayload = {
+        title: model,
+        color: color,
+        plannedQty: qty,
+        unitWeight: spec.weight,
+        actualQty: qty
+      };
+
+      const container = document.getElementById('print-result-items');
+      container.innerHTML = `
+        <div class="flex justify-between items-center p-3 bg-stone-100 rounded-xl">
+          <div>
+            <div class="font-bold text-stone-900">${model} (${color})</div>
+            <div class="text-[11px] text-stone-500">Planowano: ${qty} szt.</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-stone-700">Udane:</span>
+            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+              <button onclick="changeCustomResultQty(-1)" class="w-6 h-6 font-bold text-stone-700">-</button>
+              <span id="custom-result-qty-label" class="w-6 text-center font-bold">${qty}</span>
+              <button onclick="changeCustomResultQty(1)" class="w-6 h-6 font-bold text-stone-700">+</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('print-result-modal').classList.remove('hidden');
+    }
+
+    function changeCustomResultQty(delta) {
+      if (!activeBatchPayload) return;
+      activeBatchPayload.actualQty = Math.max(0, Math.min(activeBatchPayload.plannedQty, activeBatchPayload.actualQty + delta));
+      document.getElementById('custom-result-qty-label').textContent = activeBatchPayload.actualQty;
+    }
+
+    function confirmPrintResultToShelf() {
+      if (!activeBatchPayload) return;
+
+      const { title, color, actualQty, plannedQty, unitWeight } = activeBatchPayload;
+
+      // 1. Zawsze odliczamy filament za to co poszło na stół
+      const totalGramsUsed = plannedQty * unitWeight;
+      const spools = getSpools();
+      spools[color] = Math.max(0, (spools[color] || 1000) - totalGramsUsed);
+      saveSpools(spools);
+
+      // 2. Wszystkie udane sztuki wpadają w 100% na PÓŁKĘ
+      if (actualQty > 0) {
+        const shelf = getShelf();
+        const key = `${title}:::${color}`;
+        shelf[key] = (shelf[key] || 0) + actualQty;
+        saveShelf(shelf);
+      }
+
+      document.getElementById('print-result-modal').classList.add('hidden');
+      alert(`Wydrukowano stół!\nDodano ${actualQty} szt. [${title} - ${color}] na Półkę buforową.\nOdliczono ~${totalGramsUsed}g ze szpuli.`);
+
+      updateHubStats();
+      renderShelfView();
+      renderOrdersView();
+      renderBatcherView();
+    }
+
     function renderBatcherView() {
       const specs = getSpecs();
       const progress = getPackingProgress();
@@ -1729,7 +1913,7 @@
           </div>
           <div class="pt-2">
             <button onclick="applyStemBatchPrint(${totalStemDemand},${stemWeight})" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
-              ✓ Oznacz ogonki jako wydrukowane (-${stemWeight}g Brązowy)
+              ✓ Oznacz ogonki jako wydrukowane (-${stemWeight}g Brązowy -> Półka)
             </button>
           </div>
         ` : `
@@ -1749,7 +1933,7 @@
       const grid = document.getElementById('tab-missing-grid');
       grid.innerHTML = "";
       if (Object.keys(colorGroups).length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-2 text-stone-400 text-center">Brak figurek w kolejce druku!</div>`;
+        grid.innerHTML = `<div class="col-span-full py-2 text-stone-400 text-center">Brak figurek w kolejce zamówień!</div>`;
       } else {
         for (const [col, list] of Object.entries(colorGroups)) {
           const card = document.createElement("div");
@@ -1762,91 +1946,6 @@
           grid.appendChild(card);
         }
       }
-
-      const batchContainer = document.getElementById("batch-recommendation");
-      let selectedColor = null;
-      let maxItemCount = 0;
-
-      for (const [col, list] of Object.entries(colorGroups)) {
-        const sum = list.reduce((acc, cur) => acc + cur.qty, 0);
-        if (sum > maxItemCount) {
-          maxItemCount = sum;
-          selectedColor = col;
-        }
-      }
-
-      if (selectedColor) {
-        const availableItems = JSON.parse(JSON.stringify(colorGroups[selectedColor]));
-        let bedLoad = 0;
-        const bedItems = [];
-        let totalGrams = 0;
-        let totalHours = 0;
-
-        for (const item of availableItems) {
-          const modelSpec = specs[item.title] || { weight: 45, hours: 1.5, maxOnBed: 8 };
-          const itemCostPercent = 100 / (modelSpec.maxOnBed || 8);
-
-          let qtyToTake = 0;
-          for (let i = 0; i < item.qty; i++) {
-            if (bedLoad + itemCostPercent <= 95) {
-              bedLoad += itemCostPercent;
-              qtyToTake++;
-            } else {
-              break;
-            }
-          }
-
-          if (qtyToTake > 0) {
-            bedItems.push({ title: item.title, qty: qtyToTake, max: qtyToTake });
-            totalGrams += qtyToTake * modelSpec.weight;
-            totalHours += qtyToTake * (modelSpec.hours || 1.5);
-          }
-
-          if (bedLoad >= 90) break;
-        }
-
-        activeBatchPayload = {
-          color: selectedColor,
-          items: bedItems,
-          totalGrams: totalGrams
-        };
-
-        const formattedHours = totalHours.toFixed(1).replace(".", ",");
-        const itemsSummary = bedItems.map(i => `${i.qty}x ${i.title}`).join(", ");
-
-        batchContainer.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-orange-400">Rekomendowany Wsad Stołu</span>
-              <h4 class="text-base font-bold text-white mt-0.5">Kolor: ${selectedColor.toUpperCase()}</h4>
-            </div>
-            <span class="text-xs font-bold px-2 py-0.5 rounded bg-stone-800 text-stone-200">
-              Zapełnienie: ~${Math.round(bedLoad)}%
-            </span>
-          </div>
-
-          <div class="text-xs text-stone-200 font-medium">
-            Elementy: <strong>${itemsSummary}</strong>
-          </div>
-
-          <div class="text-xs text-stone-400 flex gap-4">
-            <span>⏱️ Czas stołu: <strong class="text-white">${formattedHours} godz.</strong></span>
-            <span>⚖️ Filament: <strong class="text-white">~${totalGrams}g</strong></span>
-          </div>
-
-          <div class="pt-2 flex gap-2">
-            <button onclick="openPrintResultModal(true)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs">
-              ✓ Wszystko udane
-            </button>
-            <button onclick="openPrintResultModal(false)" class="py-2.5 px-3 bg-stone-800 hover:bg-stone-700 text-amber-400 border border-stone-600 rounded-xl font-bold text-xs">
-              ⚠️ Coś nie wyszło
-            </button>
-          </div>
-        `;
-      } else {
-        activeBatchPayload = null;
-        batchContainer.innerHTML = `<div class="text-xs text-stone-400 py-2">Wszystkie stoły zrealizowane! Brak oczekujących modeli.</div>`;
-      }
     }
 
     function applyStemBatchPrint(stemsCount, grams) {
@@ -1854,99 +1953,14 @@
       spools['Brązowy'] = Math.max(0, (spools['Brązowy'] || 1000) - grams);
       saveSpools(spools);
 
+      const shelf = getShelf();
+      shelf['Ogonek dyni:::Brązowy'] = (shelf['Ogonek dyni:::Brązowy'] || 0) + stemsCount;
+      saveShelf(shelf);
+
       updateHubStats();
       renderBatcherView();
-      alert(`Wydrukowano ${stemsCount} szt. ogonków! Odliczono ~${grams}g Brązowego.`);
-    }
-
-    // ==========================================
-    // OBSŁUGA WYNIKÓW DRUKU
-    // ==========================================
-    function openPrintResultModal(isFullSuccess) {
-      if (!activeBatchPayload || activeBatchPayload.items.length === 0) return;
-
-      if (isFullSuccess) {
-        finalizeBatchPrint(activeBatchPayload.items);
-        return;
-      }
-
-      const container = document.getElementById('print-result-items');
-      container.innerHTML = "";
-
-      activeBatchPayload.items.forEach((item, index) => {
-        const row = document.createElement('div');
-        row.className = "flex justify-between items-center p-2.5 bg-stone-100 rounded-xl";
-        row.innerHTML = `
-          <div>
-            <div class="font-bold text-stone-900">${item.title}</div>
-            <div class="text-[11px] text-stone-500">Planowano: ${item.max} szt.</div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-stone-700">Udane:</span>
-            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
-              <button onclick="changeResultItemQty(${index}, -1)" class="w-6 h-6 font-bold text-stone-700">-</button>
-              <span id="result-qty-${index}" class="w-6 text-center font-bold">${item.qty}</span>
-              <button onclick="changeResultItemQty(${index}, 1)" class="w-6 h-6 font-bold text-stone-700">+</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-
-      document.getElementById('print-result-modal').classList.remove('hidden');
-    }
-
-    function changeResultItemQty(index, delta) {
-      const item = activeBatchPayload.items[index];
-      item.qty = Math.max(0, Math.min(item.max, item.qty + delta));
-      document.getElementById(`result-qty-${index}`).textContent = item.qty;
-    }
-
-    function confirmPrintResult() {
-      document.getElementById('print-result-modal').classList.add('hidden');
-      finalizeBatchPrint(activeBatchPayload.items);
-    }
-
-    function finalizeBatchPrint(successfulItems) {
-      const spools = getSpools();
-      const col = activeBatchPayload.color;
-      spools[col] = Math.max(0, (spools[col] || 1000) - activeBatchPayload.totalGrams);
-      saveSpools(spools);
-
-      const progress = getPackingProgress();
-      const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
-
-      // Wydrukowane modele ptaszkują checklistę w zamówieniach
-      successfulItems.forEach(item => {
-        let remaining = item.qty;
-
-        for (const order of activeOrders) {
-          if (remaining <= 0) break;
-          const oItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
-
-          oItems.forEach((oItem, oIdx) => {
-            if (remaining <= 0) return;
-            if (oItem.title === item.title && oItem.color === col) {
-              const key = `${order.id}:::${oIdx}`;
-              const checked = progress[key] || 0;
-              const needed = Math.max(0, oItem.qty - checked);
-
-              if (needed > 0) {
-                const take = Math.min(remaining, needed);
-                progress[key] = checked + take;
-                remaining -= take;
-              }
-            }
-          });
-        }
-      });
-
-      savePackingProgress(progress);
-
-      alert(`Stół (${col}) rozliczony!\nZużycie filamentu: ~${activeBatchPayload.totalGrams}g.\nWydrukowane elementy zostały odhaczone w zamówieniach!`);
-      updateHubStats();
-      renderBatcherView();
-      renderOrdersView();
+      renderShelfView();
+      alert(`Wydrukowano ${stemsCount} szt. ogonków! Trafiły na Półkę buforową.`);
     }
 
     // ==========================================
@@ -1957,7 +1971,6 @@
       const container = document.getElementById('shelf-items-list');
       container.innerHTML = '';
 
-      // Przygotuj selektory do dodawania
       const titleSelect = document.getElementById('shelf-add-title');
       if (titleSelect) {
         titleSelect.innerHTML = Object.keys(ALL_PRICES).concat(['Ogonek dyni']).map(t => `<option value="${t}">${t}</option>`).join('');
@@ -1973,7 +1986,7 @@
       if (activeKeys.length === 0) {
         container.innerHTML = `
           <div class="py-8 text-center text-stone-400 bg-stone-50 rounded-xl border border-dashed border-stone-200">
-            Półka jest obecnie pusta. Możesz dodać nadwyżki powyżej.
+            Półka jest obecnie pusta. Wszystko co wydrukujesz w Planerze trafi tutaj.
           </div>
         `;
         return;
@@ -2014,6 +2027,7 @@
 
       updateHubStats();
       renderShelfView();
+      renderOrdersView();
     }
 
     function changeShelfQty(key, delta) {
@@ -2025,6 +2039,7 @@
       saveShelf(shelf);
       updateHubStats();
       renderShelfView();
+      renderOrdersView();
     }
 
     function removeShelfItem(key) {
@@ -2033,6 +2048,7 @@
       saveShelf(shelf);
       updateHubStats();
       renderShelfView();
+      renderOrdersView();
     }
 
     // ==========================================
