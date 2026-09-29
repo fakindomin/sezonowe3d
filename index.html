@@ -87,6 +87,25 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="products-grid"></div>
+
+      <!-- SEKCJA KONTAKTOWA W POMARAŃCZOWYM KAFELKU -->
+      <footer class="mt-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 text-white shadow-md relative overflow-hidden">
+        <div class="relative z-10 text-center max-w-lg mx-auto space-y-3">
+          <span class="text-[11px] uppercase font-extrabold tracking-widest text-amber-200 block">Masz pytania? Skontaktuj się z nami</span>
+          <h3 class="font-heading font-extrabold text-xl sm:text-2xl tracking-tight">Kontakt z Pracownią</h3>
+          <p class="text-xs text-amber-100/90 leading-relaxed">Chętnie pomożemy z zamówieniem, kolorami lub realizacjami indywidualnymi.</p>
+
+          <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="tel:665532647" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white text-stone-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm hover:bg-amber-50 transition active:scale-95">
+              <span>📞</span> <span>Zadzwoń: <strong>665 532 647</strong></span>
+            </a>
+            <a href="mailto:sezonowe3d@gmail.com" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-amber-500/30 hover:bg-amber-500/40 text-white font-bold text-xs border border-amber-300/40 flex items-center justify-center gap-2 transition active:scale-95">
+              <span>✉️</span> <span>Napisz: <strong>sezonowe3d@gmail.com</strong></span>
+            </a>
+          </div>
+          <p class="text-[10px] text-amber-200/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D</p>
+        </div>
+      </footer>
     </main>
 
     <div id="sticky-bar" class="fixed bottom-4 inset-x-4 max-w-md mx-auto hidden z-40">
@@ -239,7 +258,7 @@
 
         <button onclick="switchAdminTab('batcher')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
           <div class="flex justify-between w-full">
-            <span class="text-lg">🖨️</span>
+            <span class="text-lg">🖨️️</span>
             <span id="badge-missing-parts" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-900">0</span>
           </div>
           <div>
@@ -651,21 +670,20 @@
             renderVisual: () => `<img src="wiewiorka.webp" alt="Wiewiórka" class="w-full h-full object-contain drop-shadow-sm">`
           },
           {
-            id: 'taca',
-            title: 'Okrągła tacka',
-            desc: '240 × 240 × 20 mm',
-            price: 10,
-            hasColors: true,
-            defaultColor: 'Pomarańczowy',
-            colors: [
-              { name: 'Pomarańczowy', hex: '#c2410c', img: 'tacka_orange.webp' },
-              { name: 'Zielony', hex: '#15803d', img: 'tacka_green.webp' },
-              { name: 'Żółty', hex: '#facc15', img: 'tacka_yellow.webp' },
-              { name: 'Biały', hex: '#f5f5f4', img: 'tacka_white.webp' }
+            id: 'zestaw_jesienny',
+            title: 'Zestaw Jesienny',
+            desc: '3× dynia (pom., ziel., żółta) + tacka + figurka',
+            price: 40,
+            isBundle: true,
+            hasVariants: true,
+            defaultVariant: 'Z liskiem',
+            variants: [
+              { name: 'Z liskiem', icon: '🦊', img: 'zestaw_lis.webp' },
+              { name: 'Z wiewiórką', icon: '🐿️', img: 'zestaw_wiew.webp' }
             ],
             renderVisual: (sel) => {
-              const src = sel.img || 'tacka_orange.webp';
-              return `<img src="${src}" alt="Okrągła tacka" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+              const src = (sel.variant === 'Z wiewiórką') ? 'zestaw_wiew.webp' : 'zestaw_lis.webp';
+              return `<img src="${src}" alt="Zestaw Jesienny" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
             }
           }
         ]
@@ -806,7 +824,7 @@
     };
 
     const ALL_PRICES = {
-      'Dynia': 10, 'Lisek': 5, 'Wiewiórka': 5, 'Taca': 10,
+      'Dynia': 10, 'Lisek': 5, 'Wiewiórka': 5, 'Taca': 10, 'Zestaw Jesienny': 40,
       'Jelonek': 10, 'Mikołaj': 10, 'Bombka': 10,
       'Zajączek mały': 5, 'Zajączek średni': 10, 'Zajączek duży': 15, 'Jajko niespodzianka': 10
     };
@@ -928,12 +946,16 @@
 
       currentConfig.products.forEach(p => {
         if (!productSelectedState[p.id]) {
-          const defCol = p.hasColors ? p.colors.find(c => c.name === p.defaultColor) : { name: 'Pomarańczowy', hex: '#c2410c' };
-          productSelectedState[p.id] = {
-            color: defCol.name,
-            hex: defCol.hex,
-            img: defCol.img || null
-          };
+          if (p.isBundle) {
+            productSelectedState[p.id] = { variant: p.defaultVariant || 'Z liskiem' };
+          } else {
+            const defCol = p.hasColors ? p.colors.find(c => c.name === p.defaultColor) : { name: 'Pomarańczowy', hex: '#c2410c' };
+            productSelectedState[p.id] = {
+              color: defCol.name,
+              hex: defCol.hex,
+              img: defCol.img || null
+            };
+          }
         }
         if (!quantities[p.id]) quantities[p.id] = 1;
 
@@ -941,8 +963,25 @@
         const card = document.createElement('div');
         card.className = "bg-white rounded-3xl p-5 border border-stone-200 shadow-xs hover:shadow-md transition flex flex-col justify-between";
 
-        let colorPickerHtml = '';
-        if (p.hasColors) {
+        let optionsHtml = '';
+        if (p.isBundle) {
+          // Wybór wariantu zestawu (Z liskiem / Z wiewiórką)
+          optionsHtml = `
+            <div class="mt-4">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
+                Wybierz zwierzaka w zestawie:
+              </span>
+              <div class="grid grid-cols-2 gap-2">
+                ${p.variants.map(v => `
+                  <button type="button" onclick="setBundleVariant('${p.id}', '${v.name}')" 
+                    class="py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${currentSel.variant === v.name ? 'border-orange-600 bg-orange-50 text-orange-950 shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
+                    <span>${v.icon}</span> <span>${v.name}</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else if (p.hasColors) {
           const swatches = p.colors.map(c => `
             <button type="button" onclick="setProductColor('${p.id}', '${c.name}', '${c.hex}', '${c.img || ''}')" 
               class="swatch-btn ${currentSel.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition" 
@@ -951,7 +990,7 @@
             </button>
           `).join('');
 
-          colorPickerHtml = `
+          optionsHtml = `
             <div class="mt-4">
               <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
                 Kolor: <strong class="text-stone-800">${currentSel.color}</strong>
@@ -962,7 +1001,7 @@
             </div>
           `;
         } else {
-          colorPickerHtml = `
+          optionsHtml = `
             <div class="mt-4">
               <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor figurki</span>
               <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200">
@@ -987,7 +1026,7 @@
               </div>
               <span class="font-heading font-extrabold text-lg text-stone-900">${p.price.toFixed(2)} zł</span>
             </div>
-            ${colorPickerHtml}
+            ${optionsHtml}
           </div>
 
           <div class="mt-5 pt-4 border-t border-stone-100 flex items-center gap-2.5">
@@ -1010,6 +1049,11 @@
       renderProductsGrid();
     }
 
+    function setBundleVariant(productId, variantName) {
+      productSelectedState[productId] = { variant: variantName };
+      renderProductsGrid();
+    }
+
     function changeQty(productId, delta) {
       quantities[productId] = Math.max(1, (quantities[productId] || 1) + delta);
       const label = document.getElementById(`qty-${productId}`);
@@ -1017,14 +1061,35 @@
     }
 
     function addToCart(productId, title, unitPrice) {
-      const selectedColor = productSelectedState[productId] ? productSelectedState[productId].color : 'Pomarańczowy';
+      const state = productSelectedState[productId] || {};
       const count = quantities[productId] || 1;
 
-      const existingIndex = cart.findIndex(item => item.title === title && item.color === selectedColor);
+      let itemTitle = title;
+      let itemColor = 'Pomarańczowy';
+      let isBundle = false;
+      let variant = null;
+
+      if (productId === 'zestaw_jesienny') {
+        isBundle = true;
+        variant = state.variant || 'Z liskiem';
+        itemTitle = `Zestaw Jesienny (${variant})`;
+        itemColor = 'Multikolor';
+      } else {
+        itemColor = state.color || 'Pomarańczowy';
+      }
+
+      const existingIndex = cart.findIndex(item => item.title === itemTitle && item.color === itemColor);
       if (existingIndex > -1) {
         cart[existingIndex].qty += count;
       } else {
-        cart.push({ title, color: selectedColor, unitPrice, qty: count });
+        cart.push({
+          title: itemTitle,
+          color: itemColor,
+          unitPrice: unitPrice,
+          qty: count,
+          isBundle: isBundle,
+          variant: variant
+        });
       }
 
       quantities[productId] = 1;
@@ -1032,7 +1097,7 @@
       if (label) label.textContent = 1;
       updateCartUI();
 
-      // EFEKT MRUGNIĘCIA PRZYCISKU (FEEDBACK DLA UŻYTKOWNIKA)
+      // Efekt kliknięcia przycisku
       const btn = document.getElementById(`btn-add-${productId}`);
       if (btn) {
         const originalText = btn.innerHTML;
@@ -1092,7 +1157,7 @@
         row.className = 'py-3 flex justify-between items-center';
         row.innerHTML = `
           <div>
-            <div class="font-bold text-stone-900">${item.title} (${item.color})</div>
+            <div class="font-bold text-stone-900">${item.title}</div>
             <div class="text-stone-500">${item.unitPrice.toFixed(2)} zł / szt.</div>
           </div>
           <div class="flex items-center gap-2">
@@ -1123,9 +1188,16 @@
       const customerNotes = document.getElementById("form-notes").value.trim();
       const orderId = Math.floor(100 + Math.random() * 900).toString();
 
-      const itemsPayload = cart.map(i => ({ title: i.title, color: i.color, qty: i.qty }));
+      const itemsPayload = cart.map(i => ({
+        title: i.title,
+        color: i.color,
+        qty: i.qty,
+        isBundle: i.isBundle || false,
+        variant: i.variant || null
+      }));
+
       const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0).toFixed(2);
-      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${i.title} (${i.color})`).join("\n");
+      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${i.title}`).join("\n");
 
       try {
         const { error: dbError } = await supabaseClient
@@ -1348,7 +1420,34 @@
     }
 
     // ==========================================
-    // TRZY KATEGORIE & KAFELKI Z INFORMACJĄ O MOŻLIWOŚCI SKOMPLETOWANIA
+    // FUNKCJA ROZBIJAJĄCA POZYCJE (W TYM ZESTAW NA ELEMENTY)
+    // ==========================================
+    function getExpandedOrderItems(order) {
+      const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      const expanded = [];
+
+      rawItems.forEach(item => {
+        if (item.title && item.title.startsWith('Zestaw Jesienny')) {
+          const isFox = item.title.includes('lis') || (item.variant && item.variant.includes('lis'));
+          const animalName = isFox ? 'Lisek' : 'Wiewiórka';
+
+          for (let q = 0; q < item.qty; q++) {
+            expanded.push({ title: 'Dynia', color: 'Pomarańczowy', qty: 1, fromBundle: true });
+            expanded.push({ title: 'Dynia', color: 'Zielony', qty: 1, fromBundle: true });
+            expanded.push({ title: 'Dynia', color: 'Żółty', qty: 1, fromBundle: true });
+            expanded.push({ title: 'Taca', color: 'Pomarańczowy', qty: 1, fromBundle: true });
+            expanded.push({ title: animalName, color: 'Pomarańczowy', qty: 1, fromBundle: true });
+          }
+        } else {
+          expanded.push(item);
+        }
+      });
+
+      return expanded;
+    }
+
+    // ==========================================
+    // TRZY KATEGORIE & KAFELKI
     // ==========================================
     function switchOrdersCategory(cat) {
       ordersActiveCategory = cat;
@@ -1393,13 +1492,13 @@
       }
 
       currentList.forEach(order => {
-        const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
-        const totalPieces = items.reduce((sum, i) => sum + i.qty, 0);
+        const expandedItems = getExpandedOrderItems(order);
+        const totalPieces = expandedItems.reduce((sum, i) => sum + i.qty, 0);
 
         let packedCount = 0;
         let readyOnShelfCount = 0;
 
-        items.forEach((item, idx) => {
+        expandedItems.forEach((item, idx) => {
           const key = `${order.id}:::${idx}`;
           const currentPacked = (progress[key] || 0);
           packedCount += currentPacked;
@@ -1441,22 +1540,18 @@
           cardBorderClass = 'border-rose-200 bg-rose-50/30 opacity-85';
         }
 
-        const itemsSummary = items.map((item, idx) => {
-          const key = `${order.id}:::${idx}`;
-          const currentPacked = (progress[key] || 0);
-          const isDone = currentPacked >= item.qty;
-          return `
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${isDone ? 'bg-emerald-100 text-emerald-900 border border-emerald-200' : 'bg-stone-100 text-stone-700 border border-stone-200'}">
-              ${isDone ? '✓' : '•'} <strong>${currentPacked}/${item.qty}x</strong> ${item.title} (${item.color})
-            </span>
-          `;
-        }).join(" ");
+        const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+        const itemsSummary = rawItems.map(item => `
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
+            • <strong>${item.qty}x</strong> ${item.title}
+          </span>
+        `).join(" ");
 
         let footerActions = '';
         if (ordersActiveCategory === 'pending') {
           footerActions = `
             <button onclick="openPackingModal('${order.id}')" class="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs">
-              <span>📦 Spakuj / Szczegóły</span>
+              <span>📦 Spakuj / Rozbij zestaw</span>
             </button>
             <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 rounded-xl text-xs font-semibold">
               ✏️
@@ -1509,7 +1604,7 @@
     }
 
     // ==========================================
-    // TRYB PAKOWANIA
+    // TRYB PAKOWANIA (ROZBICIE ZESTAWU NA POJEDYNCZE SZTUKI)
     // ==========================================
     function openPackingModal(orderId) {
       currentPackingOrder = cloudOrders.find(o => o.id === orderId);
@@ -1545,12 +1640,12 @@
 
       const shelf = getShelf();
       const progress = getPackingProgress();
-      const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
+      const expandedItems = getExpandedOrderItems(currentPackingOrder);
 
       let totalPieces = 0;
       let totalChecked = 0;
 
-      items.forEach((item, itemIdx) => {
+      expandedItems.forEach((item, itemIdx) => {
         totalPieces += item.qty;
         const key = `${currentPackingOrder.id}:::${itemIdx}`;
         const currentChecked = progress[key] || 0;
@@ -1564,34 +1659,27 @@
         const row = document.createElement('div');
         row.className = `p-3 rounded-2xl border transition ${isFullyDone ? 'bg-emerald-50 border-emerald-300' : 'bg-stone-50 border-stone-200'}`;
 
-        let pieceButtonsHtml = '';
-        for (let i = 1; i <= item.qty; i++) {
-          const isPieceChecked = i <= currentChecked;
-          const isAvailableToTake = (i === currentChecked + 1 && onShelf > 0);
-          const isEnabled = isPieceChecked || isAvailableToTake;
+        const isPieceChecked = currentChecked >= 1;
+        const isAvailableToTake = (currentChecked === 0 && onShelf > 0);
+        const isEnabled = isPieceChecked || isAvailableToTake;
 
-          pieceButtonsHtml += `
-            <button type="button" 
-              onclick="${isEnabled ? `togglePackingPiece(${itemIdx},${i})` : `alert('Brak na półce: najpierw wydrukuj ten model!')`}" 
-              class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${isPieceChecked ? 'bg-emerald-600 text-white shadow-xs' : (isAvailableToTake ? 'bg-white border-2 border-emerald-400 text-emerald-800 hover:bg-emerald-50 cursor-pointer' : 'bg-stone-200 border border-stone-300 text-stone-400 opacity-60 cursor-not-allowed')}">
-              ${isPieceChecked ? '✓' : i}
-            </button>
-          `;
-        }
+        const buttonHtml = `
+          <button type="button" 
+            onclick="${isEnabled ? `togglePackingPiece(${itemIdx}, 1)` : `alert('Brak na półce: najpierw wydrukuj ${item.title} (${item.color})!')`}" 
+            class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${isPieceChecked ? 'bg-emerald-600 text-white shadow-xs' : (isAvailableToTake ? 'bg-white border-2 border-emerald-400 text-emerald-800 hover:bg-emerald-50 cursor-pointer' : 'bg-stone-200 border border-stone-300 text-stone-400 opacity-60 cursor-not-allowed')}">
+            ${isPieceChecked ? '✓' : 1}
+          </button>
+        `;
 
         row.innerHTML = `
-          <div class="flex justify-between items-center mb-2">
+          <div class="flex justify-between items-center">
             <div>
               <span class="font-bold text-xs ${isFullyDone ? 'text-emerald-950' : 'text-stone-900'}">${item.title}</span>
               <span class="text-[11px] text-stone-500 ml-1">(${item.color})</span>
+              ${item.fromBundle ? '<span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded ml-1 font-semibold">Zestaw</span>' : ''}
               <span class="text-[10px] ml-2 px-1.5 py-0.5 rounded ${onShelf > 0 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-stone-200 text-stone-600'}">Półka: ${onShelf} szt.</span>
             </div>
-            <span class="text-xs font-extrabold ${isFullyDone ? 'text-emerald-700' : 'text-stone-600'}">
-              ${currentChecked} / ${item.qty} szt.
-            </span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            ${pieceButtonsHtml}
+            ${buttonHtml}
           </div>
         `;
         container.appendChild(row);
@@ -1618,8 +1706,8 @@
       const key = `${currentPackingOrder.id}:::${itemIdx}`;
       const current = progress[key] || 0;
 
-      const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
-      const item = items[itemIdx];
+      const expandedItems = getExpandedOrderItems(currentPackingOrder);
+      const item = expandedItems[itemIdx];
       const shelfKey = `${item.title}:::${item.color}`;
 
       if (current >= pieceNumber) {
@@ -1661,9 +1749,9 @@
 
       const progress = getPackingProgress();
       const shelf = getShelf();
-      const items = Array.isArray(currentPackingOrder.items) ? currentPackingOrder.items : JSON.parse(currentPackingOrder.items || '[]');
+      const expandedItems = getExpandedOrderItems(currentPackingOrder);
 
-      items.forEach((item, idx) => {
+      expandedItems.forEach((item, idx) => {
         const key = `${orderId}:::${idx}`;
         const packed = progress[key] || 0;
         if (packed > 0) {
@@ -1699,8 +1787,8 @@
       let missingPieces = 0;
 
       activeOrders.forEach(o => {
-        const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
-        items.forEach((item, idx) => {
+        const expanded = getExpandedOrderItems(o);
+        expanded.forEach((item, idx) => {
           const checked = progress[`${o.id}:::${idx}`] || 0;
           missingPieces += Math.max(0, item.qty - checked);
         });
@@ -1721,12 +1809,20 @@
 
       cloudOrders.forEach(o => {
         if (o.status === "Zrealizowane") {
-          const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
-          items.forEach(item => {
-            const price = ALL_PRICES[item.title] || 10;
-            const spec = specs[item.title] || { weight: 45, hours: 1.5 };
+          const expanded = getExpandedOrderItems(o);
+          const rawItems = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
 
-            totalRevenue += price * item.qty;
+          rawItems.forEach(item => {
+            if (item.title && item.title.startsWith('Zestaw Jesienny')) {
+              totalRevenue += 40 * item.qty;
+            } else {
+              const price = ALL_PRICES[item.title] || 10;
+              totalRevenue += price * item.qty;
+            }
+          });
+
+          expanded.forEach(item => {
+            const spec = specs[item.title] || { weight: 45, hours: 1.5 };
             totalPiecesCompleted += item.qty;
             totalGramsPrinted += spec.weight * item.qty;
             totalHoursPrinted += (spec.hours || 1.5) * item.qty;
@@ -1782,7 +1878,7 @@
       const colorSel = document.getElementById('batch-select-color');
 
       if (modelSel && modelSel.options.length === 0) {
-        modelSel.innerHTML = Object.keys(ALL_PRICES).map(t => `<option value="${t}">${t}</option>`).join('');
+        modelSel.innerHTML = Object.keys(DEFAULT_SPECS).filter(t => t !== 'Ogonek dyni').map(t => `<option value="${t}">${t}</option>`).join('');
       }
       if (colorSel && colorSel.options.length === 0) {
         colorSel.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
@@ -1882,8 +1978,8 @@
       const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
 
       activeOrders.forEach(order => {
-        const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
-        items.forEach((item, idx) => {
+        const expanded = getExpandedOrderItems(order);
+        expanded.forEach((item, idx) => {
           const checked = progress[`${order.id}:::${idx}`] || 0;
           const needed = Math.max(0, item.qty - checked);
 
@@ -1974,6 +2070,94 @@
       renderBatcherView();
       renderShelfView();
       alert(`Wydrukowano ${stemsCount} szt. ogonków! Trafiły na Półkę buforową.`);
+    }
+
+    // ==========================================
+    // PÓŁKA BUFOROWA (BEZ SUWAKA / SCROLLA)
+    // ==========================================
+    function renderShelfView() {
+      const shelf = getShelf();
+      const container = document.getElementById('shelf-items-list');
+      container.innerHTML = '';
+
+      const titleSelect = document.getElementById('shelf-add-title');
+      if (titleSelect) {
+        titleSelect.innerHTML = Object.keys(DEFAULT_SPECS).map(t => `<option value="${t}">${t}</option>`).join('');
+      }
+
+      const colorSelect = document.getElementById('shelf-add-color');
+      if (colorSelect) {
+        colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+
+      const activeKeys = Object.keys(shelf).filter(k => (shelf[k] || 0) > 0);
+
+      if (activeKeys.length === 0) {
+        container.innerHTML = `
+          <div class="py-8 text-center text-stone-400 bg-stone-50 rounded-xl border border-dashed border-stone-200">
+            Półka jest obecnie pusta. Wszystko co wydrukujesz w Planerze trafi tutaj.
+          </div>
+        `;
+        return;
+      }
+
+      activeKeys.forEach(key => {
+        const [title, color] = key.split(':::');
+        const count = shelf[key] || 0;
+
+        const row = document.createElement('div');
+        row.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center";
+        row.innerHTML = `
+          <div>
+            <span class="font-bold text-xs text-stone-900">${title}</span>
+            <span class="text-[11px] text-stone-500 ml-1">(${color})</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">-</button>
+              <span class="w-8 text-center text-xs font-bold text-stone-900">${count}</span>
+              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">+</button>
+            </div>
+            <button onclick="removeShelfItem('${key}')" class="text-rose-600 hover:text-rose-800 font-bold p-1">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addItemDirectlyToShelf() {
+      const title = document.getElementById('shelf-add-title').value;
+      const color = document.getElementById('shelf-add-color').value;
+      const key = `${title}:::${color}`;
+
+      const shelf = getShelf();
+      shelf[key] = (shelf[key] || 0) + 1;
+      saveShelf(shelf);
+
+      updateHubStats();
+      renderShelfView();
+      renderOrdersView();
+    }
+
+    function changeShelfQty(key, delta) {
+      const shelf = getShelf();
+      const current = shelf[key] || 0;
+      shelf[key] = Math.max(0, current + delta);
+      if (shelf[key] === 0) delete shelf[key];
+
+      saveShelf(shelf);
+      updateHubStats();
+      renderShelfView();
+      renderOrdersView();
+    }
+
+    function removeShelfItem(key) {
+      const shelf = getShelf();
+      delete shelf[key];
+      saveShelf(shelf);
+      updateHubStats();
+      renderShelfView();
+      renderOrdersView();
     }
 
     // ==========================================
