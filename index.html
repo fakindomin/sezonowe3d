@@ -850,6 +850,14 @@
       return ALL_PRICES[title] ?? 10;
     }
 
+    // Kwota zamówienia: cena z dnia zamówienia, a dla starszych zamówień z cennika
+    function getOrderTotal(order) {
+      return getOrderItems(order).reduce((sum, item) => {
+        const price = typeof item.unitPrice === 'number' ? item.unitPrice : getUnitPrice(item.title);
+        return sum + price * (Number(item.qty) || 0);
+      }, 0);
+    }
+
     // Pozycje do wyboru w zamówieniach ręcznych i edycji
     function getOrderableTitles() {
       return Object.keys(ALL_PRICES).flatMap(t =>
@@ -1686,6 +1694,11 @@
             • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}
           </span>
         `).join(" ");
+        const totalPill = `
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-stone-900 text-white">
+            Do zapłaty: ${getOrderTotal(order).toFixed(2).replace('.', ',')} zł
+          </span>
+        `;
 
         let footerActions = '';
         if (ordersActiveCategory === 'pending') {
@@ -1733,8 +1746,9 @@
 
             ${order.notes ? `<div class="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-xl p-2 text-amber-900">💬 ${escapeHtml(order.notes)}</div>` : ''}
 
-            <div class="mt-3 flex flex-wrap gap-1">
+            <div class="mt-3 flex flex-wrap items-center gap-1">
               ${itemsSummary}
+              ${totalPill}
             </div>
           </div>
 
@@ -2016,13 +2030,8 @@
       cloudOrders.forEach(o => {
         if (o.status === "Zrealizowane") {
           const expanded = getExpandedOrderItems(o);
-          const rawItems = getOrderItems(o);
 
-          rawItems.forEach(item => {
-            // Cena z dnia zamówienia; starsze zamówienia nie mają jej zapisanej
-            const price = typeof item.unitPrice === 'number' ? item.unitPrice : getUnitPrice(item.title);
-            totalRevenue += price * item.qty;
-          });
+          totalRevenue += getOrderTotal(o);
 
           expanded.forEach(item => {
             const spec = specs[item.title] || { weight: 45, hours: 1.5 };
