@@ -1,0 +1,10 @@
+{
+  "name": "sezonowe3d",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/tailwind.input.css -o ./tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.19"
+  }
+}

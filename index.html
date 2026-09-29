@@ -4,7 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>sezonowe3d.pl - Pracownia Druku 3D</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Sezonowe dekoracje drukowane w 3D: dynie, liski, wiewiórki i zestawy jesienne. Zamów online, odbiór osobisty.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#faf6f0">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="sezonowe3d.pl">
+  <meta property="og:title" content="sezonowe3d.pl – Pracownia Druku 3D">
+  <meta property="og:description" content="Sezonowe dekoracje drukowane w 3D. Zamów online.">
+  <meta property="og:url" content="https://sezonowe3d.pl/">
+  <meta property="og:image" content="https://sezonowe3d.pl/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="pl_PL">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="tailwind.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,7 +116,7 @@
               <span>✉️</span> <span>Napisz: <strong>sezonowe3d@gmail.com</strong></span>
             </a>
           </div>
-          <p class="text-[10px] text-amber-200/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D</p>
+          <p class="text-[10px] text-amber-200/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D · <a href="polityka-prywatnosci.html" class="underline hover:text-amber-100">Polityka prywatności</a></p>
         </div>
       </footer>
     </main>
@@ -151,6 +164,10 @@
           <button id="submit-btn" type="submit" class="w-full mt-3 bg-stone-900 hover:bg-stone-800 text-amber-50 font-bold py-3.5 rounded-2xl text-xs transition active:scale-[0.99]">
             Złóż zamówienie
           </button>
+          <p class="text-[10px] text-stone-500 text-center leading-relaxed">
+            Dane z formularza wykorzystamy wyłącznie do realizacji zamówienia i kontaktu w jego sprawie.
+            Szczegóły w <a href="polityka-prywatnosci.html" target="_blank" class="underline hover:text-stone-800">polityce prywatności</a>.
+          </p>
         </form>
       </div>
     </div>
@@ -249,7 +266,7 @@
         <button onclick="switchAdminTab('orders')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
           <div class="flex justify-between w-full">
             <span class="text-lg">📦</span>
-            <span id="badge-active-orders" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-stone-900 text-white">0</span>
+            <span id="badge-active-orders" class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-stone-900 text-white">0</span>
           </div>
           <div>
             <div class="font-bold text-xs text-stone-900">Zamówienia</div>
@@ -260,7 +277,7 @@
         <button onclick="switchAdminTab('batcher')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
           <div class="flex justify-between w-full">
             <span class="text-lg">🖨️</span>
-            <span id="badge-missing-parts" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-900">0</span>
+            <span id="badge-missing-parts" class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-900">0</span>
           </div>
           <div>
             <div class="font-bold text-xs text-stone-900">Planer Stołu</div>
@@ -271,7 +288,7 @@
         <button onclick="switchAdminTab('shelf')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
           <div class="flex justify-between w-full">
             <span class="text-lg">🪑</span>
-            <span id="badge-shelf-count" class="text-xs font-bold px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-800">0</span>
+            <span id="badge-shelf-count" class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-stone-200 text-stone-800">0</span>
           </div>
           <div>
             <div class="font-bold text-xs text-stone-900">Półka Bufor</div>
@@ -345,7 +362,7 @@
         <div class="grid grid-cols-12 gap-2 text-xs">
           <div class="col-span-6 sm:col-span-5">
             <label class="block text-stone-400 mb-1">Model figurki:</label>
-            <select id="batch-select-model" onchange="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold"></select>
+            <select id="batch-select-model" onchange="onBatchModelChange()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold"></select>
           </div>
           <div class="col-span-6 sm:col-span-4">
             <label class="block text-stone-400 mb-1">Kolor filamentu:</label>
@@ -353,7 +370,7 @@
           </div>
           <div class="col-span-12 sm:col-span-3">
             <label class="block text-stone-400 mb-1">Liczba na stół:</label>
-            <input type="number" id="batch-select-qty" min="1" max="40" value="8" onchange="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold text-center">
+            <input type="number" id="batch-select-qty" min="1" max="40" value="8" oninput="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold text-center">
           </div>
         </div>
 
@@ -361,6 +378,8 @@
           <span>⏱️ Czas stołu: <strong id="batch-calc-time" class="text-white">-</strong></span>
           <span>⚖️ Filament: <strong id="batch-calc-grams" class="text-white">-</strong></span>
         </div>
+
+        <div id="batch-calc-hint" class="text-[11px] text-amber-200"></div>
 
         <div class="pt-1">
           <button onclick="openCustomPrintResultModal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md">
@@ -532,7 +551,7 @@
         <div class="border-t border-stone-200 pt-2">
           <label class="block font-semibold text-stone-700 mb-1">+ Dodaj pozycję:</label>
           <div class="grid grid-cols-12 gap-1.5">
-            <select id="edit-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
+            <select id="edit-add-title" onchange="updateProductColorSelect('edit')" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
             <select id="edit-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5"></select>
             <button type="button" onclick="addPositionToEditOrder()" class="col-span-2 bg-stone-900 text-white rounded-lg font-bold">+</button>
           </div>
@@ -573,7 +592,7 @@
         <div class="border-t border-stone-200 pt-2">
           <label class="block font-semibold text-stone-700 mb-1">+ Wybierz figurkę:</label>
           <div class="grid grid-cols-12 gap-1.5">
-            <select id="manual-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
+            <select id="manual-add-title" onchange="updateProductColorSelect('manual')" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
             <select id="manual-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5"></select>
             <button type="button" onclick="addPositionToManualOrder()" class="col-span-2 bg-stone-900 text-white rounded-lg font-bold">+</button>
           </div>
@@ -649,7 +668,7 @@
             ],
             renderVisual: (sel) => {
               const src = sel.img || 'dynia_orange.webp';
-              return `<img src="${src}" alt="Dynia dekoracyjna" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+              return `<img src="${src}" alt="Dynia dekoracyjna" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
             }
           },
           {
@@ -660,7 +679,7 @@
             price: 5,
             hasColors: false,
             defaultColor: 'Pomarańczowy',
-            renderVisual: () => `<img src="lisek.webp" alt="Lisek geometryczny" class="w-full h-full object-contain drop-shadow-sm">`
+            renderVisual: () => `<img src="lisek.webp" alt="Lisek geometryczny" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm">`
           },
           {
             id: 'wiewiorka',
@@ -669,7 +688,7 @@
             price: 5,
             hasColors: false,
             defaultColor: 'Pomarańczowy',
-            renderVisual: () => `<img src="wiewiorka.webp" alt="Wiewiórka" class="w-full h-full object-contain drop-shadow-sm">`
+            renderVisual: () => `<img src="wiewiorka.webp" alt="Wiewiórka" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm">`
           },
           {
             id: 'zestaw_jesienny',
@@ -685,7 +704,7 @@
             ],
             renderVisual: (sel) => {
               const src = (sel.variant === 'Z wiewiórką') ? 'zestaw_wiew.webp' : 'zestaw_lis.webp';
-              return `<img src="${src}" alt="Zestaw Jesienny" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+              return `<img src="${src}" alt="Zestaw Jesienny" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
             }
           }
         ]
@@ -830,6 +849,19 @@
       'Jelonek': 10, 'Mikołaj': 10, 'Bombka': 10,
       'Zajączek mały': 5, 'Zajączek średni': 10, 'Zajączek duży': 15, 'Jajko niespodzianka': 10
     };
+
+    // Cena z cennika; zestawy mają w nazwie wariant, np. "Zestaw Jesienny (Z liskiem)"
+    function getUnitPrice(title) {
+      if (title && title.startsWith('Zestaw Jesienny')) return ALL_PRICES['Zestaw Jesienny'];
+      return ALL_PRICES[title] ?? 10;
+    }
+
+    // Pozycje do wyboru w zamówieniach ręcznych i edycji
+    function getOrderableTitles() {
+      return Object.keys(ALL_PRICES).flatMap(t =>
+        t === 'Zestaw Jesienny' ? ['Zestaw Jesienny (Z liskiem)', 'Zestaw Jesienny (Z wiewiórką)'] : [t]
+      );
+    }
 
     const DEFAULT_COSTS = { filamentKg: 80, energyKwh: 1.15 };
 
@@ -1275,6 +1307,7 @@
         title: i.title,
         color: i.color,
         qty: i.qty,
+        unitPrice: i.unitPrice,
         isBundle: i.isBundle || false,
         variant: i.variant || null
       }));
@@ -1724,7 +1757,7 @@
               <div>
                 <div class="flex items-center gap-1.5">
                   <span class="font-bold text-stone-900 text-sm">#ZAM-${escapeHtml(order.id)}</span>
-                  ${isRecent ? '<span class="px-1.5 py-0.2 rounded bg-amber-500 text-stone-950 text-[10px] font-extrabold uppercase">Nowe</span>' : ''}
+                  ${isRecent ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-stone-950 text-[10px] font-extrabold uppercase">Nowe</span>' : ''}
                 </div>
                 <span class="font-semibold text-stone-800 text-xs">${escapeHtml(order.customer)}</span>
                 <span class="text-xs text-stone-500 block">${escapeHtml(order.contact)}</span>
@@ -2003,7 +2036,7 @@
       document.getElementById('badge-missing-parts').textContent = missingPieces;
 
       const shelf = getShelf();
-      const totalShelfItems = Object.values(shelf).reduce((acc, qty) => acc + (qty || 0), 0);
+      const totalShelfItems = Object.values(shelf).reduce((acc, qty) => acc + Math.max(0, qty || 0), 0);
       document.getElementById('badge-shelf-count').textContent = totalShelfItems;
 
       const specs = getSpecs();
@@ -2020,12 +2053,9 @@
           const rawItems = getOrderItems(o);
 
           rawItems.forEach(item => {
-            if (item.title && item.title.startsWith('Zestaw Jesienny')) {
-              totalRevenue += 40 * item.qty;
-            } else {
-              const price = ALL_PRICES[item.title] || 10;
-              totalRevenue += price * item.qty;
-            }
+            // Cena z dnia zamówienia; starsze zamówienia nie mają jej zapisanej
+            const price = typeof item.unitPrice === 'number' ? item.unitPrice : getUnitPrice(item.title);
+            totalRevenue += price * item.qty;
           });
 
           expanded.forEach(item => {
@@ -2080,22 +2110,82 @@
     // ==========================================
     // PLANER STOŁU
     // ==========================================
+    const STEM_SHELF_KEY = 'Ogonek dyni:::Brązowy';
+
+    // Kolory, w których dany model jest w ofercie
+    function getModelColors(model) {
+      if (model.startsWith('Zestaw Jesienny')) return ['Multikolor'];
+      if (model === 'Taca') return ['Pomarańczowy', 'Zielony', 'Żółty', 'Biały'];
+      if (model === 'Ogonek dyni') return ['Brązowy'];
+
+      for (const season of Object.values(CATALOG)) {
+        const product = season.products.find(p => (p.stockName || p.title) === model);
+        if (!product) continue;
+        if (product.hasColors) return product.colors.map(c => c.name);
+        return [product.defaultColor || 'Pomarańczowy'];
+      }
+      return Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy');
+    }
+
+    function getMaxOnBed(model) {
+      const spec = getSpecs()[model] || {};
+      return Math.max(1, parseInt(spec.maxOnBed) || 8);
+    }
+
+    // Brakujące sztuki z aktywnych zamówień (bez spakowanych), klucz "tytuł:::kolor"
+    function getMissingFromOrders() {
+      const progress = getPackingProgress();
+      const missing = {};
+      cloudOrders
+        .filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane")
+        .forEach(order => {
+          getExpandedOrderItems(order).forEach((item, idx) => {
+            const needed = Math.max(0, item.qty - (progress[`${order.id}:::${idx}`] || 0));
+            if (needed > 0) {
+              const key = `${item.title}:::${item.color}`;
+              missing[key] = (missing[key] || 0) + needed;
+            }
+          });
+        });
+      return missing;
+    }
+
     function initBatchBuilderSelectors() {
       const modelSel = document.getElementById('batch-select-model');
-      const colorSel = document.getElementById('batch-select-color');
-
       if (modelSel && modelSel.options.length === 0) {
-        modelSel.innerHTML = Object.keys(DEFAULT_SPECS).filter(t => t !== 'Ogonek dyni').map(t => `<option value="${t}">${t}</option>`).join('');
+        modelSel.innerHTML = Object.keys(DEFAULT_SPECS).filter(t => t !== 'Ogonek dyni').map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+        onBatchModelChange();
+      } else {
+        updateBatchBuilder();
       }
-      if (colorSel && colorSel.options.length === 0) {
-        colorSel.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
-      }
+    }
+
+    function onBatchModelChange() {
+      const model = document.getElementById('batch-select-model').value || 'Dynia';
+      const colorSel = document.getElementById('batch-select-color');
+      const previousColor = colorSel.value;
+      const colors = getModelColors(model);
+      colorSel.innerHTML = colors.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (colors.includes(previousColor)) colorSel.value = previousColor;
+
+      // Domyślnie pełny stół
+      document.getElementById('batch-select-qty').value = getMaxOnBed(model);
       updateBatchBuilder();
     }
 
     function updateBatchBuilder() {
       const model = document.getElementById('batch-select-model').value || 'Dynia';
-      const qty = parseInt(document.getElementById('batch-select-qty').value) || 1;
+      const color = document.getElementById('batch-select-color').value;
+      const qtyInput = document.getElementById('batch-select-qty');
+      const maxOnBed = getMaxOnBed(model);
+      qtyInput.max = maxOnBed;
+
+      let qty = parseInt(qtyInput.value) || 1;
+      if (qty > maxOnBed) {
+        qty = maxOnBed;
+        qtyInput.value = maxOnBed;
+      }
+
       const specs = getSpecs();
       const spec = specs[model] || { weight: 45, hours: 1.5 };
 
@@ -2104,6 +2194,19 @@
 
       document.getElementById('batch-calc-time').textContent = `${totalH} godz.`;
       document.getElementById('batch-calc-grams').textContent = `~${totalG}g`;
+
+      // Podpowiedź: ile brakuje do zamówień po uwzględnieniu półki
+      const key = `${model}:::${color}`;
+      const toPrint = Math.max(0, (getMissingFromOrders()[key] || 0) - (getShelf()[key] || 0));
+      const hint = document.getElementById('batch-calc-hint');
+      if (toPrint > 0) {
+        const fullBeds = Math.floor(toPrint / maxOnBed);
+        const rest = toPrint % maxOnBed;
+        const beds = [...Array(fullBeds).fill(maxOnBed), ...(rest ? [rest] : [])];
+        hint.textContent = `Do zamówień brakuje ${toPrint} szt. (${model}, ${color}) → ${beds.length} ${beds.length === 1 ? 'stół' : 'stoły'}: ${beds.join(' + ')} (maks. ${maxOnBed} na stół).`;
+      } else {
+        hint.textContent = `Zamówienia nie potrzebują więcej: ${model} (${color}). Maks. ${maxOnBed} na stół.`;
+      }
     }
 
     function openCustomPrintResultModal() {
@@ -2158,15 +2261,26 @@
       spools[color] = Math.max(0, (spools[color] || 1000) - totalGramsUsed);
       saveSpools(spools);
 
+      let stemInfo = '';
       if (actualQty > 0) {
         const shelf = getShelf();
         const key = `${title}:::${color}`;
         shelf[key] = (shelf[key] || 0) + actualQty;
+
+        // Dynie od razu dostają ogonki z półki; ujemny stan = dynie czekające na ogonek
+        if (title === 'Dynia') {
+          const stemsBefore = shelf[STEM_SHELF_KEY] || 0;
+          const glued = Math.max(0, Math.min(actualQty, stemsBefore));
+          shelf[STEM_SHELF_KEY] = stemsBefore - actualQty;
+          if (shelf[STEM_SHELF_KEY] === 0) delete shelf[STEM_SHELF_KEY];
+          stemInfo = `\nPrzyklejono ${glued} ogonków z półki.`;
+          if (glued < actualQty) stemInfo += ` ${actualQty - glued} dyń czeka na ogonki (planer je uwzględni).`;
+        }
         saveShelf(shelf);
       }
 
       document.getElementById('print-result-modal').classList.add('hidden');
-      alert(`Wydrukowano stół!\nDodano ${actualQty} szt. [${title} - ${color}] na Półkę buforową.\nOdliczono ~${totalGramsUsed}g ze szpuli.`);
+      alert(`Wydrukowano stół!\nDodano ${actualQty} szt. [${title} - ${color}] na Półkę buforową.\nOdliczono ~${totalGramsUsed}g ze szpuli.${stemInfo}`);
 
       updateHubStats();
       renderShelfView();
@@ -2176,38 +2290,39 @@
 
     function renderBatcherView() {
       const specs = getSpecs();
-      const progress = getPackingProgress();
+      const shelf = getShelf();
+      const missingByProduct = getMissingFromOrders();
 
       const missing = {};
       let totalPieces = 0;
-      let totalStemDemand = 0;
+      let dynieToPrint = 0;
 
-      const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
-
-      activeOrders.forEach(order => {
-        const expanded = getExpandedOrderItems(order);
-        expanded.forEach((item, idx) => {
-          const checked = progress[`${order.id}:::${idx}`] || 0;
-          const needed = Math.max(0, item.qty - checked);
-
-          if (needed > 0) {
-            const key = `${item.color}:::${item.title}`;
-            missing[key] = (missing[key] || 0) + needed;
-            totalPieces += needed;
-
-            if (item.title === 'Dynia') {
-              totalStemDemand += needed;
-            }
-          }
-        });
+      Object.entries(missingByProduct).forEach(([productKey, needed]) => {
+        const [title, color] = productKey.split(':::');
+        missing[`${color}:::${title}`] = needed;
+        totalPieces += needed;
+        if (title === 'Dynia') {
+          dynieToPrint += Math.max(0, needed - (shelf[productKey] || 0));
+        }
       });
 
       document.getElementById('tab-missing-count').textContent = `${totalPieces} szt.`;
+
+      // Ogonki przykleja się od razu do wydrukowanych dyń: potrzebne są do dyń jeszcze
+      // niewydrukowanych oraz tych, które czekają na ogonek (ujemny stan na półce)
+      const stemStock = shelf[STEM_SHELF_KEY] || 0;
+      const totalStemDemand = Math.max(0, dynieToPrint - stemStock);
+      const stemStatus = stemStock > 0
+        ? `Na półce: <strong>${stemStock} szt.</strong> (gotowe do przyklejenia)`
+        : stemStock < 0
+          ? `<span class="text-amber-300">Dyń czekających na ogonek: <strong>${-stemStock}</strong></span>`
+          : 'Na półce: 0 szt.';
 
       const stemBox = document.getElementById('batch-stem-box');
       const stemSpec = specs['Ogonek dyni'] || { weight: 2, hours: 0.15, maxOnBed: 40 };
       const stemHours = (totalStemDemand * stemSpec.hours).toFixed(1).replace(".", ",");
       const stemWeight = totalStemDemand * stemSpec.weight;
+      const stemBeds = Math.ceil(totalStemDemand / Math.max(1, stemSpec.maxOnBed || 40));
 
       stemBox.innerHTML = `
         <div class="flex justify-between items-start">
@@ -2215,8 +2330,9 @@
             <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Dedykowany stół (Brązowy)</span>
             <h4 class="text-sm font-bold text-white mt-0.5">Ogonki do dyń (zawsze osobny stół)</h4>
             <p class="text-xs text-stone-300 mt-1">
-              Potrzeba do zamówień: <strong>${totalStemDemand} szt.</strong>
+              Do wydrukowania: <strong>${totalStemDemand} szt.</strong>${stemBeds > 1 ? ` (${stemBeds} stoły)` : ''}
             </p>
+            <p class="text-[11px] text-stone-400 mt-0.5">${stemStatus}</p>
           </div>
           <span class="text-xs font-bold px-2 py-1 rounded bg-stone-700 text-amber-300">
             ${totalStemDemand} szt.
@@ -2229,7 +2345,7 @@
           </div>
           <div class="pt-2">
             <button onclick="applyStemBatchPrint(${totalStemDemand},${stemWeight})" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
-              ✓ Oznacz ogonki jako wydrukowane (-${stemWeight}g Brązowy -> Półka)
+              ✓ Oznacz ogonki jako wydrukowane (-${stemWeight}g Brązowy)
             </button>
           </div>
         ` : `
@@ -2262,6 +2378,8 @@
           grid.appendChild(card);
         }
       }
+
+      if (document.getElementById('batch-select-model').options.length > 0) updateBatchBuilder();
     }
 
     function applyStemBatchPrint(stemsCount, grams) {
@@ -2270,13 +2388,19 @@
       saveSpools(spools);
 
       const shelf = getShelf();
-      shelf['Ogonek dyni:::Brązowy'] = (shelf['Ogonek dyni:::Brązowy'] || 0) + stemsCount;
+      const stemsBefore = shelf[STEM_SHELF_KEY] || 0;
+      const gluedToWaiting = Math.max(0, Math.min(stemsCount, -stemsBefore));
+      shelf[STEM_SHELF_KEY] = stemsBefore + stemsCount;
+      if (shelf[STEM_SHELF_KEY] === 0) delete shelf[STEM_SHELF_KEY];
       saveShelf(shelf);
 
       updateHubStats();
       renderBatcherView();
       renderShelfView();
-      alert(`Wydrukowano ${stemsCount} szt. ogonków! Trafiły na Półkę buforową.`);
+      const toShelf = stemsCount - gluedToWaiting;
+      alert(`Wydrukowano ${stemsCount} szt. ogonków!` +
+        (gluedToWaiting > 0 ? `\nDo przyklejenia do czekających dyń: ${gluedToWaiting}.` : '') +
+        (toShelf > 0 ? `\nNa półkę (do kolejnych dyń): ${toShelf}.` : ''));
     }
 
     // ==========================================
@@ -2375,14 +2499,35 @@
       document.getElementById('manual-customer-name').value = '';
       document.getElementById('manual-order-notes').value = '';
 
-      const titleSelect = document.getElementById('manual-add-title');
-      titleSelect.innerHTML = Object.keys(ALL_PRICES).map(t => `<option value="${t}">${t} (${ALL_PRICES[t]} zł)</option>`).join('');
-
-      const colorSelect = document.getElementById('manual-add-color');
-      colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
+      fillProductSelects('manual');
 
       renderManualItemsList();
       document.getElementById('manual-order-modal').classList.remove('hidden');
+    }
+
+    function fillProductSelects(prefix) {
+      const titleSelect = document.getElementById(`${prefix}-add-title`);
+      titleSelect.innerHTML = getOrderableTitles()
+        .map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)} (${getUnitPrice(t)} zł)</option>`)
+        .join('');
+      updateProductColorSelect(prefix);
+    }
+
+    function updateProductColorSelect(prefix) {
+      const title = document.getElementById(`${prefix}-add-title`).value;
+      document.getElementById(`${prefix}-add-color`).innerHTML = getModelColors(title)
+        .map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+        .join('');
+    }
+
+    // Pozycja zamówienia dodawana ręcznie (z ceną z cennika i wariantem zestawu)
+    function buildOrderItem(title, color) {
+      const item = { title, color, qty: 1, unitPrice: getUnitPrice(title) };
+      if (title.startsWith('Zestaw Jesienny')) {
+        item.isBundle = true;
+        item.variant = title.includes('wiewiórką') ? 'Z wiewiórką' : 'Z liskiem';
+      }
+      return item;
     }
 
     function closeManualOrderModal() {
@@ -2428,7 +2573,7 @@
       if (existing) {
         existing.qty += 1;
       } else {
-        manualOrderItems.push({ title, color, qty: 1 });
+        manualOrderItems.push(buildOrderItem(title, color));
       }
       renderManualItemsList();
     }
@@ -2488,11 +2633,7 @@
       document.getElementById('edit-order-id-label').textContent = orderId;
       document.getElementById('edit-order-notes').value = order.notes || "";
 
-      const titleSelect = document.getElementById('edit-add-title');
-      titleSelect.innerHTML = Object.keys(ALL_PRICES).map(t => `<option value="${t}">${t} (${ALL_PRICES[t]} zł)</option>`).join('');
-
-      const colorSelect = document.getElementById('edit-add-color');
-      colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).filter(c => c !== 'Brązowy').map(c => `<option value="${c}">${c}</option>`).join('');
+      fillProductSelects('edit');
 
       renderEditItemsList();
       document.getElementById('edit-order-modal').classList.remove('hidden');
@@ -2552,7 +2693,7 @@
       if (existing) {
         existing.qty += 1;
       } else {
-        currentEditingItems.push({ title, color, qty: 1 });
+        currentEditingItems.push(buildOrderItem(title, color));
       }
       renderEditItemsList();
     }

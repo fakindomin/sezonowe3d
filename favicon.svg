@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <rect width="200" height="200" rx="40" fill="#fffbeb"/>
+  <defs>
+  <linearGradient id="brassGradH" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" stop-color="#fef08a"/>
+  <stop offset="50%" stop-color="#eab308"/>
+  <stop offset="100%" stop-color="#a16207"/>
+  </linearGradient>
+  <linearGradient id="blockGradH" x1="0%" y1="0%" x2="0%" y2="100%">
+  <stop offset="0%" stop-color="#64748b"/>
+  <stop offset="100%" stop-color="#334155"/>
+  </linearGradient>
+  <linearGradient id="filamentGradH" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" stop-color="#38bdf8"/>
+  <stop offset="100%" stop-color="#0284c7"/>
+  </linearGradient>
+  </defs>
+  <rect x="94" y="24" width="12" height="20" rx="3" fill="#475569" stroke="#334155" stroke-width="1.8"/>
+  <line x1="100" y1="24" x2="100" y2="44" stroke="#0284c7" stroke-width="3" stroke-linecap="round"/>
+  <rect x="62" y="44" width="76" height="6" rx="3" fill="#64748b"/>
+  <rect x="68" y="53" width="64" height="6" rx="3" fill="#64748b"/>
+  <rect x="74" y="62" width="52" height="6" rx="3" fill="#64748b"/>
+  <rect x="70" y="71" width="60" height="34" rx="6" fill="url(#blockGradH)" stroke="#475569" stroke-width="1.8"/>
+  <circle cx="116" cy="88" r="4" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+  <path d="M 81 105 L 119 105 L 110 130 L 90 130 Z" fill="url(#brassGradH)"/>
+  <rect x="95" y="130" width="10" height="6" rx="2" fill="#fef08a"/>
+  <circle cx="100" cy="140" r="2.8" fill="#bae6fd"/>
+  <path d="M 100 142 L 100 154 L 148 154" fill="none" stroke="url(#filamentGradH)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="50" y1="162" x2="150" y2="162" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+  </svg>
