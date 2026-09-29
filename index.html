@@ -615,11 +615,10 @@
     let currentPackingOrder = null;
 
     function getPackingProgress() {
-      const data = localStorage.getItem("bambu_packing_progress_v1");
-      return data ? JSON.parse(data) : {};
+      return { ...readState('packing') };
     }
     function savePackingProgress(prog) {
-      localStorage.setItem("bambu_packing_progress_v1", JSON.stringify(prog));
+      writeState('packing', prog);
     }
 
     // ==========================================
@@ -845,36 +844,98 @@
       'Miętowy': 1000
     };
 
+    // ==========================================
+    // WSPÓLNY STAN W CHMURZE (tabela app_state)
+    // ==========================================
+    const APP_STATE_DEFAULTS = {
+      seasons: { autumn: true, christmas: false, easter: false },
+      specs: DEFAULT_SPECS,
+      costs: DEFAULT_COSTS,
+      spools: DEFAULT_SPOOLS,
+      shelf: {},
+      packing: {}
+    };
+
+    // Klucze, pod którymi stan był wcześniej zapisywany w przeglądarce
+    const LEGACY_STORAGE_KEYS = {
+      seasons: 'bambu_seasons_active_v5',
+      specs: 'bambu_specs_v5',
+      costs: 'bambu_costs_v5',
+      spools: 'bambu_spools_v5',
+      shelf: 'bambu_shelf_v5',
+      packing: 'bambu_packing_progress_v1'
+    };
+
+    const appState = {};
+
+    function readState(key) {
+      return appState[key] ?? APP_STATE_DEFAULTS[key];
+    }
+
+    function writeState(key, value) {
+      appState[key] = value;
+      supabaseClient
+        .from('app_state')
+        .upsert({ key, value, updated_at: new Date().toISOString() })
+        .then(({ error }) => {
+          if (error) alert(`Błąd zapisu do chmury (${key}): ${error.message}`);
+        });
+    }
+
+    async function loadAppState(keys) {
+      const { data, error } = await supabaseClient.from('app_state').select('key, value').in('key', keys);
+      if (error) {
+        console.error("Błąd pobierania stanu:", error.message);
+        return false;
+      }
+      data.forEach(row => { appState[row.key] = row.value; });
+      return true;
+    }
+
+    // Jednorazowe przeniesienie danych zapisanych wcześniej tylko w tej przeglądarce
+    async function migrateLocalState() {
+      for (const [key, lsKey] of Object.entries(LEGACY_STORAGE_KEYS)) {
+        let local = null;
+        try { local = JSON.parse(localStorage.getItem(lsKey)); } catch (e) { local = null; }
+        if (local === null) continue;
+
+        if (appState[key] === undefined) {
+          const { error } = await supabaseClient
+            .from('app_state')
+            .upsert({ key, value: local, updated_at: new Date().toISOString() });
+          if (error) continue;
+          appState[key] = local;
+        }
+        try { localStorage.removeItem(lsKey); } catch (e) { /* brak dostępu do localStorage */ }
+      }
+    }
+
     function getSpecs() {
-      const data = localStorage.getItem("bambu_specs_v5");
-      return data ? JSON.parse(data) : DEFAULT_SPECS;
+      return { ...DEFAULT_SPECS, ...readState('specs') };
     }
     function saveSpecs(specs) {
-      localStorage.setItem("bambu_specs_v5", JSON.stringify(specs));
+      writeState('specs', specs);
     }
 
     function getCosts() {
-      const data = localStorage.getItem("bambu_costs_v5");
-      return data ? JSON.parse(data) : DEFAULT_COSTS;
+      return { ...DEFAULT_COSTS, ...readState('costs') };
     }
     function saveCosts(costs) {
-      localStorage.setItem("bambu_costs_v5", JSON.stringify(costs));
+      writeState('costs', costs);
     }
 
     function getSpools() {
-      const data = localStorage.getItem("bambu_spools_v5");
-      return data ? JSON.parse(data) : DEFAULT_SPOOLS;
+      return { ...DEFAULT_SPOOLS, ...readState('spools') };
     }
     function saveSpools(spools) {
-      localStorage.setItem("bambu_spools_v5", JSON.stringify(spools));
+      writeState('spools', spools);
     }
 
     function getShelf() {
-      const data = localStorage.getItem("bambu_shelf_v5");
-      return data ? JSON.parse(data) : {};
+      return { ...readState('shelf') };
     }
     function saveShelf(shelf) {
-      localStorage.setItem("bambu_shelf_v5", JSON.stringify(shelf));
+      writeState('shelf', shelf);
     }
 
     function clearWholeShelf() {
@@ -887,11 +948,10 @@
     }
 
     function getSeasonsState() {
-      const data = localStorage.getItem("bambu_seasons_active_v5");
-      return data ? JSON.parse(data) : { autumn: true, christmas: false, easter: false };
+      return { ...APP_STATE_DEFAULTS.seasons, ...readState('seasons') };
     }
     function saveSeasonsState(state) {
-      localStorage.setItem("bambu_seasons_active_v5", JSON.stringify(state));
+      writeState('seasons', state);
     }
 
     // Zamienia znaki specjalne HTML, żeby dane od klientów nie mogły wstrzyknąć kodu
@@ -1287,6 +1347,9 @@
         if (isAuth) {
           document.getElementById("admin-login").classList.add("hidden");
           document.getElementById("admin-app").classList.remove("hidden");
+          if (await loadAppState(Object.keys(APP_STATE_DEFAULTS))) {
+            await migrateLocalState();
+          }
           fetchOrdersFromCloud();
           setupRealtimeListener();
           switchAdminTab('hub');
@@ -1298,6 +1361,7 @@
         document.getElementById("admin-login").classList.add("hidden");
         document.getElementById("admin-app").classList.add("hidden");
         document.getElementById("client-app").classList.remove("hidden");
+        await loadAppState(['seasons']);
         renderSeasonSelector();
       }
     }
@@ -1391,6 +1455,31 @@
           }
         )
         .subscribe();
+
+      // Zmiany półki, szpul i ustawień z drugiego telefonu
+      supabaseClient
+        .channel('public:app_state_realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'app_state' },
+          (payload) => {
+            if (!payload.new || !payload.new.key) return;
+            appState[payload.new.key] = payload.new.value;
+            refreshVisibleAdminView();
+          }
+        )
+        .subscribe();
+    }
+
+    function refreshVisibleAdminView() {
+      const isVisible = (id) => !document.getElementById(id).classList.contains('hidden');
+      updateHubStats();
+      if (isVisible('admin-tab-orders')) renderOrdersView();
+      if (isVisible('admin-tab-batcher')) renderBatcherView();
+      if (isVisible('admin-tab-shelf')) renderShelfView();
+      if (isVisible('admin-tab-spools')) renderSpoolsView();
+      if (isVisible('packing-modal')) renderPackingChecklist();
+      // Ustawień nie odświeżamy, żeby nie nadpisać pól w trakcie edycji
     }
 
     function dismissNewOrderBanner() {
@@ -1428,8 +1517,10 @@
 
         if (error) throw error;
         await fetchOrdersFromCloud();
+        return true;
       } catch (err) {
         alert("Błąd aktualizacji: " + err.message);
+        return false;
       }
     }
 
@@ -1442,6 +1533,11 @@
             .eq('id', orderId);
 
           if (error) throw error;
+
+          const progress = getPackingProgress();
+          clearPackingProgress(orderId, progress);
+          savePackingProgress(progress);
+
           await fetchOrdersFromCloud();
         } catch (err) {
           alert("Błąd usuwania: " + err.message);
@@ -1779,11 +1875,46 @@
       updateHubStats();
     }
 
+    // Odkłada spakowane sztuki zamówienia z powrotem na półkę i zeruje jego postęp pakowania
+    function releasePackedItems(order) {
+      const progress = getPackingProgress();
+      const shelf = getShelf();
+      let returned = 0;
+
+      getExpandedOrderItems(order).forEach((item, idx) => {
+        const key = `${order.id}:::${idx}`;
+        const packed = progress[key] || 0;
+        if (packed > 0) {
+          const shelfKey = `${item.title}:::${item.color}`;
+          shelf[shelfKey] = (shelf[shelfKey] || 0) + packed;
+          returned += packed;
+        }
+      });
+      clearPackingProgress(order.id, progress);
+
+      if (returned > 0) saveShelf(shelf);
+      savePackingProgress(progress);
+      return returned;
+    }
+
+    // Usuwa wpisy postępu pakowania danego zamówienia (po wydaniu, usunięciu lub edycji)
+    function clearPackingProgress(orderId, progress) {
+      Object.keys(progress).forEach(k => {
+        if (k.startsWith(`${orderId}:::`)) delete progress[k];
+      });
+    }
+
     async function fulfillCurrentOrder() {
       if (!currentPackingOrder) return;
 
       const orderId = currentPackingOrder.id;
-      await updateOrderStatus(orderId, 'Zrealizowane');
+      const ok = await updateOrderStatus(orderId, 'Zrealizowane');
+      if (!ok) return;
+
+      const progress = getPackingProgress();
+      clearPackingProgress(orderId, progress);
+      savePackingProgress(progress);
+
       closePackingModal();
       switchOrdersCategory('completed');
       alert(`Zamówienie #ZAM-${orderId} zostało pomyślnie wydane i przeniesione do zrealizowanych!`);
@@ -1797,22 +1928,7 @@
         return;
       }
 
-      const progress = getPackingProgress();
-      const shelf = getShelf();
-      const expandedItems = getExpandedOrderItems(currentPackingOrder);
-
-      expandedItems.forEach((item, idx) => {
-        const key = `${orderId}:::${idx}`;
-        const packed = progress[key] || 0;
-        if (packed > 0) {
-          const shelfKey = `${item.title}:::${item.color}`;
-          shelf[shelfKey] = (shelf[shelfKey] || 0) + packed;
-          delete progress[key];
-        }
-      });
-
-      saveShelf(shelf);
-      savePackingProgress(progress);
+      releasePackedItems(currentPackingOrder);
 
       closePackingModal();
       await updateOrderStatus(orderId, 'Anulowane');
@@ -2408,6 +2524,7 @@
       }
 
       const notes = document.getElementById('edit-order-notes').value;
+      const order = cloudOrders.find(o => o.id === currentEditingOrderId);
 
       try {
         const { error } = await supabaseClient
@@ -2419,6 +2536,14 @@
           .eq('id', currentEditingOrderId);
 
         if (error) throw error;
+
+        // Pozycje mogły się przesunąć, więc spakowane sztuki wracają na półkę
+        const itemsChanged = order && JSON.stringify(getOrderItems(order)) !== JSON.stringify(currentEditingItems);
+        const returned = itemsChanged ? releasePackedItems(order) : 0;
+        if (returned > 0) {
+          alert(`Zmieniono pozycje zamówienia: ${returned} spakowanych szt. wróciło na półkę. Spakuj zamówienie ponownie.`);
+        }
+
         closeEditModal();
         await fetchOrdersFromCloud();
       } catch (err) {
