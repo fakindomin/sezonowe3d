@@ -1576,7 +1576,11 @@
             expanded.push({ title: animalName, color: 'Pomarańczowy', qty: 1, fromBundle: true });
           }
         } else {
-          expanded.push(item);
+          // Każda sztuka to osobna pozycja na checkliście pakowania
+          const pieces = Math.max(0, parseInt(item.qty) || 0);
+          for (let q = 0; q < pieces; q++) {
+            expanded.push({ ...item, qty: 1 });
+          }
         }
       });
 
@@ -1891,6 +1895,43 @@
         }
       });
       clearPackingProgress(order.id, progress);
+
+      if (returned > 0) saveShelf(shelf);
+      savePackingProgress(progress);
+      return returned;
+    }
+
+    // Po edycji zamówienia przenosi odhaczone sztuki na nowe pozycje o tym samym tytule i kolorze.
+    // Sztuki, które wypadły z zamówienia, wracają na półkę. Zwraca liczbę oddanych sztuk.
+    function remapPackingAfterEdit(oldOrder, newItems) {
+      const progress = getPackingProgress();
+      const packedByProduct = {};
+
+      getExpandedOrderItems(oldOrder).forEach((item, idx) => {
+        const packed = progress[`${oldOrder.id}:::${idx}`] || 0;
+        if (packed > 0) {
+          const productKey = `${item.title}:::${item.color}`;
+          packedByProduct[productKey] = (packedByProduct[productKey] || 0) + packed;
+        }
+      });
+      clearPackingProgress(oldOrder.id, progress);
+
+      getExpandedOrderItems({ items: newItems }).forEach((item, idx) => {
+        const productKey = `${item.title}:::${item.color}`;
+        if ((packedByProduct[productKey] || 0) > 0) {
+          progress[`${oldOrder.id}:::${idx}`] = 1;
+          packedByProduct[productKey]--;
+        }
+      });
+
+      const shelf = getShelf();
+      let returned = 0;
+      Object.entries(packedByProduct).forEach(([productKey, left]) => {
+        if (left > 0) {
+          shelf[productKey] = (shelf[productKey] || 0) + left;
+          returned += left;
+        }
+      });
 
       if (returned > 0) saveShelf(shelf);
       savePackingProgress(progress);
@@ -2537,11 +2578,11 @@
 
         if (error) throw error;
 
-        // Pozycje mogły się przesunąć, więc spakowane sztuki wracają na półkę
+        // Odhaczone sztuki zostają; wracają na półkę tylko te usunięte z zamówienia
         const itemsChanged = order && JSON.stringify(getOrderItems(order)) !== JSON.stringify(currentEditingItems);
-        const returned = itemsChanged ? releasePackedItems(order) : 0;
+        const returned = itemsChanged ? remapPackingAfterEdit(order, currentEditingItems) : 0;
         if (returned > 0) {
-          alert(`Zmieniono pozycje zamówienia: ${returned} spakowanych szt. wróciło na półkę. Spakuj zamówienie ponownie.`);
+          alert(`${returned} spakowanych szt. usunięto z zamówienia i wróciło na półkę.`);
         }
 
         closeEditModal();
