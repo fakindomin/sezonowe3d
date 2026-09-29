@@ -693,7 +693,7 @@
           {
             id: 'zestaw_jesienny',
             title: 'Zestaw Jesienny',
-            desc: '3× dynia (pom., ziel., żółta) + tacka + figurka',
+            desc: '3× dynia (pom., ziel., żółta) + biała tacka + figurka',
             price: 40,
             isBundle: true,
             hasVariants: true,
@@ -1605,7 +1605,7 @@
             expanded.push({ title: 'Dynia', color: 'Pomarańczowy', qty: 1, fromBundle: true });
             expanded.push({ title: 'Dynia', color: 'Zielony', qty: 1, fromBundle: true });
             expanded.push({ title: 'Dynia', color: 'Żółty', qty: 1, fromBundle: true });
-            expanded.push({ title: 'Taca', color: 'Pomarańczowy', qty: 1, fromBundle: true });
+            expanded.push({ title: 'Taca', color: 'Biały', qty: 1, fromBundle: true });
             expanded.push({ title: animalName, color: 'Pomarańczowy', qty: 1, fromBundle: true });
           }
         } else {
@@ -2115,7 +2115,7 @@
     // Kolory, w których dany model jest w ofercie
     function getModelColors(model) {
       if (model.startsWith('Zestaw Jesienny')) return ['Multikolor'];
-      if (model === 'Taca') return ['Pomarańczowy', 'Zielony', 'Żółty', 'Biały'];
+      if (model === 'Taca') return ['Biały'];
       if (model === 'Ogonek dyni') return ['Brązowy'];
 
       for (const season of Object.values(CATALOG)) {
