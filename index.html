@@ -648,7 +648,7 @@
         products: [
           {
             id: 'dynia',
-            title: 'Dynia dekoracyjna',
+            title: 'Dynia',
             stockName: 'Dynia',
             desc: '104 × 104 × 68 mm',
             price: 10,
@@ -662,18 +662,18 @@
             ],
             renderVisual: (sel) => {
               const src = sel.img || 'dynia_orange.webp';
-              return `<img src="${src}" alt="Dynia dekoracyjna" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+              return `<img src="${src}" alt="Dynia" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
             }
           },
           {
             id: 'lisek',
-            title: 'Lisek geometryczny',
+            title: 'Lisek',
             stockName: 'Lisek',
             desc: '62 × 50 × 100 mm',
             price: 5,
             hasColors: false,
             defaultColor: 'Pomarańczowy',
-            renderVisual: () => `<img src="lisek.webp" alt="Lisek geometryczny" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm">`
+            renderVisual: () => `<img src="lisek.webp" alt="Lisek" loading="lazy" decoding="async" width="800" height="800" class="w-full h-full object-contain drop-shadow-sm">`
           },
           {
             id: 'wiewiorka',
