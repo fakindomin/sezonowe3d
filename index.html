@@ -175,9 +175,10 @@
     <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm text-center space-y-4">
       <div class="font-heading font-bold text-base text-stone-900">Panel Warsztatowy</div>
       <form onsubmit="checkAdminPassword(event)" class="space-y-3">
-        <input id="admin-pass-input" type="password" placeholder="Hasło" class="w-full text-center text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
-        <p id="login-error" class="text-xs text-rose-600 hidden font-bold">Nieprawidłowe hasło!</p>
-        <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-2.5 rounded-xl text-xs">
+        <input id="admin-email-input" type="email" required autocomplete="username" placeholder="E-mail" class="w-full text-center text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+        <input id="admin-pass-input" type="password" required autocomplete="current-password" placeholder="Hasło" class="w-full text-center text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+        <p id="login-error" class="text-xs text-rose-600 hidden font-bold">Nieprawidłowy e-mail lub hasło!</p>
+        <button id="admin-login-btn" type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-2.5 rounded-xl text-xs">
           Zaloguj
         </button>
       </form>
@@ -891,7 +892,21 @@
       localStorage.setItem("bambu_seasons_active_v5", JSON.stringify(state));
     }
 
-    const ADMIN_PASSWORD = "bambu123";
+    // Zamienia znaki specjalne HTML, żeby dane od klientów nie mogły wstrzyknąć kodu
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Bezpieczny argument tekstowy do atrybutu onclick="fn(...)"
+    function jsArg(value) {
+      return escapeHtml(JSON.stringify(String(value ?? '')));
+    }
+
     let activeSeasonKey = 'autumn';
     const productSelectedState = {};
     const quantities = {};
@@ -1162,7 +1177,7 @@
           <div class="flex items-center gap-2">
             <div class="flex items-center border border-stone-200 rounded-lg bg-stone-50 px-1 py-0.5">
               <button onclick="changeCartItemQty(${index}, -1)" class="w-5 h-5 font-bold">-</button>
-              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <span class="w-5 text-center font-bold">${escapeHtml(item.qty)}</span>
               <button onclick="changeCartItemQty(${index}, 1)" class="w-5 h-5 font-bold">+</button>
             </div>
             <span class="font-bold text-stone-900 w-14 text-right">${(item.unitPrice * item.qty).toFixed(2)} zł</span>
@@ -1253,9 +1268,13 @@
     // ==========================================
     // ROUTING & AUTH
     // ==========================================
-    function route() {
+    async function route() {
       const hash = window.location.hash;
-      const isAuth = sessionStorage.getItem("bambu_admin_logged") === "true";
+      let isAuth = false;
+      if (hash === "#admin") {
+        const { data } = await supabaseClient.auth.getSession();
+        isAuth = !!data.session;
+      }
 
       if (hash === "#admin") {
         document.getElementById("client-app").classList.add("hidden");
@@ -1280,22 +1299,28 @@
     window.addEventListener("hashchange", route);
     window.addEventListener("DOMContentLoaded", route);
 
-    function checkAdminPassword(e) {
+    async function checkAdminPassword(e) {
       e.preventDefault();
-      const input = document.getElementById("admin-pass-input").value;
-      if (input === ADMIN_PASSWORD) {
-        sessionStorage.setItem("bambu_admin_logged", "true");
-        document.getElementById("login-error").classList.add("hidden");
-        route();
-      } else {
+      const email = document.getElementById("admin-email-input").value.trim();
+      const passInput = document.getElementById("admin-pass-input");
+      const btn = document.getElementById("admin-login-btn");
+      btn.disabled = true;
+
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password: passInput.value });
+      btn.disabled = false;
+      passInput.value = "";
+
+      if (error) {
         document.getElementById("login-error").classList.remove("hidden");
+        return;
       }
+      document.getElementById("login-error").classList.add("hidden");
+      route();
     }
 
-    function logoutAdmin() {
-      sessionStorage.removeItem("bambu_admin_logged");
-      window.location.hash = "";
-      route();
+    async function logoutAdmin() {
+      await supabaseClient.auth.signOut();
+      window.location.replace(window.location.pathname + window.location.search);
     }
 
     function switchAdminTab(tabName) {
@@ -1542,33 +1567,33 @@
         const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
         const itemsSummary = rawItems.map(item => `
           <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
-            • <strong>${item.qty}x</strong> ${item.title}
+            • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}
           </span>
         `).join(" ");
 
         let footerActions = '';
         if (ordersActiveCategory === 'pending') {
           footerActions = `
-            <button onclick="openPackingModal('${order.id}')" class="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs">
+            <button onclick="openPackingModal(${jsArg(order.id)})" class="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs">
               <span>📦 Spakuj / Rozbij zestaw</span>
             </button>
-            <button onclick="openEditOrderModal('${order.id}')" class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 rounded-xl text-xs font-semibold">
+            <button onclick="openEditOrderModal(${jsArg(order.id)})" class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 rounded-xl text-xs font-semibold">
               ✏️
             </button>
           `;
         } else if (ordersActiveCategory === 'completed') {
           footerActions = `
             <span class="text-xs text-stone-400 font-medium">Zlecenie zakończone</span>
-            <button onclick="deleteOrderPermanently('${order.id}')" class="py-2 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold flex items-center gap-1 transition">
+            <button onclick="deleteOrderPermanently(${jsArg(order.id)})" class="py-2 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold flex items-center gap-1 transition">
               <span>🗑️</span> <span>Usuń z bazy</span>
             </button>
           `;
         } else {
           footerActions = `
-            <button onclick="restoreOrder('${order.id}')" class="flex-1 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xs">
+            <button onclick="restoreOrder(${jsArg(order.id)})" class="flex-1 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xs">
               Przywróć zamówienie ↺
             </button>
-            <button onclick="deleteOrderPermanently('${order.id}')" class="py-2.5 px-3 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold">
+            <button onclick="deleteOrderPermanently(${jsArg(order.id)})" class="py-2.5 px-3 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold">
               Usuń trwale
             </button>
           `;
@@ -1581,16 +1606,16 @@
             <div class="flex justify-between items-start">
               <div>
                 <div class="flex items-center gap-1.5">
-                  <span class="font-bold text-stone-900 text-sm">#ZAM-${order.id}</span>
+                  <span class="font-bold text-stone-900 text-sm">#ZAM-${escapeHtml(order.id)}</span>
                   ${isRecent ? '<span class="px-1.5 py-0.2 rounded bg-amber-500 text-stone-950 text-[10px] font-extrabold uppercase">Nowe</span>' : ''}
                 </div>
-                <span class="font-semibold text-stone-800 text-xs">${order.customer}</span>
-                <span class="text-xs text-stone-500 block">${order.contact}</span>
+                <span class="font-semibold text-stone-800 text-xs">${escapeHtml(order.customer)}</span>
+                <span class="text-xs text-stone-500 block">${escapeHtml(order.contact)}</span>
               </div>
               ${badgeHtml}
             </div>
 
-            ${order.notes ? `<div class="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-xl p-2 text-amber-900">💬 ${order.notes}</div>` : ''}
+            ${order.notes ? `<div class="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-xl p-2 text-amber-900">💬 ${escapeHtml(order.notes)}</div>` : ''}
 
             <div class="mt-3 flex flex-wrap gap-1">
               ${itemsSummary}
@@ -1667,7 +1692,7 @@
 
         const buttonHtml = `
           <button type="button" 
-            onclick="${isEnabled ? `togglePackingPiece(${itemIdx}, 1)` : `alert('Brak na półce: najpierw wydrukuj ${item.title} (${item.color})!')`}" 
+            onclick="${isEnabled ? `togglePackingPiece(${itemIdx}, 1)` : `alertMissingOnShelf(${itemIdx})`}" 
             class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${isPieceChecked ? 'bg-emerald-600 text-white shadow-xs' : (isAvailableToTake ? 'bg-white border-2 border-emerald-400 text-emerald-800 hover:bg-emerald-50 cursor-pointer' : 'bg-stone-200 border border-stone-300 text-stone-400 opacity-60 cursor-not-allowed')}">
             ${isPieceChecked ? '✓' : 1}
           </button>
@@ -1676,8 +1701,8 @@
         row.innerHTML = `
           <div class="flex justify-between items-center">
             <div>
-              <span class="font-bold text-xs ${isFullyDone ? 'text-emerald-950' : 'text-stone-900'}">${item.title}</span>
-              <span class="text-[11px] text-stone-500 ml-1">(${item.color})</span>
+              <span class="font-bold text-xs ${isFullyDone ? 'text-emerald-950' : 'text-stone-900'}">${escapeHtml(item.title)}</span>
+              <span class="text-[11px] text-stone-500 ml-1">(${escapeHtml(item.color)})</span>
               ${item.fromBundle ? '<span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded ml-1 font-semibold">Zestaw</span>' : ''}
               <span class="text-[10px] ml-2 px-1.5 py-0.5 rounded ${onShelf > 0 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-stone-200 text-stone-600'}">Półka: ${onShelf} szt.</span>
             </div>
@@ -1699,6 +1724,12 @@
         fulfillBtn.className = "w-full py-3.5 rounded-2xl font-bold text-xs bg-stone-200 text-stone-400 cursor-not-allowed";
         fulfillBtn.textContent = `Wydaj zamówienie (Spakowano: ${totalChecked}/${totalPieces})`;
       }
+    }
+
+    function alertMissingOnShelf(itemIdx) {
+      if (!currentPackingOrder) return;
+      const item = getExpandedOrderItems(currentPackingOrder)[itemIdx];
+      if (item) alert(`Brak na półce: najpierw wydrukuj ${item.title} (${item.color})!`);
     }
 
     function togglePackingPiece(itemIdx, pieceNumber) {
@@ -1860,7 +1891,7 @@
           const alert = document.createElement('div');
           alert.className = 'p-2.5 bg-red-100 border border-red-300 text-red-900 rounded-xl text-xs flex items-center justify-between';
           alert.innerHTML = `
-            <span>⚠️ <strong>Kończy się filament: ${color}!</strong> (${grams}g).</span>
+            <span>⚠️ <strong>Kończy się filament: ${escapeHtml(color)}!</strong> (${escapeHtml(grams)}g).</span>
             <button onclick="switchAdminTab('spools')" class="font-bold underline ml-2">Sprawdź</button>
           `;
           alertContainer.appendChild(alert);
@@ -1920,7 +1951,7 @@
       container.innerHTML = `
         <div class="flex justify-between items-center p-3 bg-stone-100 rounded-xl">
           <div>
-            <div class="font-bold text-stone-900">${model} (${color})</div>
+            <div class="font-bold text-stone-900">${escapeHtml(model)} (${escapeHtml(color)})</div>
             <div class="text-[11px] text-stone-500">Planowano: ${qty} szt.</div>
           </div>
           <div class="flex items-center gap-2">
@@ -2049,9 +2080,9 @@
         for (const [col, list] of Object.entries(colorGroups)) {
           const card = document.createElement("div");
           card.className = "p-2 rounded-xl border border-stone-200 bg-stone-50";
-          let itemsHtml = list.map(i => `<div class="font-bold text-stone-800 text-[11px]">${i.qty}x ${i.title}</div>`).join("");
+          let itemsHtml = list.map(i => `<div class="font-bold text-stone-800 text-[11px]">${escapeHtml(i.qty)}x ${escapeHtml(i.title)}</div>`).join("");
           card.innerHTML = `
-            <span class="text-[9px] font-bold uppercase text-stone-500 block mb-0.5">${col}</span>
+            <span class="text-[9px] font-bold uppercase text-stone-500 block mb-0.5">${escapeHtml(col)}</span>
             ${itemsHtml}
           `;
           grid.appendChild(card);
@@ -2111,16 +2142,16 @@
         row.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center";
         row.innerHTML = `
           <div>
-            <span class="font-bold text-xs text-stone-900">${title}</span>
-            <span class="text-[11px] text-stone-500 ml-1">(${color})</span>
+            <span class="font-bold text-xs text-stone-900">${escapeHtml(title)}</span>
+            <span class="text-[11px] text-stone-500 ml-1">(${escapeHtml(color)})</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
-              <button onclick="changeShelfQty('${key}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">-</button>
-              <span class="w-8 text-center text-xs font-bold text-stone-900">${count}</span>
-              <button onclick="changeShelfQty('${key}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">+</button>
+              <button onclick="changeShelfQty(${jsArg(key)}, -1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">-</button>
+              <span class="w-8 text-center text-xs font-bold text-stone-900">${escapeHtml(count)}</span>
+              <button onclick="changeShelfQty(${jsArg(key)}, 1)" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700">+</button>
             </div>
-            <button onclick="removeShelfItem('${key}')" class="text-rose-600 hover:text-rose-800 font-bold p-1">✕</button>
+            <button onclick="removeShelfItem(${jsArg(key)})" class="text-rose-600 hover:text-rose-800 font-bold p-1">✕</button>
           </div>
         `;
         container.appendChild(row);
@@ -2199,13 +2230,13 @@
         row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
         row.innerHTML = `
           <div>
-            <span class="font-bold text-stone-800">${item.title}</span>
-            <span class="text-stone-500 text-[11px]">(${item.color})</span>
+            <span class="font-bold text-stone-800">${escapeHtml(item.title)}</span>
+            <span class="text-stone-500 text-[11px]">(${escapeHtml(item.color)})</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
               <button type="button" onclick="changeManualItemQty(${index}, -1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">-</button>
-              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <span class="w-5 text-center font-bold">${escapeHtml(item.qty)}</span>
               <button type="button" onclick="changeManualItemQty(${index}, 1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">+</button>
             </div>
             <button type="button" onclick="removeManualItem(${index})" class="text-rose-600 font-bold p-1">✕</button>
@@ -2318,13 +2349,13 @@
         row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
         row.innerHTML = `
           <div>
-            <span class="font-bold text-stone-800">${item.title}</span>
-            <span class="text-stone-500 text-[11px]">(${item.color})</span>
+            <span class="font-bold text-stone-800">${escapeHtml(item.title)}</span>
+            <span class="text-stone-500 text-[11px]">(${escapeHtml(item.color)})</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
               <button type="button" onclick="changeEditItemQty(${index}, -1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">-</button>
-              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <span class="w-5 text-center font-bold">${escapeHtml(item.qty)}</span>
               <button type="button" onclick="changeEditItemQty(${index}, 1)" class="w-5 h-5 flex items-center justify-center font-bold text-stone-700">+</button>
             </div>
             <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold p-1">✕</button>
@@ -2398,11 +2429,11 @@
         row.innerHTML = `
           <div>
             <div class="font-bold text-stone-900 text-xs flex items-center gap-1">
-              ${color} ${isLow ? '<span class="text-[9px] bg-red-600 text-white font-bold px-1 rounded">ZAMÓW</span>' : ''}
+              ${escapeHtml(color)} ${isLow ? '<span class="text-[9px] bg-red-600 text-white font-bold px-1 rounded">ZAMÓW</span>' : ''}
             </div>
-            <div class="text-[11px] text-stone-500">Waga: <strong>${grams} g</strong></div>
+            <div class="text-[11px] text-stone-500">Waga: <strong>${escapeHtml(grams)} g</strong></div>
           </div>
-          <button onclick="resetSpool('${color}')" class="px-2.5 py-1 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-semibold">
+          <button onclick="resetSpool(${jsArg(color)})" class="px-2.5 py-1 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-semibold">
             + Nowa (1000g)
           </button>
         `;
