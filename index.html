@@ -637,6 +637,7 @@
           {
             id: 'dynia',
             title: 'Dynia dekoracyjna',
+            stockName: 'Dynia',
             desc: '104 × 104 × 68 mm',
             price: 10,
             hasColors: true,
@@ -655,6 +656,7 @@
           {
             id: 'lisek',
             title: 'Lisek geometryczny',
+            stockName: 'Lisek',
             desc: '62 × 50 × 100 mm',
             price: 5,
             hasColors: false,
@@ -1049,7 +1051,7 @@
               <span id="qty-${p.id}" class="w-8 text-center text-xs font-bold text-stone-900">${quantities[p.id]}</span>
               <button onclick="changeQty('${p.id}', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
             </div>
-            <button id="btn-add-${p.id}" onclick="addToCart('${p.id}', '${p.title}', ${p.price})" class="flex-1 py-3 ${seasonBtnClass} rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
+            <button id="btn-add-${p.id}" onclick="addToCart('${p.id}')" class="flex-1 py-3 ${seasonBtnClass} rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
               + Dodaj do koszyka
             </button>
           </div>
@@ -1074,11 +1076,15 @@
       if (label) label.textContent = quantities[productId];
     }
 
-    function addToCart(productId, title, unitPrice) {
+    function addToCart(productId) {
+      const product = CATALOG[activeSeasonKey].products.find(p => p.id === productId);
+      if (!product) return;
+      const unitPrice = product.price;
       const state = productSelectedState[productId] || {};
       const count = quantities[productId] || 1;
 
-      let itemTitle = title;
+      // Nazwa magazynowa (jak w planerze i na półce), a nie opisowa nazwa ze sklepu
+      let itemTitle = product.stockName || product.title;
       let itemColor = 'Pomarańczowy';
       let isBundle = false;
       let variant = null;
@@ -1127,6 +1133,10 @@
       }
     }
 
+    function formatItemName(item) {
+      return item.color && item.color !== 'Multikolor' ? `${item.title} (${item.color})` : item.title;
+    }
+
     function changeCartItemQty(index, delta) {
       cart[index].qty += delta;
       if (cart[index].qty <= 0) cart.splice(index, 1);
@@ -1171,7 +1181,7 @@
         row.className = 'py-3 flex justify-between items-center';
         row.innerHTML = `
           <div>
-            <div class="font-bold text-stone-900">${item.title}</div>
+            <div class="font-bold text-stone-900">${escapeHtml(formatItemName(item))}</div>
             <div class="text-stone-500">${item.unitPrice.toFixed(2)} zł / szt.</div>
           </div>
           <div class="flex items-center gap-2">
@@ -1200,7 +1210,6 @@
       const customerName = document.getElementById("form-name").value.trim();
       const customerContact = document.getElementById("form-contact").value.trim();
       const customerNotes = document.getElementById("form-notes").value.trim();
-      const orderId = Math.floor(100 + Math.random() * 900).toString();
 
       const itemsPayload = cart.map(i => ({
         title: i.title,
@@ -1211,19 +1220,16 @@
       }));
 
       const totalPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0).toFixed(2);
-      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${i.title}`).join("\n");
+      const itemsFormattedText = cart.map(i => `• ${i.qty}x ${formatItemName(i)}`).join("\n");
 
       try {
-        const { error: dbError } = await supabaseClient
-          .from('orders')
-          .insert([{
-            id: orderId,
-            customer: customerName,
-            contact: customerContact,
-            notes: customerNotes,
-            status: "W kolejce",
-            items: itemsPayload
-          }]);
+        // Numer zamówienia nadaje baza (funkcja place_order)
+        const { data: orderId, error: dbError } = await supabaseClient.rpc('place_order', {
+          p_customer: customerName,
+          p_contact: customerContact,
+          p_notes: customerNotes,
+          p_items: itemsPayload
+        });
 
         if (dbError) throw dbError;
 
@@ -1446,8 +1452,19 @@
     // ==========================================
     // FUNKCJA ROZBIJAJĄCA POZYCJE (W TYM ZESTAW NA ELEMENTY)
     // ==========================================
-    function getExpandedOrderItems(order) {
+    // Starsze zamówienia ze sklepu zapisywały opisowe nazwy produktów
+    const LEGACY_TITLES = {
+      'Dynia dekoracyjna': 'Dynia',
+      'Lisek geometryczny': 'Lisek'
+    };
+
+    function getOrderItems(order) {
       const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      return rawItems.map(item => LEGACY_TITLES[item.title] ? { ...item, title: LEGACY_TITLES[item.title] } : item);
+    }
+
+    function getExpandedOrderItems(order) {
+      const rawItems = getOrderItems(order);
       const expanded = [];
 
       rawItems.forEach(item => {
@@ -1564,7 +1581,7 @@
           cardBorderClass = 'border-rose-200 bg-rose-50/30 opacity-85';
         }
 
-        const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+        const rawItems = getOrderItems(order);
         const itemsSummary = rawItems.map(item => `
           <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
             • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}
@@ -1843,7 +1860,7 @@
       cloudOrders.forEach(o => {
         if (o.status === "Zrealizowane") {
           const expanded = getExpandedOrderItems(o);
-          const rawItems = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
+          const rawItems = getOrderItems(o);
 
           rawItems.forEach(item => {
             if (item.title && item.title.startsWith('Zestaw Jesienny')) {
@@ -2281,19 +2298,14 @@
       }
 
       const notes = document.getElementById('manual-order-notes').value.trim();
-      const orderId = Math.floor(100 + Math.random() * 900).toString();
 
       try {
-        const { error } = await supabaseClient
-          .from('orders')
-          .insert([{
-            id: orderId,
-            customer: customer,
-            contact: "Zamówienie warsztatowe",
-            notes: notes ? `[Ręczne] ${notes}` : "[Ręczne]",
-            status: "W kolejce",
-            items: manualOrderItems
-          }]);
+        const { data: orderId, error } = await supabaseClient.rpc('place_order', {
+          p_customer: customer,
+          p_contact: "Zamówienie warsztatowe",
+          p_notes: notes ? `[Ręczne] ${notes}` : "[Ręczne]",
+          p_items: manualOrderItems
+        });
 
         if (error) throw error;
 
@@ -2313,7 +2325,7 @@
       if (!order) return;
 
       currentEditingOrderId = orderId;
-      const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      const rawItems = getOrderItems(order);
       currentEditingItems = JSON.parse(JSON.stringify(rawItems));
 
       document.getElementById('edit-order-id-label').textContent = orderId;
