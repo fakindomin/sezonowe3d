@@ -28,3 +28,12 @@ przed dodaniem, żeby strona szybko ładowała się na telefonach.
   czytać i zmieniać może tylko admin
 - `app_state` – wspólny stan warsztatu (sezony, półka, szpule, ustawienia, pakowanie)
 - `admins` – e-maile kont z dostępem do panelu (konta zakłada się w Supabase: Authentication → Users)
+
+## Powiadomienia e-mail o zamówieniach
+Po zamówieniu klienta funkcja `place_order()` wywołuje funkcję Edge `order-notify`
+(`supabase/functions/order-notify/`), która wysyła maila przez EmailJS z prywatnym kluczem.
+- klucz prywatny EmailJS jest w Supabase: Edge Functions → Secrets → `EMAILJS_PRIVATE_KEY`
+- EmailJS (Account → Security) ma włączone „Allow EmailJS API for non-browser applications”
+  i „Use Private Key”, więc bez klucza prywatnego nie da się wysłać maila
+- `orders.notified_at` zapisuje, kiedy wyszedł mail; każde zamówienie jest wysyłane najwyżej raz
+- zamówienia ręczne z panelu nie wysyłają maila
