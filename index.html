@@ -1684,7 +1684,10 @@
       const progress = getPackingProgress();
       const now = new Date().getTime();
 
-      const pendingOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
+      // Do zrealizowania: najstarsze na górze (kolejność realizacji); pozostałe od najnowszych
+      const pendingOrders = cloudOrders
+        .filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane")
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       const completedOrders = cloudOrders.filter(o => o.status === "Zrealizowane");
       const canceledOrders = cloudOrders.filter(o => o.status === "Anulowane");
 
