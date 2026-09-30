@@ -261,7 +261,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <button onclick="switchAdminTab('orders')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
           <div class="flex justify-between w-full">
             <span class="text-lg">📦</span>
@@ -303,6 +303,17 @@
           <div>
             <div class="font-bold text-xs text-stone-900">Szpule AMS</div>
             <div class="text-[9px] text-stone-400">Stany gramatur</div>
+          </div>
+        </button>
+
+        <button onclick="switchAdminTab('payments')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <div class="flex justify-between w-full">
+            <span class="text-lg">💰</span>
+            <span id="badge-unpaid" class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900">0</span>
+          </div>
+          <div>
+            <div class="font-bold text-xs text-stone-900">Płatności</div>
+            <div class="text-[9px] text-stone-400">Pozostało & Zapłacone</div>
           </div>
         </button>
 
@@ -432,6 +443,27 @@
         </div>
         <div id="spools-list-container" class="space-y-2"></div>
       </div>
+    </div>
+
+    <!-- WIDOK G: PŁATNOŚCI -->
+    <div id="admin-tab-payments" class="space-y-3 hidden">
+      <div class="flex bg-stone-200 p-0.5 rounded-xl text-xs font-bold w-full">
+        <button id="pay-btn-unpaid" onclick="switchPaymentsCategory('unpaid')" class="flex-1 px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs whitespace-nowrap">
+          Pozostało (<span id="count-unpaid">0</span>)
+        </button>
+        <button id="pay-btn-paid" onclick="switchPaymentsCategory('paid')" class="flex-1 px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900 whitespace-nowrap">
+          Zapłacone (<span id="count-paid">0</span>)
+        </button>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-3 bg-stone-50 border-b border-stone-200 text-xs">
+          <span id="payments-sum-label" class="font-semibold text-stone-600">Pozostało do zebrania</span>
+          <span id="payments-sum" class="font-extrabold text-stone-900 text-sm">0,00 zł</span>
+        </div>
+        <div id="payments-list" class="divide-y divide-stone-100"></div>
+      </div>
+      <p class="text-[10px] text-stone-400 text-center">Anulowane zamówienia nie są tu pokazywane.</p>
     </div>
 
     <!-- WIDOK F: USTAWIENIA -->
@@ -856,6 +888,10 @@
         const price = typeof item.unitPrice === 'number' ? item.unitPrice : getUnitPrice(item.title);
         return sum + price * (Number(item.qty) || 0);
       }, 0);
+    }
+
+    function formatPLN(amount) {
+      return `${amount.toFixed(2).replace('.', ',')} zł`;
     }
 
     // Pozycje do wyboru w zamówieniach ręcznych i edycji
@@ -1401,7 +1437,7 @@
     }
 
     function switchAdminTab(tabName) {
-      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'settings'];
+      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'payments', 'settings'];
       tabs.forEach(t => {
         const el = document.getElementById(`admin-tab-${t}`);
         if (el) el.classList.add('hidden');
@@ -1432,6 +1468,9 @@
         } else if (tabName === 'spools') {
           title.textContent = "Szpule Filamentu";
           renderSpoolsView();
+        } else if (tabName === 'payments') {
+          title.textContent = "Płatności";
+          renderPaymentsView();
         } else if (tabName === 'settings') {
           title.textContent = "Ustawienia Kolekcji i Stołu";
           renderSettingsView();
@@ -1460,6 +1499,16 @@
             document.getElementById('new-order-banner').classList.remove('hidden');
             fetchOrdersFromCloud();
           }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'orders' },
+          () => fetchOrdersFromCloud()
+        )
+        .on(
+          'postgres_changes',
+          { event: 'DELETE', schema: 'public', table: 'orders' },
+          () => fetchOrdersFromCloud()
         )
         .subscribe();
 
@@ -1509,6 +1558,9 @@
         }
         if (!document.getElementById('admin-tab-batcher').classList.contains('hidden')) {
           renderBatcherView();
+        }
+        if (!document.getElementById('admin-tab-payments').classList.contains('hidden')) {
+          renderPaymentsView();
         }
       } catch (err) {
         console.error("Błąd pobierania:", err.message);
@@ -1694,11 +1746,9 @@
             • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}
           </span>
         `).join(" ");
-        const totalPill = `
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-stone-900 text-white">
-            Do zapłaty: ${getOrderTotal(order).toFixed(2).replace('.', ',')} zł
-          </span>
-        `;
+        const totalPill = order.paid_at
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">Zapłacono: ${formatPLN(getOrderTotal(order))} ✓</span>`
+          : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-stone-900 text-white">Do zapłaty: ${formatPLN(getOrderTotal(order))}</span>`;
 
         let footerActions = '';
         if (ordersActiveCategory === 'pending') {
@@ -1997,11 +2047,81 @@
     }
 
     // ==========================================
+    // PŁATNOŚCI
+    // ==========================================
+    let paymentsCategory = 'unpaid';
+
+    function switchPaymentsCategory(cat) {
+      paymentsCategory = cat;
+      const activeClass = "flex-1 px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-xs whitespace-nowrap";
+      const inactiveClass = "flex-1 px-3 py-1.5 rounded-lg text-stone-600 hover:text-stone-900 whitespace-nowrap";
+      document.getElementById('pay-btn-unpaid').className = cat === 'unpaid' ? activeClass : inactiveClass;
+      document.getElementById('pay-btn-paid').className = cat === 'paid' ? activeClass : inactiveClass;
+      renderPaymentsView();
+    }
+
+    function renderPaymentsView() {
+      const orders = cloudOrders.filter(o => o.status !== "Anulowane");
+      // Najstarsze nieopłacone na górze; zapłacone od ostatnio odhaczonych
+      const unpaid = orders.filter(o => !o.paid_at)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const paid = orders.filter(o => o.paid_at)
+        .sort((a, b) => new Date(b.paid_at) - new Date(a.paid_at));
+
+      document.getElementById('count-unpaid').textContent = unpaid.length;
+      document.getElementById('count-paid').textContent = paid.length;
+
+      const list = paymentsCategory === 'unpaid' ? unpaid : paid;
+      const sum = list.reduce((acc, o) => acc + getOrderTotal(o), 0);
+      document.getElementById('payments-sum-label').textContent = paymentsCategory === 'unpaid' ? 'Pozostało do zebrania' : 'Zapłacone razem';
+      document.getElementById('payments-sum').textContent = formatPLN(sum);
+
+      const container = document.getElementById('payments-list');
+      if (list.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-stone-400">${paymentsCategory === 'unpaid' ? 'Wszystko zapłacone!' : 'Brak zapłaconych zamówień.'}</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(o => `
+        <label class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-stone-50">
+          <input type="checkbox" ${o.paid_at ? 'checked' : ''} onchange="togglePaid(${jsArg(o.id)}, this.checked)" class="w-5 h-5 rounded accent-emerald-600 shrink-0">
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold text-stone-900 truncate">${escapeHtml(o.customer)}</span>
+            <span class="block text-[10px] text-stone-400">#ZAM-${escapeHtml(o.id)}${o.status === 'Zrealizowane' ? ' · wydane' : ''}</span>
+          </span>
+          <span class="text-sm font-bold ${o.paid_at ? 'text-emerald-700' : 'text-stone-900'}">${formatPLN(getOrderTotal(o))}</span>
+        </label>
+      `).join('');
+    }
+
+    async function togglePaid(orderId, isPaid) {
+      const order = cloudOrders.find(o => o.id === orderId);
+      if (!order) return;
+      const previous = order.paid_at;
+      order.paid_at = isPaid ? new Date().toISOString() : null;
+      renderPaymentsView();
+      updateHubStats();
+
+      const { error } = await supabaseClient
+        .from('orders')
+        .update({ paid_at: order.paid_at })
+        .eq('id', orderId);
+
+      if (error) {
+        order.paid_at = previous;
+        renderPaymentsView();
+        updateHubStats();
+        alert("Błąd zapisu płatności: " + error.message);
+      }
+    }
+
+    // ==========================================
     // STATYSTYKI & FINANSE
     // ==========================================
     function updateHubStats() {
       const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
       document.getElementById('badge-active-orders').textContent = activeOrders.length;
+      document.getElementById('badge-unpaid').textContent = cloudOrders.filter(o => o.status !== "Anulowane" && !o.paid_at).length;
 
       const progress = getPackingProgress();
       let missingPieces = 0;
