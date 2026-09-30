@@ -405,6 +405,15 @@
         </div>
         <div id="tab-missing-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs"></div>
       </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2">
+        <div class="flex justify-between items-center">
+          <h4 class="font-bold text-xs text-stone-800 uppercase tracking-wider">Do druku łącznie (wszystkie kolory)</h4>
+          <span id="tab-print-total" class="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-100">0 szt.</span>
+        </div>
+        <p class="text-[10px] text-stone-400">Brakujące sztuki z zamówień minus to, co już leży na półce.</p>
+        <div id="tab-print-totals" class="divide-y divide-stone-100 text-xs"></div>
+      </div>
     </div>
 
     <!-- WIDOK D: PÓŁKA BUFOROWA (BEZ SUWAKA, CZYSTO INFORMACYJNA) -->
@@ -2473,6 +2482,31 @@
           grid.appendChild(card);
         }
       }
+
+      // Do druku łącznie: po modelu, niezależnie od koloru (półka odjęta dla każdego koloru osobno)
+      const printTotals = {};
+      Object.entries(missingByProduct).forEach(([productKey, needed]) => {
+        const title = productKey.split(':::')[0];
+        const onShelf = Math.min(needed, Math.max(0, shelf[productKey] || 0));
+        if (!printTotals[title]) printTotals[title] = { toPrint: 0, needed: 0, onShelf: 0 };
+        printTotals[title].needed += needed;
+        printTotals[title].onShelf += onShelf;
+        printTotals[title].toPrint += needed - onShelf;
+      });
+      const printRows = Object.entries(printTotals).sort((a, b) => b[1].toPrint - a[1].toPrint);
+      document.getElementById('tab-print-total').textContent =
+        `${printRows.reduce((sum, [, t]) => sum + t.toPrint, 0)} szt.`;
+      document.getElementById('tab-print-totals').innerHTML = printRows.length === 0
+        ? `<div class="py-2 text-stone-400 text-center">Nic do drukowania!</div>`
+        : printRows.map(([title, t]) => `
+          <div class="flex justify-between items-center py-2">
+            <span class="font-bold text-stone-800">${escapeHtml(title)}</span>
+            <span class="text-right">
+              ${t.onShelf > 0 ? `<span class="text-[10px] text-stone-400 mr-1.5">(potrzeba ${t.needed}, na półce ${t.onShelf})</span>` : ''}
+              <span class="font-extrabold ${t.toPrint > 0 ? 'text-stone-900' : 'text-emerald-700'}">${t.toPrint > 0 ? `${t.toPrint} szt.` : 'gotowe ✓'}</span>
+            </span>
+          </div>
+        `).join('');
 
       if (document.getElementById('batch-select-model').options.length > 0) updateBatchBuilder();
     }
