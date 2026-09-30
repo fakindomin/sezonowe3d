@@ -357,6 +357,8 @@
 
     <!-- WIDOK C: PLANER STOŁU I WYBÓR WSADÓW -->
     <div id="admin-tab-batcher" class="space-y-4 hidden">
+      <div id="batch-job-box" class="hidden p-4 rounded-2xl bg-sky-50 border-2 border-sky-500 space-y-3"></div>
+
       <div id="batch-suggest-box" class="p-4 rounded-2xl bg-white border-2 border-emerald-500 space-y-3"></div>
 
       <div id="batch-stem-box" class="p-4 rounded-2xl bg-stone-800 text-white space-y-2 border border-stone-700"></div>
@@ -394,8 +396,8 @@
         <div id="batch-calc-hint" class="text-[11px] text-amber-200"></div>
 
         <div class="pt-1">
-          <button onclick="openCustomPrintResultModal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md">
-            Rozpocznij druk stołu (Raport po zakończeniu) →
+          <button id="batch-start-btn" onclick="startPrintJob()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md">
+            Rozpocznij druk stołu →
           </button>
         </div>
       </div>
@@ -568,9 +570,12 @@
   <!-- MODAL RAPORTU PO ZAKOŃCZENIU DRUKU -->
   <div id="print-result-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
     <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[90vh] overflow-y-auto space-y-4">
-      <div class="border-b border-stone-200 pb-2">
-        <h3 class="font-heading font-bold text-base text-stone-900">Raport ze stołu: Co się udało?</h3>
-        <p class="text-xs text-stone-500">Zatwierdzone sztuki trafią bezpośrednio na Półkę buforową.</p>
+      <div class="flex justify-between items-start border-b border-stone-200 pb-2">
+        <div>
+          <h3 class="font-heading font-bold text-base text-stone-900">Raport ze stołu: Co się udało?</h3>
+          <p class="text-xs text-stone-500">Zatwierdzone sztuki trafią bezpośrednio na Półkę buforową.</p>
+        </div>
+        <button onclick="closePrintResultModal()" class="text-stone-400 hover:text-stone-700 font-bold text-sm p-1">✕ Zamknij</button>
       </div>
       <div id="print-result-items" class="space-y-2.5 text-xs"></div>
       <div class="pt-2">
@@ -949,7 +954,8 @@
       costs: DEFAULT_COSTS,
       spools: DEFAULT_SPOOLS,
       shelf: {},
-      packing: {}
+      packing: {},
+      printjob: {}
     };
 
     // Klucze, pod którymi stan był wcześniej zapisywany w przeglądarce
@@ -2253,6 +2259,95 @@
     // ==========================================
     const STEM_SHELF_KEY = 'Ogonek dyni:::Brązowy';
 
+    // Bieżący druk na drukarce (wspólny dla telefonów); pusty obiekt = drukarka wolna
+    function getPrintJob() {
+      const job = readState('printjob');
+      return job && job.title ? job : null;
+    }
+    function savePrintJob(job) {
+      writeState('printjob', job || {});
+    }
+
+    // Półka na potrzeby planowania: to, co leży, plus sztuki właśnie drukowane
+    function getPlanningShelf() {
+      const shelf = getShelf();
+      const job = getPrintJob();
+      if (job && job.title !== 'Ogonek dyni') {
+        const key = `${job.title}:::${job.color}`;
+        shelf[key] = (shelf[key] || 0) + job.qty;
+      }
+      return shelf;
+    }
+
+    function formatJobTime(date) {
+      const now = new Date();
+      const time = date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+      const dayDiff = Math.round((new Date(date.toDateString()) - new Date(now.toDateString())) / 86400000);
+      if (dayDiff === 0) return time;
+      if (dayDiff === 1) return `jutro ${time}`;
+      return `${date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' })} ${time}`;
+    }
+
+    function renderPrintJobBox() {
+      const box = document.getElementById('batch-job-box');
+      const job = getPrintJob();
+      if (!job) {
+        box.classList.add('hidden');
+        box.innerHTML = '';
+        return;
+      }
+      const start = new Date(job.startedAt);
+      const end = new Date(start.getTime() + (job.hours || 0) * job.qty * 3600000);
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700">🖨️ Na drukarce</span>
+        <div>
+          <div class="text-lg font-extrabold text-stone-900">${job.qty}× ${escapeHtml(job.title)} <span class="text-stone-500 font-bold">(${escapeHtml(job.color)})</span></div>
+          <div class="text-[11px] text-stone-600 mt-0.5">start ${escapeHtml(formatJobTime(start))} · koniec ok. ${escapeHtml(formatJobTime(end))} · ~${job.qty * job.unitWeight}g filamentu</div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openPrintResultModal()" class="flex-1 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs">Zakończono – wpisz wynik</button>
+          <button onclick="cancelPrintJob()" class="py-2.5 px-3 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-semibold text-xs">Anuluj druk</button>
+        </div>
+      `;
+    }
+
+    function startPrintJob() {
+      if (getPrintJob()) {
+        alert('Najpierw zakończ bieżący druk.');
+        return;
+      }
+      const model = document.getElementById('batch-select-model').value;
+      const color = document.getElementById('batch-select-color').value;
+      const qty = parseInt(document.getElementById('batch-select-qty').value) || 1;
+      const spec = getSpecs()[model] || { weight: 45, hours: 1.5 };
+      savePrintJob({ title: model, color, qty, unitWeight: spec.weight, hours: spec.hours || 1.5, startedAt: new Date().toISOString() });
+      renderBatcherView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startStemPrintJob(qty) {
+      if (getPrintJob()) {
+        alert('Najpierw zakończ bieżący druk.');
+        return;
+      }
+      const spec = getSpecs()['Ogonek dyni'] || { weight: 2, hours: 0.15 };
+      savePrintJob({ title: 'Ogonek dyni', color: 'Brązowy', qty, unitWeight: spec.weight, hours: spec.hours || 0.15, startedAt: new Date().toISOString() });
+      renderBatcherView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelPrintJob() {
+      if (!confirm('Anulować bieżący druk?\nNic nie zostanie zapisane na półce ani w szpulach.\n\nJeśli druk był przerwany w trakcie, wybierz raczej „Zakończono” i wpisz 0 udanych – wtedy odliczy się zużyty filament.')) return;
+      savePrintJob(null);
+      renderBatcherView();
+    }
+
+    function closePrintResultModal() {
+      document.getElementById('print-result-modal').classList.add('hidden');
+      activeBatchPayload = null;
+    }
+
     // Kolory, w których dany model jest w ofercie
     function getModelColors(model) {
       if (model.startsWith('Zestaw Jesienny')) return ['Multikolor'];
@@ -2295,7 +2390,7 @@
     // a każda brakująca sztuka pamięta zamówienie, które na nią czeka
     function getPrintQueue() {
       const progress = getPackingProgress();
-      const pool = { ...getShelf() };
+      const pool = getPlanningShelf();
       const missing = {};       // "tytuł:::kolor" -> [{ orderId, createdAt }] od najstarszych
       const orderMissing = {};  // orderId -> { "tytuł:::kolor": liczba brakujących }
 
@@ -2365,7 +2460,7 @@
       if (suggestions.length === 0) {
         box.innerHTML = `
           <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Proponowany następny stół</span>
-          <div class="text-xs text-stone-500">Wszystkie zamówienia mają już wydrukowane sztuki. Nic nie trzeba drukować.</div>
+          <div class="text-xs text-stone-500">${getPrintJob() ? 'Po bieżącym druku nic więcej nie trzeba drukować.' : 'Wszystkie zamówienia mają już wydrukowane sztuki. Nic nie trzeba drukować.'}</div>
         `;
         return;
       }
@@ -2476,12 +2571,23 @@
       const totalH = (qty * (spec.hours || 1.5)).toFixed(1).replace(".", ",");
       const totalG = qty * spec.weight;
 
+      const startBtn = document.getElementById('batch-start-btn');
+      if (getPrintJob()) {
+        startBtn.disabled = true;
+        startBtn.textContent = 'Najpierw zakończ bieżący druk';
+        startBtn.className = 'w-full py-3 bg-stone-700 text-stone-400 font-bold rounded-xl text-xs cursor-not-allowed';
+      } else {
+        startBtn.disabled = false;
+        startBtn.textContent = 'Rozpocznij druk stołu →';
+        startBtn.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md';
+      }
+
       document.getElementById('batch-calc-time').textContent = `${totalH} godz.`;
       document.getElementById('batch-calc-grams').textContent = `~${totalG}g`;
 
       // Podpowiedź: ile brakuje do zamówień po uwzględnieniu półki
       const key = `${model}:::${color}`;
-      const toPrint = Math.max(0, (getMissingFromOrders()[key] || 0) - (getShelf()[key] || 0));
+      const toPrint = Math.max(0, (getMissingFromOrders()[key] || 0) - (getPlanningShelf()[key] || 0));
       const hint = document.getElementById('batch-calc-hint');
       if (toPrint > 0) {
         const fullBeds = Math.floor(toPrint / maxOnBed);
@@ -2493,19 +2599,18 @@
       }
     }
 
-    function openCustomPrintResultModal() {
-      const model = document.getElementById('batch-select-model').value;
-      const color = document.getElementById('batch-select-color').value;
-      const qty = parseInt(document.getElementById('batch-select-qty').value) || 1;
-      const specs = getSpecs();
-      const spec = specs[model] || { weight: 45, hours: 1.5 };
+    function openPrintResultModal() {
+      const job = getPrintJob();
+      if (!job) return;
+      const { title: model, color, qty } = job;
 
       activeBatchPayload = {
         title: model,
         color: color,
         plannedQty: qty,
-        unitWeight: spec.weight,
-        actualQty: qty
+        unitWeight: job.unitWeight,
+        actualQty: qty,
+        startedAt: job.startedAt
       };
 
       const container = document.getElementById('print-result-items');
@@ -2538,7 +2643,24 @@
     function confirmPrintResultToShelf() {
       if (!activeBatchPayload) return;
 
-      const { title, color, actualQty, plannedQty, unitWeight } = activeBatchPayload;
+      const { title, color, actualQty, plannedQty, unitWeight, startedAt } = activeBatchPayload;
+
+      // Ten sam druk mógł już zostać zakończony na drugim telefonie
+      const job = getPrintJob();
+      if (!job || job.startedAt !== startedAt) {
+        closePrintResultModal();
+        alert('Ten druk został już zakończony lub anulowany (np. na drugim telefonie).');
+        renderBatcherView();
+        return;
+      }
+      savePrintJob(null);
+      activeBatchPayload = null;
+
+      if (title === 'Ogonek dyni') {
+        document.getElementById('print-result-modal').classList.add('hidden');
+        applyStemBatchPrint(actualQty, plannedQty * unitWeight);
+        return;
+      }
 
       const totalGramsUsed = plannedQty * unitWeight;
       const spools = getSpools();
@@ -2573,10 +2695,13 @@
     }
 
     function renderBatcherView() {
+      renderPrintJobBox();
       renderBedSuggestions();
 
       const specs = getSpecs();
       const shelf = getShelf();
+      const planningShelf = getPlanningShelf();
+      const job = getPrintJob();
       const missingByProduct = getMissingFromOrders();
 
       const missing = {};
@@ -2588,7 +2713,7 @@
         missing[`${color}:::${title}`] = needed;
         totalPieces += needed;
         if (title === 'Dynia') {
-          dynieToPrint += Math.max(0, needed - (shelf[productKey] || 0));
+          dynieToPrint += Math.max(0, needed - (planningShelf[productKey] || 0));
         }
       });
 
@@ -2597,7 +2722,10 @@
       // Ogonki przykleja się od razu do wydrukowanych dyń: potrzebne są do dyń jeszcze
       // niewydrukowanych oraz tych, które czekają na ogonek (ujemny stan na półce)
       const stemStock = shelf[STEM_SHELF_KEY] || 0;
-      const totalStemDemand = Math.max(0, dynieToPrint - stemStock);
+      // Drukowane właśnie dynie też będą potrzebować ogonków; drukowane ogonki już się liczą
+      const dynieInPrint = job && job.title === 'Dynia' ? job.qty : 0;
+      const stemsInPrint = job && job.title === 'Ogonek dyni' ? job.qty : 0;
+      const totalStemDemand = Math.max(0, dynieToPrint + dynieInPrint - stemStock - stemsInPrint);
       const stemStatus = stemStock > 0
         ? `Na półce: <strong>${stemStock} szt.</strong> (gotowe do przyklejenia)`
         : stemStock < 0
@@ -2618,7 +2746,7 @@
             <p class="text-xs text-stone-300 mt-1">
               Do wydrukowania: <strong>${totalStemDemand} szt.</strong>${stemBeds > 1 ? ` (${stemBeds} stoły)` : ''}
             </p>
-            <p class="text-[11px] text-stone-400 mt-0.5">${stemStatus}</p>
+            <p class="text-[11px] text-stone-400 mt-0.5">${stemStatus}${stemsInPrint > 0 ? ` · w druku: ${stemsInPrint} szt.` : ''}</p>
           </div>
           <span class="text-xs font-bold px-2 py-1 rounded bg-stone-700 text-amber-300">
             ${totalStemDemand} szt.
@@ -2630,9 +2758,15 @@
             <span>⚖️ Filament: <strong>~${stemWeight}g (Brązowy)</strong></span>
           </div>
           <div class="pt-2">
-            <button onclick="applyStemBatchPrint(${totalStemDemand},${stemWeight})" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
-              ✓ Oznacz ogonki jako wydrukowane (-${stemWeight}g Brązowy)
-            </button>
+            ${job ? `
+              <button disabled class="w-full py-2 bg-stone-600 text-stone-300 rounded-xl font-bold text-xs cursor-not-allowed">
+                Najpierw zakończ bieżący druk
+              </button>
+            ` : `
+              <button onclick="startStemPrintJob(${totalStemDemand})" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
+                Rozpocznij druk ogonków (${totalStemDemand} szt.) →
+              </button>
+            `}
           </div>
         ` : `
           <div class="text-xs text-emerald-400 font-semibold pt-1">
@@ -2670,10 +2804,12 @@
       Object.entries(missingByProduct).forEach(([productKey, needed]) => {
         const title = productKey.split(':::')[0];
         const onShelf = Math.min(needed, Math.max(0, shelf[productKey] || 0));
-        if (!printTotals[title]) printTotals[title] = { toPrint: 0, needed: 0, onShelf: 0 };
+        const inPrint = Math.min(needed - onShelf, Math.max(0, (planningShelf[productKey] || 0) - (shelf[productKey] || 0)));
+        if (!printTotals[title]) printTotals[title] = { toPrint: 0, needed: 0, onShelf: 0, inPrint: 0 };
         printTotals[title].needed += needed;
         printTotals[title].onShelf += onShelf;
-        printTotals[title].toPrint += needed - onShelf;
+        printTotals[title].inPrint += inPrint;
+        printTotals[title].toPrint += needed - onShelf - inPrint;
       });
       const printRows = Object.entries(printTotals).sort((a, b) => b[1].toPrint - a[1].toPrint);
       document.getElementById('tab-print-total').textContent =
@@ -2684,7 +2820,7 @@
           <div class="flex justify-between items-center py-2">
             <span class="font-bold text-stone-800">${escapeHtml(title)}</span>
             <span class="text-right">
-              ${t.onShelf > 0 ? `<span class="text-[10px] text-stone-400 mr-1.5">(potrzeba ${t.needed}, na półce ${t.onShelf})</span>` : ''}
+              ${t.onShelf > 0 || t.inPrint > 0 ? `<span class="text-[10px] text-stone-400 mr-1.5">(potrzeba ${t.needed}${t.onShelf > 0 ? `, na półce ${t.onShelf}` : ''}${t.inPrint > 0 ? `, w druku ${t.inPrint}` : ''})</span>` : ''}
               <span class="font-extrabold ${t.toPrint > 0 ? 'text-stone-900' : 'text-emerald-700'}">${t.toPrint > 0 ? `${t.toPrint} szt.` : 'gotowe ✓'}</span>
             </span>
           </div>
