@@ -1629,6 +1629,17 @@
       return rawItems.map(item => LEGACY_TITLES[item.title] ? { ...item, title: LEGACY_TITLES[item.title] } : item);
     }
 
+    // Domyślne kolory dyń w zestawie; zamówienie może mieć własne (pumpkinColors)
+    const BUNDLE_PUMPKIN_COLORS = ['Pomarańczowy', 'Zielony', 'Żółty'];
+
+    function getBundlePumpkinColors(item) {
+      const colors = item.pumpkinColors;
+      if (Array.isArray(colors) && colors.length === 3 && colors.every(c => typeof c === 'string' && c)) {
+        return colors;
+      }
+      return BUNDLE_PUMPKIN_COLORS;
+    }
+
     function getExpandedOrderItems(order) {
       const rawItems = getOrderItems(order);
       const expanded = [];
@@ -1638,10 +1649,12 @@
           const isFox = item.title.includes('lis') || (item.variant && item.variant.includes('lis'));
           const animalName = isFox ? 'Lisek' : 'Wiewiórka';
 
+          const pumpkinColors = getBundlePumpkinColors(item);
+
           for (let q = 0; q < item.qty; q++) {
-            expanded.push({ title: 'Dynia', color: 'Pomarańczowy', qty: 1, fromBundle: true });
-            expanded.push({ title: 'Dynia', color: 'Zielony', qty: 1, fromBundle: true });
-            expanded.push({ title: 'Dynia', color: 'Żółty', qty: 1, fromBundle: true });
+            pumpkinColors.forEach(color => {
+              expanded.push({ title: 'Dynia', color, qty: 1, fromBundle: true });
+            });
             expanded.push({ title: 'Taca', color: 'Biały', qty: 1, fromBundle: true });
             expanded.push({ title: animalName, color: 'Pomarańczowy', qty: 1, fromBundle: true });
           }
@@ -1757,7 +1770,7 @@
         const rawItems = getOrderItems(order);
         const itemsSummary = rawItems.map(item => `
           <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
-            • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}
+            • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}${isBundleItem(item) ? ` <span class="text-stone-500">· dynie: ${escapeHtml(getBundlePumpkinColors(item).join(', '))}</span>` : ''}
           </span>
         `).join(" ");
         const totalPill = order.paid_at
@@ -2805,6 +2818,40 @@
       return item;
     }
 
+    function isBundleItem(item) {
+      return !!(item.title && item.title.startsWith('Zestaw Jesienny'));
+    }
+
+    // Trzy listy kolorów dyń dla zestawu (w edycji i w zamówieniu ręcznym)
+    function bundlePumpkinSelectsHtml(listName, index, item) {
+      if (!isBundleItem(item)) return '';
+      const current = getBundlePumpkinColors(item);
+      const options = getModelColors('Dynia');
+      return `
+        <div class="w-full mt-1">
+          <span class="block text-[10px] text-stone-500 mb-0.5">Kolory dyń w zestawie:</span>
+          <div class="grid grid-cols-3 gap-1">
+            ${current.map((color, slot) => `
+              <select aria-label="Kolor dyni ${slot + 1}" onchange="setBundlePumpkinColor(${jsArg(listName)}, ${index}, ${slot}, this.value)" class="w-full text-[11px] bg-white border border-stone-300 rounded-md px-1 py-0.5">
+                ${options.map(c => `<option value="${escapeHtml(c)}" ${c === color ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+              </select>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function setBundlePumpkinColor(listName, index, slot, color) {
+      const list = listName === 'edit' ? currentEditingItems : manualOrderItems;
+      const item = list[index];
+      if (!item) return;
+      const colors = [...getBundlePumpkinColors(item)];
+      colors[slot] = color;
+      item.pumpkinColors = colors;
+      if (listName === 'edit') renderEditItemsList();
+      else renderManualItemsList();
+    }
+
     function closeManualOrderModal() {
       document.getElementById('manual-order-modal').classList.add('hidden');
       manualOrderItems = [];
@@ -2821,7 +2868,7 @@
 
       manualOrderItems.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
+        row.className = "flex flex-wrap items-center justify-between py-1 border-b border-stone-200 last:border-0";
         row.innerHTML = `
           <div>
             <span class="font-bold text-stone-800">${escapeHtml(item.title)}</span>
@@ -2835,6 +2882,7 @@
             </div>
             <button type="button" onclick="removeManualItem(${index})" class="text-rose-600 font-bold p-1">✕</button>
           </div>
+          ${bundlePumpkinSelectsHtml('manual', index, item)}
         `;
         container.appendChild(row);
       });
@@ -2844,7 +2892,7 @@
       const title = document.getElementById('manual-add-title').value;
       const color = document.getElementById('manual-add-color').value;
 
-      const existing = manualOrderItems.find(i => i.title === title && i.color === color);
+      const existing = isBundleItem({ title }) ? null : manualOrderItems.find(i => i.title === title && i.color === color);
       if (existing) {
         existing.qty += 1;
       } else {
@@ -2931,7 +2979,7 @@
 
       currentEditingItems.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = "flex items-center justify-between py-1 border-b border-stone-200 last:border-0";
+        row.className = "flex flex-wrap items-center justify-between py-1 border-b border-stone-200 last:border-0";
         row.innerHTML = `
           <div>
             <span class="font-bold text-stone-800">${escapeHtml(item.title)}</span>
@@ -2945,6 +2993,7 @@
             </div>
             <button type="button" onclick="removeEditItem(${index})" class="text-rose-600 font-bold p-1">✕</button>
           </div>
+          ${bundlePumpkinSelectsHtml('edit', index, item)}
         `;
         container.appendChild(row);
       });
@@ -2964,7 +3013,7 @@
       const title = document.getElementById('edit-add-title').value;
       const color = document.getElementById('edit-add-color').value;
 
-      const existing = currentEditingItems.find(i => i.title === title && i.color === color);
+      const existing = isBundleItem({ title }) ? null : currentEditingItems.find(i => i.title === title && i.color === color);
       if (existing) {
         existing.qty += 1;
       } else {
