@@ -357,10 +357,12 @@
 
     <!-- WIDOK C: PLANER STOŁU I WYBÓR WSADÓW -->
     <div id="admin-tab-batcher" class="space-y-4 hidden">
+      <div id="batch-suggest-box" class="p-4 rounded-2xl bg-white border-2 border-emerald-500 space-y-3"></div>
+
       <div id="batch-stem-box" class="p-4 rounded-2xl bg-stone-800 text-white space-y-2 border border-stone-700"></div>
 
       <!-- KREATOR WYBORU STOŁU DO DRUKU -->
-      <div class="p-4 rounded-2xl bg-stone-900 text-white space-y-3">
+      <div id="batch-builder" class="p-4 rounded-2xl bg-stone-900 text-white space-y-3">
         <div class="flex justify-between items-center border-b border-stone-800 pb-2">
           <div>
             <span class="text-[10px] font-bold uppercase tracking-wider text-orange-400">Panel operatora P1S</span>
@@ -2254,6 +2256,145 @@
       return missing;
     }
 
+    // Braki do druku: półka jest przydzielana najpierw najstarszym zamówieniom,
+    // a każda brakująca sztuka pamięta zamówienie, które na nią czeka
+    function getPrintQueue() {
+      const progress = getPackingProgress();
+      const pool = { ...getShelf() };
+      const missing = {};       // "tytuł:::kolor" -> [{ orderId, createdAt }] od najstarszych
+      const orderMissing = {};  // orderId -> { "tytuł:::kolor": liczba brakujących }
+
+      cloudOrders
+        .filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane")
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .forEach(order => {
+          getExpandedOrderItems(order).forEach((item, idx) => {
+            const needed = Math.max(0, item.qty - (progress[`${order.id}:::${idx}`] || 0));
+            const key = `${item.title}:::${item.color}`;
+            for (let i = 0; i < needed; i++) {
+              if ((pool[key] || 0) > 0) {
+                pool[key]--;
+                continue;
+              }
+              (missing[key] = missing[key] || []).push({ orderId: order.id, createdAt: order.created_at });
+              orderMissing[order.id] = orderMissing[order.id] || {};
+              orderMissing[order.id][key] = (orderMissing[order.id][key] || 0) + 1;
+            }
+          });
+        });
+      return { missing, orderMissing };
+    }
+
+    // Propozycje stołów: liczy się zapełnienie stołu (0–1) plus czas czekania najstarszego
+    // zamówienia; tydzień czekania jest wart tyle co pełny stół, więc nic nie utknie
+    function getBedSuggestions() {
+      const { missing, orderMissing } = getPrintQueue();
+      const now = Date.now();
+
+      return Object.entries(missing).map(([key, pieces]) => {
+        const [title, color] = key.split(':::');
+        const maxOnBed = getMaxOnBed(title);
+        const count = Math.min(maxOnBed, pieces.length);
+        const oldestDays = Math.max(0, (now - new Date(pieces[0].createdAt)) / 86400000);
+        const fill = count / maxOnBed;
+
+        // Zamówienia, którym ten stół dostarczy wszystkie brakujące sztuki
+        const coveredByOrder = {};
+        pieces.slice(0, count).forEach(p => { coveredByOrder[p.orderId] = (coveredByOrder[p.orderId] || 0) + 1; });
+        const completes = Object.entries(coveredByOrder).filter(([orderId, n]) => {
+          const orderKeys = orderMissing[orderId];
+          return Object.keys(orderKeys).length === 1 && orderKeys[key] === n;
+        }).length;
+
+        return {
+          title, color, count, maxOnBed, fill, oldestDays, completes,
+          totalMissing: pieces.length,
+          score: fill + oldestDays / 7
+        };
+      }).sort((a, b) => b.score - a.score);
+    }
+
+    function formatWaitingDays(days) {
+      const d = Math.floor(days);
+      if (d < 1) return 'od dziś';
+      return d === 1 ? '1 dzień' : `${d} dni`;
+    }
+
+    function renderBedSuggestions() {
+      const box = document.getElementById('batch-suggest-box');
+      const suggestions = getBedSuggestions();
+
+      if (suggestions.length === 0) {
+        box.innerHTML = `
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Proponowany następny stół</span>
+          <div class="text-xs text-stone-500">Wszystkie zamówienia mają już wydrukowane sztuki. Nic nie trzeba drukować.</div>
+        `;
+        return;
+      }
+
+      const describe = (sug) => [
+        `stół ${sug.count}/${sug.maxOnBed} (${Math.round(sug.fill * 100)}%)`,
+        `najstarsze czeka ${formatWaitingDays(sug.oldestDays)}`,
+        sug.completes > 0 ? `dokończy ${sug.completes} zam.` : '',
+        sug.totalMissing > sug.count ? `zostanie ${sug.totalMissing - sug.count} szt. na kolejny stół` : ''
+      ].filter(Boolean).join(' · ');
+
+      const top = suggestions[0];
+      const others = suggestions.slice(1, 4);
+
+      box.innerHTML = `
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Proponowany następny stół</span>
+          <span class="text-[10px] text-stone-400">najstarsze zamówienia + pełny stół</span>
+        </div>
+        <div>
+          <div class="text-lg font-extrabold text-stone-900">${top.count}× ${escapeHtml(top.title)} <span class="text-stone-500 font-bold">(${escapeHtml(top.color)})</span></div>
+          <div class="text-[11px] text-stone-500 mt-0.5">${escapeHtml(describe(top))}</div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="setupBed(${jsArg(top.title)}, ${jsArg(top.color)}, ${top.count})" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs">
+            Ustaw ten stół (${top.count} szt.)
+          </button>
+          ${top.count < top.maxOnBed ? `
+            <button onclick="setupBed(${jsArg(top.title)}, ${jsArg(top.color)}, ${top.maxOnBed})" class="flex-1 py-2.5 bg-white border border-emerald-500 text-emerald-800 hover:bg-emerald-50 rounded-xl font-bold text-xs">
+              Pełny stół: ${top.maxOnBed} szt. (+${top.maxOnBed - top.count} na zapas)
+            </button>` : ''}
+        </div>
+        ${others.length > 0 ? `
+          <div class="pt-2 border-t border-stone-100 space-y-1.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Potem</div>
+            ${others.map(sug => `
+              <div class="flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-stone-800">${sug.count}× ${escapeHtml(sug.title)} <span class="text-stone-500 font-semibold">(${escapeHtml(sug.color)})</span></div>
+                  <div class="text-[10px] text-stone-400 truncate">${escapeHtml(describe(sug))}</div>
+                </div>
+                <button onclick="setupBed(${jsArg(sug.title)}, ${jsArg(sug.color)}, ${sug.count})" class="shrink-0 px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-[11px] font-semibold">Ustaw</button>
+              </div>
+            `).join('')}
+          </div>` : ''}
+      `;
+    }
+
+    // Wypełnia panel operatora wybranym stołem
+    function setupBed(title, color, qty) {
+      const modelSel = document.getElementById('batch-select-model');
+      if (![...modelSel.options].some(o => o.value === title)) {
+        modelSel.add(new Option(title, title));
+      }
+      modelSel.value = title;
+      onBatchModelChange();
+
+      const colorSel = document.getElementById('batch-select-color');
+      if (![...colorSel.options].some(o => o.value === color)) {
+        colorSel.add(new Option(color, color));
+      }
+      colorSel.value = color;
+      document.getElementById('batch-select-qty').value = qty;
+      updateBatchBuilder();
+      document.getElementById('batch-builder').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function initBatchBuilderSelectors() {
       const modelSel = document.getElementById('batch-select-model');
       if (modelSel && modelSel.options.length === 0) {
@@ -2393,6 +2534,8 @@
     }
 
     function renderBatcherView() {
+      renderBedSuggestions();
+
       const specs = getSpecs();
       const shelf = getShelf();
       const missingByProduct = getMissingFromOrders();
