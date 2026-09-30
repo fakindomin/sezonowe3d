@@ -602,6 +602,15 @@
           <label class="block font-semibold text-stone-700 mb-0.5">Uwagi:</label>
           <input id="edit-order-notes" type="text" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5">
         </div>
+        <div>
+          <label class="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-rose-200 bg-rose-50 cursor-pointer">
+            <span>
+              <span class="block font-bold text-rose-700">🚩 Pilne</span>
+              <span class="block text-[10px] text-rose-600/80">Zamówienie trafi na początek listy i planu druku.</span>
+            </span>
+            <input id="edit-order-urgent" type="checkbox" class="w-5 h-5 accent-rose-600 shrink-0">
+          </label>
+        </div>
       </div>
       <button onclick="saveOrderEdits()" class="w-full py-2.5 bg-stone-900 text-white font-bold rounded-xl text-xs mt-2">
         Zapisz zmiany
@@ -899,6 +908,12 @@
         const price = typeof item.unitPrice === 'number' ? item.unitPrice : getUnitPrice(item.title);
         return sum + price * (Number(item.qty) || 0);
       }, 0);
+    }
+
+    // Kolejność realizacji: pilne na początku, dalej od najstarszych
+    function compareByPriority(a, b) {
+      if (!!a.urgent !== !!b.urgent) return a.urgent ? -1 : 1;
+      return new Date(a.created_at) - new Date(b.created_at);
     }
 
     function formatPLN(amount) {
@@ -1697,10 +1712,10 @@
       const progress = getPackingProgress();
       const now = new Date().getTime();
 
-      // Do zrealizowania: najstarsze na górze (kolejność realizacji); pozostałe od najnowszych
+      // Do zrealizowania: pilne i najstarsze na górze (kolejność realizacji); pozostałe od najnowszych
       const pendingOrders = cloudOrders
         .filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane")
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        .sort(compareByPriority);
       const completedOrders = cloudOrders.filter(o => o.status === "Zrealizowane");
       const canceledOrders = cloudOrders.filter(o => o.status === "Anulowane");
 
@@ -1806,6 +1821,9 @@
         }
 
         const card = document.createElement("div");
+        if (order.urgent && ordersActiveCategory === 'pending') {
+          cardBorderClass = cardBorderClass.replace(/border-\S+/, 'border-rose-500') + ' border-2';
+        }
         card.className = `p-4 rounded-2xl border ${cardBorderClass} shadow-2xs hover:shadow-xs transition flex flex-col justify-between`;
         card.innerHTML = `
           <div>
@@ -1813,6 +1831,7 @@
               <div>
                 <div class="flex items-center gap-1.5">
                   <span class="font-bold text-stone-900 text-sm">#ZAM-${escapeHtml(order.id)}</span>
+                  ${order.urgent && ordersActiveCategory === 'pending' ? '<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-extrabold uppercase">🚩 Pilne</span>' : ''}
                   ${isRecent ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-stone-950 text-[10px] font-extrabold uppercase">Nowe</span>' : ''}
                 </div>
                 <span class="font-semibold text-stone-800 text-xs">${escapeHtml(order.customer)}</span>
@@ -2282,7 +2301,7 @@
 
       cloudOrders
         .filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane")
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .sort(compareByPriority)
         .forEach(order => {
           getExpandedOrderItems(order).forEach((item, idx) => {
             const needed = Math.max(0, item.qty - (progress[`${order.id}:::${idx}`] || 0));
@@ -2292,7 +2311,7 @@
                 pool[key]--;
                 continue;
               }
-              (missing[key] = missing[key] || []).push({ orderId: order.id, createdAt: order.created_at });
+              (missing[key] = missing[key] || []).push({ orderId: order.id, createdAt: order.created_at, urgent: !!order.urgent });
               orderMissing[order.id] = orderMissing[order.id] || {};
               orderMissing[order.id][key] = (orderMissing[order.id][key] || 0) + 1;
             }
@@ -2311,8 +2330,10 @@
         const [title, color] = key.split(':::');
         const maxOnBed = getMaxOnBed(title);
         const count = Math.min(maxOnBed, pieces.length);
-        const oldestDays = Math.max(0, (now - new Date(pieces[0].createdAt)) / 86400000);
+        const oldestTime = Math.min(...pieces.map(p => new Date(p.createdAt).getTime()));
+        const oldestDays = Math.max(0, (now - oldestTime) / 86400000);
         const fill = count / maxOnBed;
+        const urgentPieces = pieces.filter(p => p.urgent).length;
 
         // Zamówienia, którym ten stół dostarczy wszystkie brakujące sztuki
         const coveredByOrder = {};
@@ -2323,9 +2344,10 @@
         }).length;
 
         return {
-          title, color, count, maxOnBed, fill, oldestDays, completes,
+          title, color, count, maxOnBed, fill, oldestDays, completes, urgentPieces,
           totalMissing: pieces.length,
-          score: fill + oldestDays / 7
+          // Pilne zamówienie zawsze wygrywa z resztą
+          score: (urgentPieces > 0 ? 1000 : 0) + fill + oldestDays / 7
         };
       }).sort((a, b) => b.score - a.score);
     }
@@ -2349,6 +2371,7 @@
       }
 
       const describe = (sug) => [
+        sug.urgentPieces > 0 ? `🚩 pilne: ${sug.urgentPieces} szt.` : '',
         `stół ${sug.count}/${sug.maxOnBed} (${Math.round(sug.fill * 100)}%)`,
         `najstarsze czeka ${formatWaitingDays(sug.oldestDays)}`,
         sug.completes > 0 ? `dokończy ${sug.completes} zam.` : '',
@@ -2955,6 +2978,7 @@
 
       document.getElementById('edit-order-id-label').textContent = orderId;
       document.getElementById('edit-order-notes').value = order.notes || "";
+      document.getElementById('edit-order-urgent').checked = !!order.urgent;
 
       fillProductSelects('edit');
 
@@ -3030,6 +3054,7 @@
       }
 
       const notes = document.getElementById('edit-order-notes').value;
+      const urgent = document.getElementById('edit-order-urgent').checked;
       const order = cloudOrders.find(o => o.id === currentEditingOrderId);
 
       try {
@@ -3037,7 +3062,8 @@
           .from('orders')
           .update({
             items: currentEditingItems,
-            notes: notes
+            notes: notes,
+            urgent: urgent
           })
           .eq('id', currentEditingOrderId);
 
