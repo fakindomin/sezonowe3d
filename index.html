@@ -2326,12 +2326,51 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Ręcznie wybrana ilość ogonków (null = domyślna); przetrwa odświeżenie widoku
+    let stemQtyChoice = null;
+
+    function clampStemQty(qty, max) {
+      return Math.max(1, Math.min(max, parseInt(qty) || 1));
+    }
+
+    function getStemSpec() {
+      return getSpecs()['Ogonek dyni'] || { weight: 2, hours: 0.15, maxOnBed: 40 };
+    }
+
+    function readStemQty() {
+      const spec = getStemSpec();
+      return clampStemQty(document.getElementById('stem-qty-input').value, Math.max(1, parseInt(spec.maxOnBed) || 40));
+    }
+
+    function updateStemCalc() {
+      const spec = getStemSpec();
+      const qty = readStemQty();
+      document.getElementById('stem-calc-time').textContent = `${(qty * spec.hours).toFixed(1).replace('.', ',')} godz.`;
+      document.getElementById('stem-calc-grams').textContent = `~${qty * spec.weight}g`;
+      document.getElementById('stem-start-btn').textContent = `Rozpocznij druk ogonków (${qty} szt.) →`;
+    }
+
+    function onStemQtyInput() {
+      const input = document.getElementById('stem-qty-input');
+      if (input.value === '') return;
+      stemQtyChoice = readStemQty();
+      updateStemCalc();
+    }
+
+    function changeStemQty(delta) {
+      const input = document.getElementById('stem-qty-input');
+      input.value = clampStemQty((parseInt(input.value) || 0) + delta, parseInt(input.max) || 40);
+      stemQtyChoice = parseInt(input.value);
+      updateStemCalc();
+    }
+
     function startStemPrintJob(qty) {
       if (getPrintJob()) {
         alert('Najpierw zakończ bieżący druk.');
         return;
       }
-      const spec = getSpecs()['Ogonek dyni'] || { weight: 2, hours: 0.15 };
+      const spec = getStemSpec();
+      stemQtyChoice = null;
       savePrintJob({ title: 'Ogonek dyni', color: 'Brązowy', qty, unitWeight: spec.weight, hours: spec.hours || 0.15, startedAt: new Date().toISOString() });
       renderBatcherView();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2734,8 +2773,11 @@
 
       const stemBox = document.getElementById('batch-stem-box');
       const stemSpec = specs['Ogonek dyni'] || { weight: 2, hours: 0.15, maxOnBed: 40 };
-      const stemHours = (totalStemDemand * stemSpec.hours).toFixed(1).replace(".", ",");
-      const stemWeight = totalStemDemand * stemSpec.weight;
+      // Ilość na ten druk: wybrana ręcznie albo domyślnie tyle, ile potrzeba (w granicach stołu)
+      const stemMaxOnBed = Math.max(1, parseInt(stemSpec.maxOnBed) || 40);
+      const stemQty = clampStemQty(stemQtyChoice ?? Math.min(totalStemDemand, stemMaxOnBed), stemMaxOnBed);
+      const stemHours = (stemQty * stemSpec.hours).toFixed(1).replace(".", ",");
+      const stemWeight = stemQty * stemSpec.weight;
       const stemBeds = Math.ceil(totalStemDemand / Math.max(1, stemSpec.maxOnBed || 40));
 
       stemBox.innerHTML = `
@@ -2753,21 +2795,32 @@
           </span>
         </div>
         ${totalStemDemand > 0 ? `
-          <div class="text-xs text-stone-300 flex gap-4 pt-1">
-            <span>⏱️ Czas: <strong>${stemHours} godz.</strong></span>
-            <span>⚖️ Filament: <strong>~${stemWeight}g (Brązowy)</strong></span>
-          </div>
-          <div class="pt-2">
-            ${job ? `
+          ${job ? `
+            <div class="pt-2">
               <button disabled class="w-full py-2 bg-stone-600 text-stone-300 rounded-xl font-bold text-xs cursor-not-allowed">
                 Najpierw zakończ bieżący druk
               </button>
-            ` : `
-              <button onclick="startStemPrintJob(${totalStemDemand})" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
-                Rozpocznij druk ogonków (${totalStemDemand} szt.) →
+            </div>
+          ` : `
+            <div class="flex items-center justify-between gap-3 pt-2">
+              <label for="stem-qty-input" class="text-xs text-stone-300">Ile drukujemy teraz:</label>
+              <div class="flex items-center bg-stone-700 rounded-xl p-0.5">
+                <button type="button" aria-label="Mniej" onclick="changeStemQty(-1)" class="w-9 h-9 font-bold text-white rounded-lg hover:bg-stone-600">−</button>
+                <input id="stem-qty-input" type="number" min="1" max="${stemMaxOnBed}" value="${stemQty}" oninput="onStemQtyInput()" class="w-14 bg-transparent text-center text-white font-bold text-sm">
+                <button type="button" aria-label="Więcej" onclick="changeStemQty(1)" class="w-9 h-9 font-bold text-white rounded-lg hover:bg-stone-600">+</button>
+              </div>
+            </div>
+            <div class="text-xs text-stone-300 flex gap-4">
+              <span>⏱️ Czas: <strong id="stem-calc-time">${stemHours} godz.</strong></span>
+              <span>⚖️ Filament: <strong id="stem-calc-grams">~${stemWeight}g</strong> (Brązowy)</span>
+            </div>
+            <div class="text-[10px] text-stone-400">Potrzeba łącznie ${totalStemDemand} szt. · maks. ${stemMaxOnBed} na stół</div>
+            <div>
+              <button id="stem-start-btn" onclick="startStemPrintJob(readStemQty())" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl font-bold text-xs">
+                Rozpocznij druk ogonków (${stemQty} szt.) →
               </button>
-            `}
-          </div>
+            </div>
+          `}
         ` : `
           <div class="text-xs text-emerald-400 font-semibold pt-1">
             Brak zapotrzebowania na ogonki.
