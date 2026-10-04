@@ -317,6 +317,14 @@
           </div>
         </button>
 
+        <button onclick="switchAdminTab('filaments')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
+          <span class="text-lg">💳</span>
+          <div>
+            <div class="font-bold text-xs text-stone-900">Rozliczenie filamentów</div>
+            <div class="text-[9px] text-stone-400">Zakupy & Spłaty</div>
+          </div>
+        </button>
+
         <button onclick="switchAdminTab('settings')" class="p-3 rounded-2xl bg-white border border-stone-200 text-left flex flex-col justify-between h-24 hover:bg-stone-50">
           <span class="text-lg">⚙️</span>
           <div>
@@ -477,6 +485,126 @@
         <div id="payments-list" class="divide-y divide-stone-100"></div>
       </div>
       <p class="text-[10px] text-stone-400 text-center">Anulowane zamówienia nie są tu pokazywane.</p>
+    </div>
+
+    <!-- WIDOK H: ROZLICZENIE FILAMENTÓW (osobny notatnik, niepowiązany z resztą panelu) -->
+    <div id="admin-tab-filaments" class="space-y-4 hidden">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="p-3 rounded-2xl bg-white border border-stone-200">
+          <span class="text-[10px] font-bold text-stone-500 uppercase block">Zakupione</span>
+          <div id="fil-sum-bought" class="text-base font-bold text-stone-900 mt-0.5">0,00 zł</div>
+          <span id="fil-sum-spools" class="text-[9px] text-stone-400">0 szpul</span>
+        </div>
+        <div class="p-3 rounded-2xl bg-white border border-stone-200">
+          <span class="text-[10px] font-bold text-stone-500 uppercase block">Oddane</span>
+          <div id="fil-sum-paid" class="text-base font-bold text-emerald-700 mt-0.5">0,00 zł</div>
+          <span id="fil-count-payments" class="text-[9px] text-stone-400">0 wpłat</span>
+        </div>
+        <div id="fil-balance-box" class="p-3 rounded-2xl bg-stone-900 text-white">
+          <span id="fil-balance-label" class="text-[10px] font-bold text-amber-300 uppercase block">Do spłaty</span>
+          <div id="fil-balance" class="text-base font-bold text-amber-200 mt-0.5">0,00 zł</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+        <h3 class="font-bold text-sm text-stone-900">Zakupione filamenty</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[11px]">
+            <thead>
+              <tr class="text-left text-stone-500 border-b border-stone-200">
+                <th class="py-1.5 pr-2 font-semibold">Data</th>
+                <th class="py-1.5 pr-2 font-semibold">Filament</th>
+                <th class="py-1.5 pr-2 font-semibold text-right">Szpule × cena</th>
+                <th class="py-1.5 pr-2 font-semibold text-right">Wartość</th>
+                <th class="py-1.5"></th>
+              </tr>
+            </thead>
+            <tbody id="fil-purchases-body" class="divide-y divide-stone-100"></tbody>
+            <tfoot>
+              <tr class="border-t-2 border-stone-300 font-bold text-stone-900">
+                <td class="py-1.5 pr-2" colspan="2">Razem</td>
+                <td id="fil-purchases-spools" class="py-1.5 pr-2 text-right">0 szt.</td>
+                <td id="fil-purchases-total" class="py-1.5 pr-2 text-right">0,00 zł</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2 text-xs">
+          <div id="fil-purchase-form-title" class="font-bold text-stone-700">+ Dodaj zakup</div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Data</span>
+              <input id="fil-purchase-date" type="date" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+            <label class="block">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Filament</span>
+              <input id="fil-purchase-name" type="text" maxlength="120" placeholder="np. PLA Matte zielony" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+            <label class="block">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Ile szpul</span>
+              <input id="fil-purchase-spools" type="number" min="1" step="1" value="1" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+            <label class="block">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Cena za szpulę (zł)</span>
+              <input id="fil-purchase-price" type="number" min="0" step="0.01" placeholder="np. 79,99" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+          </div>
+          <div class="flex gap-2">
+            <button id="fil-purchase-save" onclick="saveFilamentPurchase()" class="flex-1 py-2 bg-stone-900 text-white rounded-lg font-bold">+ Dodaj</button>
+            <button id="fil-purchase-cancel" onclick="resetFilamentPurchaseForm()" class="hidden py-2 px-3 bg-white border border-stone-300 rounded-lg font-semibold">Anuluj</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+        <h3 class="font-bold text-sm text-stone-900">Wpłaty (ile już oddałem)</h3>
+
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2 text-xs">
+          <div id="fil-payment-form-title" class="font-bold text-emerald-900">Oddałem:</div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Data</span>
+              <input id="fil-payment-date" type="date" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+            <label class="block">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Kwota (zł)</span>
+              <input id="fil-payment-amount" type="number" min="0.01" step="0.01" placeholder="np. 100" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+            <label class="block col-span-2">
+              <span class="block text-[10px] text-stone-500 mb-0.5">Notatka (opcjonalnie)</span>
+              <input id="fil-payment-note" type="text" maxlength="200" placeholder="np. BLIK, gotówka" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5">
+            </label>
+          </div>
+          <div class="flex gap-2">
+            <button id="fil-payment-save" onclick="saveFilamentPayment()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold">Zapisz wpłatę</button>
+            <button id="fil-payment-cancel" onclick="resetFilamentPaymentForm()" class="hidden py-2 px-3 bg-white border border-stone-300 rounded-lg font-semibold">Anuluj</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-[11px]">
+            <thead>
+              <tr class="text-left text-stone-500 border-b border-stone-200">
+                <th class="py-1.5 pr-2 font-semibold">Data</th>
+                <th class="py-1.5 pr-2 font-semibold text-right">Kwota</th>
+                <th class="py-1.5 pr-2 font-semibold">Notatka</th>
+                <th class="py-1.5"></th>
+              </tr>
+            </thead>
+            <tbody id="fil-payments-body" class="divide-y divide-stone-100"></tbody>
+            <tfoot>
+              <tr class="border-t-2 border-stone-300 font-bold text-stone-900">
+                <td class="py-1.5 pr-2">Razem oddane</td>
+                <td id="fil-payments-total" class="py-1.5 pr-2 text-right">0,00 zł</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <p class="text-[10px] text-stone-400 text-center">Ta zakładka jest tylko informacyjna – nie zmienia szpul, kosztów ani statystyk.</p>
     </div>
 
     <!-- WIDOK F: USTAWIENIA -->
@@ -1469,7 +1597,7 @@
     }
 
     function switchAdminTab(tabName) {
-      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'payments', 'settings'];
+      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'payments', 'filaments', 'settings'];
       tabs.forEach(t => {
         const el = document.getElementById(`admin-tab-${t}`);
         if (el) el.classList.add('hidden');
@@ -1500,6 +1628,11 @@
         } else if (tabName === 'spools') {
           title.textContent = "Szpule Filamentu";
           renderSpoolsView();
+        } else if (tabName === 'filaments') {
+          title.textContent = "Rozliczenie filamentów";
+          resetFilamentPurchaseForm();
+          resetFilamentPaymentForm();
+          fetchFilamentLedger();
         } else if (tabName === 'payments') {
           title.textContent = "Płatności";
           renderPaymentsView();
@@ -1542,6 +1675,13 @@
           { event: 'DELETE', schema: 'public', table: 'orders' },
           () => fetchOrdersFromCloud()
         )
+        .subscribe();
+
+      // Rozliczenie filamentów zmienione na drugim telefonie
+      supabaseClient
+        .channel('public:filament_ledger_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'filament_purchases' }, () => refreshFilamentLedgerIfVisible())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'filament_payments' }, () => refreshFilamentLedgerIfVisible())
         .subscribe();
 
       // Zmiany półki, szpul i ustawień z drugiego telefonu
@@ -2165,6 +2305,221 @@
         updateHubStats();
         alert("Błąd zapisu płatności: " + error.message);
       }
+    }
+
+    // ==========================================
+    // ROZLICZENIE FILAMENTÓW (osobny notatnik admina)
+    // ==========================================
+    let filamentPurchases = [];
+    let filamentPayments = [];
+    let editingPurchaseId = null;
+    let editingPaymentId = null;
+
+    function todayLocalISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatDatePL(iso) {
+      const [y, m, d] = String(iso || '').split('-');
+      return y && m && d ? `${d}.${m}.${y}` : '';
+    }
+
+    function refreshFilamentLedgerIfVisible() {
+      if (!document.getElementById('admin-tab-filaments').classList.contains('hidden')) fetchFilamentLedger();
+    }
+
+    async function fetchFilamentLedger() {
+      const [purchases, payments] = await Promise.all([
+        supabaseClient.from('filament_purchases').select('*').order('bought_on', { ascending: true }).order('id', { ascending: true }),
+        supabaseClient.from('filament_payments').select('*').order('paid_on', { ascending: true }).order('id', { ascending: true })
+      ]);
+      if (purchases.error || payments.error) {
+        alert('Błąd pobierania rozliczenia: ' + (purchases.error || payments.error).message);
+        return;
+      }
+      filamentPurchases = purchases.data || [];
+      filamentPayments = payments.data || [];
+      renderFilamentsView();
+    }
+
+    function renderFilamentsView() {
+      const purchaseValue = p => Number(p.spools) * Number(p.unit_price);
+      const bought = filamentPurchases.reduce((sum, p) => sum + purchaseValue(p), 0);
+      const spools = filamentPurchases.reduce((sum, p) => sum + Number(p.spools), 0);
+      const paid = filamentPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const balance = Math.round((bought - paid) * 100) / 100;
+
+      document.getElementById('fil-sum-bought').textContent = formatPLN(bought);
+      document.getElementById('fil-sum-spools').textContent = `${spools} ${spools === 1 ? 'szpula' : 'szpul'}`;
+      document.getElementById('fil-sum-paid').textContent = formatPLN(paid);
+      document.getElementById('fil-count-payments').textContent = `${filamentPayments.length} ${filamentPayments.length === 1 ? 'wpłata' : 'wpłat'}`;
+
+      const label = document.getElementById('fil-balance-label');
+      const value = document.getElementById('fil-balance');
+      const box = document.getElementById('fil-balance-box');
+      if (balance > 0) {
+        box.className = 'p-3 rounded-2xl bg-stone-900 text-white';
+        label.className = 'text-[10px] font-bold text-amber-300 uppercase block';
+        label.textContent = 'Do spłaty';
+        value.className = 'text-base font-bold text-amber-200 mt-0.5';
+        value.textContent = formatPLN(balance);
+      } else if (balance === 0) {
+        box.className = 'p-3 rounded-2xl bg-emerald-600 text-white';
+        label.className = 'text-[10px] font-bold text-emerald-100 uppercase block';
+        label.textContent = 'Do spłaty';
+        value.className = 'text-base font-bold text-white mt-0.5';
+        value.textContent = 'Spłacone ✓';
+      } else {
+        box.className = 'p-3 rounded-2xl bg-sky-600 text-white';
+        label.className = 'text-[10px] font-bold text-sky-100 uppercase block';
+        label.textContent = 'Nadpłata';
+        value.className = 'text-base font-bold text-white mt-0.5';
+        value.textContent = formatPLN(-balance);
+      }
+
+      document.getElementById('fil-purchases-body').innerHTML = filamentPurchases.length === 0
+        ? `<tr><td colspan="5" class="py-3 text-center text-stone-400">Brak zakupów.</td></tr>`
+        : filamentPurchases.map(p => `
+          <tr class="${p.id === editingPurchaseId ? 'bg-amber-50' : ''}">
+            <td class="py-1.5 pr-2 whitespace-nowrap text-stone-500">${escapeHtml(formatDatePL(p.bought_on))}</td>
+            <td class="py-1.5 pr-2 font-semibold text-stone-900">${escapeHtml(p.name)}</td>
+            <td class="py-1.5 pr-2 text-right whitespace-nowrap">${escapeHtml(p.spools)} × ${formatPLN(Number(p.unit_price))}</td>
+            <td class="py-1.5 pr-2 text-right whitespace-nowrap font-bold">${formatPLN(purchaseValue(p))}</td>
+            <td class="py-1.5 text-right whitespace-nowrap">
+              <button onclick="startEditFilamentPurchase(${Number(p.id)})" aria-label="Edytuj" class="px-1">✏️</button>
+              <button onclick="deleteFilamentPurchase(${Number(p.id)})" aria-label="Usuń" class="px-1 text-rose-600 font-bold">✕</button>
+            </td>
+          </tr>
+        `).join('');
+      document.getElementById('fil-purchases-spools').textContent = `${spools} szt.`;
+      document.getElementById('fil-purchases-total').textContent = formatPLN(bought);
+
+      document.getElementById('fil-payments-body').innerHTML = filamentPayments.length === 0
+        ? `<tr><td colspan="4" class="py-3 text-center text-stone-400">Brak wpłat.</td></tr>`
+        : filamentPayments.map(p => `
+          <tr class="${p.id === editingPaymentId ? 'bg-amber-50' : ''}">
+            <td class="py-1.5 pr-2 whitespace-nowrap text-stone-500">${escapeHtml(formatDatePL(p.paid_on))}</td>
+            <td class="py-1.5 pr-2 text-right whitespace-nowrap font-bold text-emerald-700">${formatPLN(Number(p.amount))}</td>
+            <td class="py-1.5 pr-2 text-stone-600">${escapeHtml(p.note || '')}</td>
+            <td class="py-1.5 text-right whitespace-nowrap">
+              <button onclick="startEditFilamentPayment(${Number(p.id)})" aria-label="Edytuj" class="px-1">✏️</button>
+              <button onclick="deleteFilamentPayment(${Number(p.id)})" aria-label="Usuń" class="px-1 text-rose-600 font-bold">✕</button>
+            </td>
+          </tr>
+        `).join('');
+      document.getElementById('fil-payments-total').textContent = formatPLN(paid);
+    }
+
+    function parseAmount(value) {
+      return parseFloat(String(value).replace(',', '.'));
+    }
+
+    function resetFilamentPurchaseForm() {
+      editingPurchaseId = null;
+      document.getElementById('fil-purchase-date').value = todayLocalISO();
+      document.getElementById('fil-purchase-name').value = '';
+      document.getElementById('fil-purchase-spools').value = 1;
+      document.getElementById('fil-purchase-price').value = '';
+      document.getElementById('fil-purchase-form-title').textContent = '+ Dodaj zakup';
+      document.getElementById('fil-purchase-save').textContent = '+ Dodaj';
+      document.getElementById('fil-purchase-cancel').classList.add('hidden');
+      renderFilamentsView();
+    }
+
+    function startEditFilamentPurchase(id) {
+      const p = filamentPurchases.find(x => x.id === id);
+      if (!p) return;
+      editingPurchaseId = id;
+      document.getElementById('fil-purchase-date').value = p.bought_on;
+      document.getElementById('fil-purchase-name').value = p.name;
+      document.getElementById('fil-purchase-spools').value = p.spools;
+      document.getElementById('fil-purchase-price').value = Number(p.unit_price);
+      document.getElementById('fil-purchase-form-title').textContent = '✏️ Edycja zakupu';
+      document.getElementById('fil-purchase-save').textContent = 'Zapisz zmiany';
+      document.getElementById('fil-purchase-cancel').classList.remove('hidden');
+      renderFilamentsView();
+      document.getElementById('fil-purchase-name').focus();
+    }
+
+    async function saveFilamentPurchase() {
+      const row = {
+        bought_on: document.getElementById('fil-purchase-date').value || todayLocalISO(),
+        name: document.getElementById('fil-purchase-name').value.trim(),
+        spools: parseInt(document.getElementById('fil-purchase-spools').value),
+        unit_price: parseAmount(document.getElementById('fil-purchase-price').value)
+      };
+      if (!row.name) return alert('Wpisz nazwę filamentu.');
+      if (!(row.spools >= 1)) return alert('Liczba szpul musi być co najmniej 1.');
+      if (!(row.unit_price >= 0)) return alert('Wpisz cenę za szpulę.');
+
+      const query = editingPurchaseId
+        ? supabaseClient.from('filament_purchases').update(row).eq('id', editingPurchaseId)
+        : supabaseClient.from('filament_purchases').insert([row]);
+      const { error } = await query;
+      if (error) return alert('Błąd zapisu zakupu: ' + error.message);
+      resetFilamentPurchaseForm();
+      fetchFilamentLedger();
+    }
+
+    async function deleteFilamentPurchase(id) {
+      const p = filamentPurchases.find(x => x.id === id);
+      if (!p || !confirm(`Usunąć zakup „${p.name}” (${formatPLN(Number(p.spools) * Number(p.unit_price))})?`)) return;
+      const { error } = await supabaseClient.from('filament_purchases').delete().eq('id', id);
+      if (error) return alert('Błąd usuwania: ' + error.message);
+      if (editingPurchaseId === id) resetFilamentPurchaseForm();
+      fetchFilamentLedger();
+    }
+
+    function resetFilamentPaymentForm() {
+      editingPaymentId = null;
+      document.getElementById('fil-payment-date').value = todayLocalISO();
+      document.getElementById('fil-payment-amount').value = '';
+      document.getElementById('fil-payment-note').value = '';
+      document.getElementById('fil-payment-form-title').textContent = 'Oddałem:';
+      document.getElementById('fil-payment-save').textContent = 'Zapisz wpłatę';
+      document.getElementById('fil-payment-cancel').classList.add('hidden');
+      renderFilamentsView();
+    }
+
+    function startEditFilamentPayment(id) {
+      const p = filamentPayments.find(x => x.id === id);
+      if (!p) return;
+      editingPaymentId = id;
+      document.getElementById('fil-payment-date').value = p.paid_on;
+      document.getElementById('fil-payment-amount').value = Number(p.amount);
+      document.getElementById('fil-payment-note').value = p.note || '';
+      document.getElementById('fil-payment-form-title').textContent = '✏️ Edycja wpłaty';
+      document.getElementById('fil-payment-save').textContent = 'Zapisz zmiany';
+      document.getElementById('fil-payment-cancel').classList.remove('hidden');
+      renderFilamentsView();
+      document.getElementById('fil-payment-amount').focus();
+    }
+
+    async function saveFilamentPayment() {
+      const row = {
+        paid_on: document.getElementById('fil-payment-date').value || todayLocalISO(),
+        amount: parseAmount(document.getElementById('fil-payment-amount').value),
+        note: document.getElementById('fil-payment-note').value.trim() || null
+      };
+      if (!(row.amount > 0)) return alert('Wpisz kwotę wpłaty.');
+
+      const query = editingPaymentId
+        ? supabaseClient.from('filament_payments').update(row).eq('id', editingPaymentId)
+        : supabaseClient.from('filament_payments').insert([row]);
+      const { error } = await query;
+      if (error) return alert('Błąd zapisu wpłaty: ' + error.message);
+      resetFilamentPaymentForm();
+      fetchFilamentLedger();
+    }
+
+    async function deleteFilamentPayment(id) {
+      const p = filamentPayments.find(x => x.id === id);
+      if (!p || !confirm(`Usunąć wpłatę ${formatPLN(Number(p.amount))} z ${formatDatePL(p.paid_on)}?`)) return;
+      const { error } = await supabaseClient.from('filament_payments').delete().eq('id', id);
+      if (error) return alert('Błąd usuwania: ' + error.message);
+      if (editingPaymentId === id) resetFilamentPaymentForm();
+      fetchFilamentLedger();
     }
 
     // ==========================================
