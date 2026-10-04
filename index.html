@@ -2200,7 +2200,8 @@
       let totalHoursPrinted = 0;
 
       cloudOrders.forEach(o => {
-        if (o.status === "Zrealizowane") {
+        // Liczą się tylko zamówienia odhaczone w Płatnościach jako zapłacone
+        if (o.paid_at && o.status !== "Anulowane") {
           const expanded = getExpandedOrderItems(o);
 
           totalRevenue += getOrderTotal(o);
