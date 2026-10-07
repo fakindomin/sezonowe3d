@@ -376,7 +376,7 @@
         <div class="flex justify-between items-center border-b border-stone-800 pb-2">
           <div>
             <span class="text-[10px] font-bold uppercase tracking-wider text-orange-400">Panel operatora P1S</span>
-            <h4 class="text-sm font-bold text-white">Wybierz wsad stołu do druku</h4>
+            <h4 class="text-sm font-bold text-white">Ułóż stół do druku</h4>
           </div>
           <span class="text-[11px] text-stone-400">Trafia na Półkę</span>
         </div>
@@ -391,17 +391,31 @@
             <select id="batch-select-color" onchange="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold"></select>
           </div>
           <div class="col-span-12 sm:col-span-3">
-            <label class="block text-stone-400 mb-1">Liczba na stół:</label>
+            <label class="block text-stone-400 mb-1">Liczba sztuk:</label>
             <input type="number" id="batch-select-qty" min="1" max="40" value="8" oninput="updateBatchBuilder()" class="w-full bg-stone-800 border border-stone-700 text-white rounded-xl p-2 font-bold text-center">
           </div>
         </div>
 
-        <div id="batch-calc-summary" class="text-xs text-stone-300 bg-stone-800/80 p-2.5 rounded-xl border border-stone-700 flex justify-between items-center">
-          <span>⏱️ Czas stołu: <strong id="batch-calc-time" class="text-white">-</strong></span>
-          <span>⚖️ Filament: <strong id="batch-calc-grams" class="text-white">-</strong></span>
-        </div>
-
         <div id="batch-calc-hint" class="text-[11px] text-amber-200"></div>
+
+        <button onclick="addToBedDraft()" class="w-full py-2.5 bg-stone-700 hover:bg-stone-600 text-white font-bold rounded-xl text-xs border border-stone-600">
+          + Dodaj do stołu
+        </button>
+
+        <div class="bg-stone-800/80 p-3 rounded-xl border border-stone-700 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Na stole</span>
+            <span id="bed-fill-label" class="text-[11px] font-bold text-stone-300">Zapełnienie: 0%</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-stone-700 overflow-hidden">
+            <div id="bed-fill-bar" class="h-full bg-emerald-500" style="width: 0%"></div>
+          </div>
+          <div id="bed-draft-list" class="space-y-1 text-xs"></div>
+          <div id="batch-calc-summary" class="text-xs text-stone-300 flex justify-between items-center pt-1 border-t border-stone-700">
+            <span>⏱️ Czas stołu: <strong id="batch-calc-time" class="text-white">-</strong></span>
+            <span>⚖️ Filament: <strong id="batch-calc-grams" class="text-white">-</strong></span>
+          </div>
+        </div>
 
         <div class="pt-1">
           <button id="batch-start-btn" onclick="startPrintJob()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md">
@@ -2615,10 +2629,22 @@
     // ==========================================
     const STEM_SHELF_KEY = 'Ogonek dyni:::Brązowy';
 
-    // Bieżący druk na drukarce (wspólny dla telefonów); pusty obiekt = drukarka wolna
+    // Bieżący druk na drukarce (wspólny dla telefonów); pusty obiekt = drukarka wolna.
+    // Stół może mieć kilka pozycji: { items: [{ title, color, qty, unitWeight, hours }], startedAt }
     function getPrintJob() {
       const job = readState('printjob');
-      return job && job.title ? job : null;
+      if (!job) return null;
+      if (Array.isArray(job.items) && job.items.length > 0) return job;
+      if (job.title) {
+        // Starszy zapis: jeden model na stole
+        const { title, color, qty, unitWeight, hours, startedAt } = job;
+        return { items: [{ title, color, qty, unitWeight, hours }], startedAt };
+      }
+      return null;
+    }
+
+    function jobQty(job, title) {
+      return job ? job.items.filter(i => i.title === title).reduce((sum, i) => sum + i.qty, 0) : 0;
     }
     function savePrintJob(job) {
       writeState('printjob', job || {});
@@ -2628,9 +2654,11 @@
     function getPlanningShelf() {
       const shelf = getShelf();
       const job = getPrintJob();
-      if (job && job.title !== 'Ogonek dyni') {
-        const key = `${job.title}:::${job.color}`;
-        shelf[key] = (shelf[key] || 0) + job.qty;
+      if (job) {
+        job.items.filter(i => i.title !== 'Ogonek dyni').forEach(i => {
+          const key = `${i.title}:::${i.color}`;
+          shelf[key] = (shelf[key] || 0) + i.qty;
+        });
       }
       return shelf;
     }
@@ -2653,13 +2681,17 @@
         return;
       }
       const start = new Date(job.startedAt);
-      const end = new Date(start.getTime() + (job.hours || 0) * job.qty * 3600000);
+      const totalHours = job.items.reduce((sum, i) => sum + (i.hours || 0) * i.qty, 0);
+      const totalGrams = job.items.reduce((sum, i) => sum + (i.unitWeight || 0) * i.qty, 0);
+      const end = new Date(start.getTime() + totalHours * 3600000);
       box.classList.remove('hidden');
       box.innerHTML = `
         <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700">🖨️ Na drukarce</span>
         <div>
-          <div class="text-lg font-extrabold text-stone-900">${job.qty}× ${escapeHtml(job.title)} <span class="text-stone-500 font-bold">(${escapeHtml(job.color)})</span></div>
-          <div class="text-[11px] text-stone-600 mt-0.5">start ${escapeHtml(formatJobTime(start))} · koniec ok. ${escapeHtml(formatJobTime(end))} · ~${job.qty * job.unitWeight}g filamentu</div>
+          ${job.items.map(i => `
+            <div class="text-base font-extrabold text-stone-900">${i.qty}× ${escapeHtml(i.title)} <span class="text-stone-500 font-bold">(${escapeHtml(i.color)})</span></div>
+          `).join('')}
+          <div class="text-[11px] text-stone-600 mt-0.5">start ${escapeHtml(formatJobTime(start))} · koniec ok. ${escapeHtml(formatJobTime(end))} · ~${totalGrams}g filamentu</div>
         </div>
         <div class="flex gap-2">
           <button onclick="openPrintResultModal()" class="flex-1 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs">Zakończono – wpisz wynik</button>
@@ -2668,16 +2700,79 @@
       `;
     }
 
+    // Pozycje układanego stołu (tylko na tym telefonie, do chwili startu druku)
+    let bedDraft = [];
+
+    function getBedFill(items) {
+      return items.reduce((sum, i) => sum + i.qty / getMaxOnBed(i.title), 0);
+    }
+
+    function addToBedDraft() {
+      const title = document.getElementById('batch-select-model').value;
+      const color = document.getElementById('batch-select-color').value;
+      const qty = Math.min(getMaxOnBed(title), Math.max(1, parseInt(document.getElementById('batch-select-qty').value) || 1));
+      const existing = bedDraft.find(i => i.title === title && i.color === color);
+      if (existing) existing.qty += qty;
+      else bedDraft.push({ title, color, qty });
+      updateBatchBuilder();
+    }
+
+    function removeFromBedDraft(index) {
+      bedDraft.splice(index, 1);
+      updateBatchBuilder();
+    }
+
+    function renderBedDraft() {
+      const specs = getSpecs();
+      const list = document.getElementById('bed-draft-list');
+      list.innerHTML = bedDraft.length === 0
+        ? `<div class="text-stone-500">Stół jest pusty – wybierz model, kolor i liczbę, potem „+ Dodaj do stołu”.</div>`
+        : bedDraft.map((i, idx) => `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-white font-bold">${i.qty}× ${escapeHtml(i.title)} <span class="text-stone-400 font-semibold">(${escapeHtml(i.color)})</span></span>
+            <span class="flex items-center gap-2 shrink-0">
+              <span class="text-[10px] text-stone-400">${Math.round(i.qty / getMaxOnBed(i.title) * 100)}% stołu</span>
+              <button onclick="removeFromBedDraft(${idx})" aria-label="Usuń z stołu" class="text-rose-400 hover:text-rose-300 font-bold px-1">✕</button>
+            </span>
+          </div>
+        `).join('');
+
+      const fill = getBedFill(bedDraft);
+      const pct = Math.round(fill * 100);
+      const label = document.getElementById('bed-fill-label');
+      const bar = document.getElementById('bed-fill-bar');
+      label.textContent = pct > 100 ? `Zapełnienie: ${pct}% – za dużo na jeden stół!` : `Zapełnienie: ${pct}%`;
+      label.className = `text-[11px] font-bold ${pct > 100 ? 'text-rose-400' : 'text-stone-300'}`;
+      bar.style.width = `${Math.min(100, pct)}%`;
+      bar.className = `h-full ${pct > 100 ? 'bg-rose-500' : 'bg-emerald-500'}`;
+
+      const hours = bedDraft.reduce((sum, i) => sum + (specs[i.title]?.hours || 1.5) * i.qty, 0);
+      const gramsByColor = {};
+      bedDraft.forEach(i => {
+        gramsByColor[i.color] = (gramsByColor[i.color] || 0) + (specs[i.title]?.weight || 45) * i.qty;
+      });
+      document.getElementById('batch-calc-time').textContent = bedDraft.length ? `${hours.toFixed(1).replace('.', ',')} godz.` : '-';
+      document.getElementById('batch-calc-grams').textContent = bedDraft.length
+        ? Object.entries(gramsByColor).map(([c, g]) => `~${g}g ${c}`).join(', ')
+        : '-';
+    }
+
     function startPrintJob() {
       if (getPrintJob()) {
         alert('Najpierw zakończ bieżący druk.');
         return;
       }
-      const model = document.getElementById('batch-select-model').value;
-      const color = document.getElementById('batch-select-color').value;
-      const qty = parseInt(document.getElementById('batch-select-qty').value) || 1;
-      const spec = getSpecs()[model] || { weight: 45, hours: 1.5 };
-      savePrintJob({ title: model, color, qty, unitWeight: spec.weight, hours: spec.hours || 1.5, startedAt: new Date().toISOString() });
+      if (bedDraft.length === 0) {
+        alert('Stół jest pusty – dodaj pozycje przyciskiem „+ Dodaj do stołu”.');
+        return;
+      }
+      const specs = getSpecs();
+      const items = bedDraft.map(i => {
+        const spec = specs[i.title] || { weight: 45, hours: 1.5 };
+        return { title: i.title, color: i.color, qty: i.qty, unitWeight: spec.weight, hours: spec.hours || 1.5 };
+      });
+      savePrintJob({ items, startedAt: new Date().toISOString() });
+      bedDraft = [];
       renderBatcherView();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2727,7 +2822,7 @@
       }
       const spec = getStemSpec();
       stemQtyChoice = null;
-      savePrintJob({ title: 'Ogonek dyni', color: 'Brązowy', qty, unitWeight: spec.weight, hours: spec.hours || 0.15, startedAt: new Date().toISOString() });
+      savePrintJob({ items: [{ title: 'Ogonek dyni', color: 'Brązowy', qty, unitWeight: spec.weight, hours: spec.hours || 0.15 }], startedAt: new Date().toISOString() });
       renderBatcherView();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2898,15 +2993,20 @@
                   <div class="text-xs font-bold text-stone-800">${sug.count}× ${escapeHtml(sug.title)} <span class="text-stone-500 font-semibold">(${escapeHtml(sug.color)})</span></div>
                   <div class="text-[10px] text-stone-400 leading-snug">${escapeHtml(describe(sug))}</div>
                 </div>
-                <button onclick="setupBed(${jsArg(sug.title)}, ${jsArg(sug.color)}, ${sug.count})" class="shrink-0 px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-[11px] font-semibold">Ustaw</button>
+                <button onclick="setupBed(${jsArg(sug.title)}, ${jsArg(sug.color)}, ${sug.count}, false)" class="shrink-0 px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-[11px] font-semibold">+ Dodaj do stołu</button>
               </div>
             `).join('')}
           </div>` : ''}
       `;
     }
 
-    // Wypełnia panel operatora wybranym stołem
-    function setupBed(title, color, qty) {
+    // Wypełnia panel operatora wybraną pozycją: replace = nowy stół, inaczej dokłada do układanego
+    function setupBed(title, color, qty, replace = true) {
+      if (replace) bedDraft = [];
+      const existing = bedDraft.find(i => i.title === title && i.color === color);
+      if (existing) existing.qty += qty;
+      else bedDraft.push({ title, color, qty });
+
       const modelSel = document.getElementById('batch-select-model');
       if (![...modelSel.options].some(o => o.value === title)) {
         modelSel.add(new Option(title, title));
@@ -2919,7 +3019,7 @@
         colorSel.add(new Option(color, color));
       }
       colorSel.value = color;
-      document.getElementById('batch-select-qty').value = qty;
+      document.getElementById('batch-select-qty').value = Math.min(qty, getMaxOnBed(title));
       updateBatchBuilder();
       document.getElementById('batch-builder').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -2960,25 +3060,23 @@
         qtyInput.value = maxOnBed;
       }
 
-      const specs = getSpecs();
-      const spec = specs[model] || { weight: 45, hours: 1.5 };
-
-      const totalH = (qty * (spec.hours || 1.5)).toFixed(1).replace(".", ",");
-      const totalG = qty * spec.weight;
+      renderBedDraft();
 
       const startBtn = document.getElementById('batch-start-btn');
+      const draftPieces = bedDraft.reduce((sum, i) => sum + i.qty, 0);
       if (getPrintJob()) {
         startBtn.disabled = true;
         startBtn.textContent = 'Najpierw zakończ bieżący druk';
         startBtn.className = 'w-full py-3 bg-stone-700 text-stone-400 font-bold rounded-xl text-xs cursor-not-allowed';
+      } else if (draftPieces === 0) {
+        startBtn.disabled = true;
+        startBtn.textContent = 'Dodaj pozycje do stołu';
+        startBtn.className = 'w-full py-3 bg-stone-700 text-stone-400 font-bold rounded-xl text-xs cursor-not-allowed';
       } else {
         startBtn.disabled = false;
-        startBtn.textContent = 'Rozpocznij druk stołu →';
+        startBtn.textContent = `Rozpocznij druk stołu (${draftPieces} szt.) →`;
         startBtn.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md';
       }
-
-      document.getElementById('batch-calc-time').textContent = `${totalH} godz.`;
-      document.getElementById('batch-calc-grams').textContent = `~${totalG}g`;
 
       // Podpowiedź: ile brakuje do zamówień po uwzględnieniu półki
       const key = `${model}:::${color}`;
@@ -2997,48 +3095,43 @@
     function openPrintResultModal() {
       const job = getPrintJob();
       if (!job) return;
-      const { title: model, color, qty } = job;
 
       activeBatchPayload = {
-        title: model,
-        color: color,
-        plannedQty: qty,
-        unitWeight: job.unitWeight,
-        actualQty: qty,
+        items: job.items.map(i => ({ ...i, actualQty: i.qty })),
         startedAt: job.startedAt
       };
 
       const container = document.getElementById('print-result-items');
-      container.innerHTML = `
+      container.innerHTML = activeBatchPayload.items.map((i, idx) => `
         <div class="flex justify-between items-center p-3 bg-stone-100 rounded-xl">
           <div>
-            <div class="font-bold text-stone-900">${escapeHtml(model)} (${escapeHtml(color)})</div>
-            <div class="text-[11px] text-stone-500">Planowano: ${qty} szt.</div>
+            <div class="font-bold text-stone-900">${escapeHtml(i.title)} (${escapeHtml(i.color)})</div>
+            <div class="text-[11px] text-stone-500">Planowano: ${i.qty} szt.</div>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-stone-700">Udane:</span>
             <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
-              <button onclick="changeCustomResultQty(-1)" class="w-6 h-6 font-bold text-stone-700">-</button>
-              <span id="custom-result-qty-label" class="w-6 text-center font-bold">${qty}</span>
-              <button onclick="changeCustomResultQty(1)" class="w-6 h-6 font-bold text-stone-700">+</button>
+              <button onclick="changeCustomResultQty(${idx}, -1)" class="w-6 h-6 font-bold text-stone-700">-</button>
+              <span id="custom-result-qty-label-${idx}" class="w-6 text-center font-bold">${i.qty}</span>
+              <button onclick="changeCustomResultQty(${idx}, 1)" class="w-6 h-6 font-bold text-stone-700">+</button>
             </div>
           </div>
         </div>
-      `;
+      `).join('');
 
       document.getElementById('print-result-modal').classList.remove('hidden');
     }
 
-    function changeCustomResultQty(delta) {
-      if (!activeBatchPayload) return;
-      activeBatchPayload.actualQty = Math.max(0, Math.min(activeBatchPayload.plannedQty, activeBatchPayload.actualQty + delta));
-      document.getElementById('custom-result-qty-label').textContent = activeBatchPayload.actualQty;
+    function changeCustomResultQty(idx, delta) {
+      const item = activeBatchPayload && activeBatchPayload.items[idx];
+      if (!item) return;
+      item.actualQty = Math.max(0, Math.min(item.qty, item.actualQty + delta));
+      document.getElementById(`custom-result-qty-label-${idx}`).textContent = item.actualQty;
     }
 
     function confirmPrintResultToShelf() {
       if (!activeBatchPayload) return;
-
-      const { title, color, actualQty, plannedQty, unitWeight, startedAt } = activeBatchPayload;
+      const { items, startedAt } = activeBatchPayload;
 
       // Ten sam druk mógł już zostać zakończony na drugim telefonie
       const job = getPrintJob();
@@ -3051,37 +3144,50 @@
       savePrintJob(null);
       activeBatchPayload = null;
 
-      if (title === 'Ogonek dyni') {
-        document.getElementById('print-result-modal').classList.add('hidden');
-        applyStemBatchPrint(actualQty, plannedQty * unitWeight);
-        return;
-      }
-
-      const totalGramsUsed = plannedQty * unitWeight;
+      const shelf = getShelf();
       const spools = getSpools();
-      spools[color] = Math.max(0, (spools[color] || 1000) - totalGramsUsed);
-      saveSpools(spools);
+      const lines = [];
 
-      let stemInfo = '';
-      if (actualQty > 0) {
-        const shelf = getShelf();
-        const key = `${title}:::${color}`;
-        shelf[key] = (shelf[key] || 0) + actualQty;
+      items.forEach(item => {
+        // Filament schodzi za cały zaplanowany wydruk, także za nieudane sztuki
+        const grams = item.qty * item.unitWeight;
+        spools[item.color] = Math.max(0, (spools[item.color] || 1000) - grams);
+        const done = item.actualQty;
 
-        // Dynie od razu dostają ogonki z półki; ujemny stan = dynie czekające na ogonek
-        if (title === 'Dynia') {
+        if (item.title === 'Ogonek dyni') {
+          // Ogonki najpierw trafiają do dyń czekających na ogonek (ujemny stan), reszta na półkę
           const stemsBefore = shelf[STEM_SHELF_KEY] || 0;
-          const glued = Math.max(0, Math.min(actualQty, stemsBefore));
-          shelf[STEM_SHELF_KEY] = stemsBefore - actualQty;
+          const gluedToWaiting = Math.max(0, Math.min(done, -stemsBefore));
+          shelf[STEM_SHELF_KEY] = stemsBefore + done;
           if (shelf[STEM_SHELF_KEY] === 0) delete shelf[STEM_SHELF_KEY];
-          stemInfo = `\nPrzyklejono ${glued} ogonków z półki.`;
-          if (glued < actualQty) stemInfo += ` ${actualQty - glued} dyń czeka na ogonki (planer je uwzględni).`;
+          lines.push(`${done}/${item.qty} szt. ogonków (-${grams}g)` +
+            (gluedToWaiting > 0 ? ` · do przyklejenia do czekających dyń: ${gluedToWaiting}` : '') +
+            (done - gluedToWaiting > 0 ? ` · na półkę: ${done - gluedToWaiting}` : ''));
+          return;
         }
-        saveShelf(shelf);
-      }
+
+        let stemInfo = '';
+        if (done > 0) {
+          const key = `${item.title}:::${item.color}`;
+          shelf[key] = (shelf[key] || 0) + done;
+
+          // Dynie od razu dostają ogonki z półki; ujemny stan = dynie czekające na ogonek
+          if (item.title === 'Dynia') {
+            const stemsBefore = shelf[STEM_SHELF_KEY] || 0;
+            const glued = Math.max(0, Math.min(done, stemsBefore));
+            shelf[STEM_SHELF_KEY] = stemsBefore - done;
+            if (shelf[STEM_SHELF_KEY] === 0) delete shelf[STEM_SHELF_KEY];
+            stemInfo = ` · przyklejono ${glued} ogonków` + (glued < done ? `, ${done - glued} dyń czeka na ogonki` : '');
+          }
+        }
+        lines.push(`${done}/${item.qty} szt. ${item.title} (${item.color}) na półkę (-${grams}g)${stemInfo}`);
+      });
+
+      saveSpools(spools);
+      saveShelf(shelf);
 
       document.getElementById('print-result-modal').classList.add('hidden');
-      alert(`Wydrukowano stół!\nDodano ${actualQty} szt. [${title} - ${color}] na Półkę buforową.\nOdliczono ~${totalGramsUsed}g ze szpuli.${stemInfo}`);
+      alert(`Wydrukowano stół!\n${lines.map(l => `• ${l}`).join('\n')}`);
 
       updateHubStats();
       renderShelfView();
@@ -3118,8 +3224,8 @@
       // niewydrukowanych oraz tych, które czekają na ogonek (ujemny stan na półce)
       const stemStock = shelf[STEM_SHELF_KEY] || 0;
       // Drukowane właśnie dynie też będą potrzebować ogonków; drukowane ogonki już się liczą
-      const dynieInPrint = job && job.title === 'Dynia' ? job.qty : 0;
-      const stemsInPrint = job && job.title === 'Ogonek dyni' ? job.qty : 0;
+      const dynieInPrint = jobQty(job, 'Dynia');
+      const stemsInPrint = jobQty(job, 'Ogonek dyni');
       const totalStemDemand = Math.max(0, dynieToPrint + dynieInPrint - stemStock - stemsInPrint);
       const stemStatus = stemStock > 0
         ? `Na półce: <strong>${stemStock} szt.</strong> (gotowe do przyklejenia)`
@@ -3236,27 +3342,6 @@
         `).join('');
 
       if (document.getElementById('batch-select-model').options.length > 0) updateBatchBuilder();
-    }
-
-    function applyStemBatchPrint(stemsCount, grams) {
-      const spools = getSpools();
-      spools['Brązowy'] = Math.max(0, (spools['Brązowy'] || 1000) - grams);
-      saveSpools(spools);
-
-      const shelf = getShelf();
-      const stemsBefore = shelf[STEM_SHELF_KEY] || 0;
-      const gluedToWaiting = Math.max(0, Math.min(stemsCount, -stemsBefore));
-      shelf[STEM_SHELF_KEY] = stemsBefore + stemsCount;
-      if (shelf[STEM_SHELF_KEY] === 0) delete shelf[STEM_SHELF_KEY];
-      saveShelf(shelf);
-
-      updateHubStats();
-      renderBatcherView();
-      renderShelfView();
-      const toShelf = stemsCount - gluedToWaiting;
-      alert(`Wydrukowano ${stemsCount} szt. ogonków!` +
-        (gluedToWaiting > 0 ? `\nDo przyklejenia do czekających dyń: ${gluedToWaiting}.` : '') +
-        (toShelf > 0 ? `\nNa półkę (do kolejnych dyń): ${toShelf}.` : ''));
     }
 
     // ==========================================
