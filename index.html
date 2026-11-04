@@ -1487,8 +1487,9 @@
       }
       if (rerender && d.type !== 'number') renderCustomDims();
       document.getElementById('custom-add').disabled = true;
+      document.getElementById('custom-est').textContent = 'Przeliczam…';
       clearTimeout(customizer.timer);
-      customizer.timer = setTimeout(() => refreshCustomizer(), 120);
+      customizer.timer = setTimeout(() => refreshCustomizer(), 150);
     }
 
     function customColorHex() {
@@ -1516,10 +1517,20 @@
             hours: e.hours,
             pieces: e.pieces,
             maxOnBed: Math.max(1, Math.floor(250 / (s[0] + 5)) * Math.floor(250 / (s[1] + 5))),
-            price: customPrice(e.grams, e.hours)
+            price: customPrice(e.grams, e.hours),
+            fits: e.fits !== false,
+            longest: e.longest,
+            bed: e.bed || 250
           };
         }
         const est = customizer.est;
+        if (!est.fits) {
+          document.getElementById('custom-price').textContent = '–';
+          document.getElementById('custom-est').textContent =
+            `Za duży na drukarkę: ma ${est.longest} mm, a mieści się najwyżej ${est.bed} mm. Zmniejsz któryś wymiar.`;
+          document.getElementById('custom-add').disabled = true;
+          return;
+        }
         document.getElementById('custom-price').textContent = `${est.price.toFixed(2)} zł`;
         document.getElementById('custom-est').textContent =
           `ok. ${formatMm(est.grams)} g filamentu, druk ok. ${formatMm(est.hours)} godz.${est.pieces > 1 ? ` · ${est.pieces} części` : ''}`;
