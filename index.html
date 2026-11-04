@@ -171,6 +171,46 @@
       </div>
     </div>
 
+    <!-- Konfigurator modeli „Na wymiar” -->
+    <div id="custom-modal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 hidden flex flex-col justify-end sm:justify-center" onclick="if (event.target === this) closeCustomizer()">
+      <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-3xl w-full mx-auto max-h-[94vh] overflow-y-auto sm:grid sm:grid-cols-2">
+        <div class="relative bg-stone-50 sm:rounded-l-3xl">
+          <div id="custom-view" class="w-full aspect-square max-h-[46vh] sm:max-h-none mx-auto"></div>
+          <div id="custom-view-status" class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-stone-500">Wczytuję podgląd 3D…</div>
+          <p class="absolute bottom-2 left-0 right-0 text-center text-[10px] text-stone-400 pointer-events-none">Przeciągnij, żeby obrócić · szczypnij, żeby przybliżyć</p>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 id="custom-title" class="font-heading font-bold text-base text-stone-900"></h3>
+              <p id="custom-desc" class="text-xs text-stone-500 mt-0.5"></p>
+            </div>
+            <button onclick="closeCustomizer()" class="text-stone-400 hover:text-stone-700 text-sm font-bold p-1 shrink-0">✕</button>
+          </div>
+          <div id="custom-dims" class="space-y-3"></div>
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor: <strong id="custom-color-name" class="text-stone-800"></strong></span>
+            <div id="custom-colors" class="flex flex-wrap items-center gap-2"></div>
+          </div>
+          <div class="p-3 rounded-2xl bg-stone-50 border border-stone-200 text-xs text-stone-600 space-y-0.5">
+            <div class="flex justify-between items-baseline"><span>Cena za sztukę</span><span id="custom-price" class="font-heading font-extrabold text-lg text-stone-900">–</span></div>
+            <div id="custom-est" class="text-[11px] text-stone-500"></div>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <div class="flex items-center border border-stone-200 rounded-2xl bg-stone-50 p-1">
+              <button onclick="changeCustomQty(-1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="custom-qty" class="w-8 text-center text-xs font-bold text-stone-900">1</span>
+              <button onclick="changeCustomQty(1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+            </div>
+            <button id="custom-add" onclick="addCustomToCart()" disabled class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
+              + Dodaj do koszyka
+            </button>
+          </div>
+          <p class="text-[10px] text-stone-400 leading-relaxed">Każdy model drukujemy dopiero po zamówieniu, dokładnie w podanych wymiarach. Wymiary w milimetrach.</p>
+        </div>
+      </div>
+    </div>
+
     <div id="success-view" class="max-w-md mx-auto px-4 pt-12 hidden text-center space-y-4">
       <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-2xl mx-auto">✓</div>
       <div>
@@ -640,6 +680,10 @@
               <span class="font-semibold text-stone-800">🐣 Kolekcja Wielkanocna</span>
               <input type="checkbox" id="setting-season-easter" class="w-4 h-4 rounded text-emerald-600">
             </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
+              <span class="font-semibold text-stone-800">📐 Na wymiar (haczyki, uchwyty, doniczki)</span>
+              <input type="checkbox" id="setting-season-custom" class="w-4 h-4 rounded text-stone-800">
+            </label>
           </div>
         </div>
 
@@ -1091,7 +1135,7 @@
     // WSPÓLNY STAN W CHMURZE (tabela app_state)
     // ==========================================
     const APP_STATE_DEFAULTS = {
-      seasons: { autumn: true, christmas: false, easter: false },
+      seasons: { autumn: true, christmas: false, easter: false, custom: true },
       specs: DEFAULT_SPECS,
       costs: DEFAULT_COSTS,
       spools: DEFAULT_SPOOLS,
@@ -1213,6 +1257,329 @@
       return escapeHtml(JSON.stringify(String(value ?? '')));
     }
 
+    // ==========================================
+    // NA WYMIAR: haczyki, uchwyty i doniczki w wymiarach klienta
+    // Podgląd 3D, waga, czas i plik 3MF liczy moduł na-wymiar/model3d.js
+    // (zbudowany z projektu modelowanie3d: npm run build:lite)
+    // ==========================================
+    // Cena za sztukę: gramy × stawka + godziny druku × stawka, zaokrąglona w górę do pełnych złotych
+    const CUSTOM_PRICING = { perGram: 0.2, perHour: 1.5, min: 8 };
+
+    const CUSTOM_COLORS = [
+      { name: 'Biały', hex: '#f5f5f4' },
+      { name: 'Pomarańczowy', hex: '#c2410c' },
+      { name: 'Zielony', hex: '#15803d' },
+      { name: 'Żółty', hex: '#facc15' },
+      { name: 'Czerwony', hex: '#dc2626' },
+      { name: 'Różowy', hex: '#f472b6' },
+      { name: 'Miętowy', hex: '#2dd4bf' },
+      { name: 'Brązowy', hex: '#78350f' }
+    ];
+
+    // grams/hours: wartości dla domyślnych wymiarów (cena „od” na kafelku, zanim wczyta się podgląd)
+    const CUSTOM_PRODUCTS = [
+      { id: 'wallHook', title: 'Haczyk ścienny', desc: 'Na ręcznik, kurtkę albo torbę. Ustawiasz wysięg, szerokość i wysokość.', grams: 5.3, hours: 0.39, defaultColor: 'Biały' },
+      { id: 'hookRail', title: 'Listwa z haczykami', desc: 'Na klucze, smycze albo ścierki. Ustawiasz liczbę haczyków i odstęp.', grams: 17.6, hours: 0.95, defaultColor: 'Zielony' },
+      { id: 'shelfHook', title: 'Haczyk pod półkę', desc: 'Wsuwany na półkę, bez wiercenia. Podajesz grubość półki.', grams: 7.6, hours: 0.5, defaultColor: 'Biały' },
+      { id: 'toiletPaperHolder', title: 'Uchwyt na papier toaletowy', desc: 'Ramię z końcówką w górę, opcjonalnie z półeczką na telefon.', grams: 17.5, hours: 0.95, defaultColor: 'Biały' },
+      { id: 'paperTowelHolder', title: 'Uchwyt na ręcznik papierowy', desc: 'Na ścianę, pod szafkę albo nasuwany na półkę. Podajesz szerokość rolki.', grams: 68.9, hours: 3.28, defaultColor: 'Biały' },
+      { id: 'pot', title: 'Doniczka z podstawką', desc: 'Okrągła, z otworami odpływowymi. Ustawiasz średnicę i wysokość.', grams: 125.1, hours: 5.84, defaultColor: 'Pomarańczowy' },
+      { id: 'keyShelf', title: 'Wieszak na klucze z półką', desc: 'Haczyki na klucze i półeczka na portfel albo telefon.', grams: 49.1, hours: 2.38, defaultColor: 'Zielony' },
+      { id: 'plantLabel', title: 'Tabliczka do roślin', desc: 'Wbijana tabliczka z Twoim napisem.', grams: 4, hours: 0.33, defaultColor: 'Miętowy' }
+    ];
+
+    function customPrice(grams, hours) {
+      return Math.max(CUSTOM_PRICING.min, Math.ceil(grams * CUSTOM_PRICING.perGram + hours * CUSTOM_PRICING.perHour));
+    }
+
+    CATALOG.custom = {
+      name: 'Na wymiar',
+      icon: '📐',
+      title: 'Na wymiar 📐',
+      desc: 'Haczyki, uchwyty i doniczki dopasowane do Twojego domu: ustaw wymiary, a wydrukujemy dokładnie taki model.',
+      themeClass: 'from-stone-700 to-stone-900',
+      btnClass: 'bg-stone-900 hover:bg-stone-800 text-white shadow-sm',
+      isCustom: true,
+      products: CUSTOM_PRODUCTS
+    };
+
+    // Waga i czas pozycji na wymiar (do planera i statystyk), klucz: tytuł pozycji
+    const CUSTOM_SPECS = {};
+    function rememberCustomSpec(item) {
+      if (item && item.custom && typeof item.custom.grams === 'number') {
+        CUSTOM_SPECS[item.title] = { weight: item.custom.grams, hours: item.custom.hours, maxOnBed: item.custom.maxOnBed || 1 };
+      }
+    }
+    function specOf(specs, title) {
+      return specs[title] || CUSTOM_SPECS[title];
+    }
+
+    let model3dPromise = null;
+    function loadModel3D() {
+      if (!model3dPromise) {
+        model3dPromise = new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'na-wymiar/model3d.js';
+          s.onload = () => window.Model3D.ready.then(() => resolve(window.Model3D), reject);
+          s.onerror = () => { model3dPromise = null; reject(new Error('Nie udało się wczytać modułu 3D.')); };
+          document.head.appendChild(s);
+        });
+      }
+      return model3dPromise;
+    }
+
+    function renderCustomGrid(grid) {
+      CUSTOM_PRODUCTS.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-3xl p-5 border border-stone-200 shadow-xs hover:shadow-md transition flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <button type="button" onclick="openCustomizer('${p.id}')" class="w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden">
+              <img src="na-wymiar/${p.id}.webp" alt="${p.title}" loading="lazy" decoding="async" width="600" height="600" class="w-full h-full object-contain drop-shadow-sm">
+            </button>
+            <div class="flex justify-between items-start gap-3">
+              <div>
+                <h3 class="font-heading font-bold text-base text-stone-900">${p.title}</h3>
+                <p class="text-xs font-semibold text-stone-500 mt-0.5 tracking-tight">${p.desc}</p>
+              </div>
+              <span class="font-heading font-extrabold text-lg text-stone-900 whitespace-nowrap"><span class="text-xs font-semibold text-stone-500">od</span> ${customPrice(p.grams, p.hours).toFixed(2)} zł</span>
+            </div>
+          </div>
+          <div class="mt-5 pt-4 border-t border-stone-100">
+            <button onclick="openCustomizer('${p.id}')" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
+              📐 Dopasuj wymiary
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Stan otwartego konfiguratora
+    const customizer = { id: null, values: {}, color: null, qty: 1, est: null, viewer: null, timer: null };
+
+    function customProduct(id) {
+      return CUSTOM_PRODUCTS.find(p => p.id === id);
+    }
+
+    async function openCustomizer(id) {
+      const p = customProduct(id);
+      if (!p) return;
+      customizer.id = id;
+      customizer.qty = 1;
+      customizer.est = null;
+      customizer.color = customizer.color && CUSTOM_COLORS.some(c => c.name === customizer.color) ? customizer.color : p.defaultColor;
+      document.getElementById('custom-title').textContent = p.title;
+      document.getElementById('custom-desc').textContent = p.desc;
+      document.getElementById('custom-qty').textContent = 1;
+      document.getElementById('custom-price').textContent = '–';
+      document.getElementById('custom-est').textContent = '';
+      document.getElementById('custom-dims').innerHTML = '';
+      document.getElementById('custom-add').disabled = true;
+      document.getElementById('custom-view-status').classList.remove('hidden');
+      document.getElementById('custom-view-status').textContent = 'Wczytuję podgląd 3D…';
+      renderCustomColors();
+      document.getElementById('custom-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      try {
+        const M3 = await loadModel3D();
+        if (customizer.id !== id) return;
+        customizer.values = M3.clean(id, {});
+        if (!customizer.viewer) customizer.viewer = M3.viewer(document.getElementById('custom-view'));
+        document.getElementById('custom-view-status').classList.add('hidden');
+        renderCustomDims();
+        refreshCustomizer();
+      } catch (err) {
+        document.getElementById('custom-view-status').textContent = err.message;
+      }
+    }
+
+    function closeCustomizer() {
+      document.getElementById('custom-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+      customizer.id = null;
+    }
+
+    function renderCustomColors() {
+      document.getElementById('custom-color-name').textContent = customizer.color;
+      document.getElementById('custom-colors').innerHTML = CUSTOM_COLORS.map(c => `
+        <button type="button" onclick="setCustomColor('${c.name}')"
+          class="swatch-btn ${customizer.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition"
+          style="background-color: ${c.hex}; ${c.name === 'Biały' ? 'border: 1px solid #d6d3d1;' : ''}" title="${c.name}"></button>
+      `).join('');
+    }
+
+    function setCustomColor(name) {
+      customizer.color = name;
+      renderCustomColors();
+      refreshCustomizer(true);
+    }
+
+    function formatMm(x) {
+      return String(Math.round(Number(x) * 10) / 10).replace('.', ',');
+    }
+
+    // Pola wymiarów z opisu modelu (suwak + pole liczby, przełączniki, wybór, napis)
+    function renderCustomDims() {
+      const M3 = window.Model3D;
+      const v = customizer.values;
+      const box = document.getElementById('custom-dims');
+      box.innerHTML = M3.model(customizer.id).dims.filter(d => !d.show || d.show(v)).map(d => {
+        const hint = d.hint ? `<p class="text-[10px] text-stone-400 mt-1">${escapeHtml(d.hint)}</p>` : '';
+        if (d.type === 'number') {
+          return `
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <label for="dim-${d.key}" class="text-xs font-semibold text-stone-700">${escapeHtml(d.label)}</label>
+                <span class="flex items-center gap-1">
+                  <input type="number" inputmode="decimal" id="dimn-${d.key}" value="${v[d.key]}" min="${d.min}" max="${d.max}" step="${d.step || 1}"
+                    onchange="setCustomDim('${d.key}', this.value, true)" class="w-16 text-right text-xs font-bold bg-stone-50 border border-stone-300 rounded-lg px-2 py-1">
+                  <span class="text-[11px] text-stone-500 w-7">${escapeHtml(d.unit || '')}</span>
+                </span>
+              </div>
+              <input type="range" id="dim-${d.key}" value="${v[d.key]}" min="${d.min}" max="${d.max}" step="${d.step || 1}"
+                oninput="setCustomDim('${d.key}', this.value, false)" class="w-full accent-stone-900">
+              ${hint}
+            </div>`;
+        }
+        if (d.type === 'select') {
+          return `
+            <div>
+              <span class="text-xs font-semibold text-stone-700 block mb-1">${escapeHtml(d.label)}</span>
+              <div class="grid ${d.options.length >= 3 ? 'grid-cols-3' : 'grid-cols-2'} gap-2">
+                ${d.options.map(o => `
+                  <button type="button" onclick="setCustomDim('${d.key}', ${jsArg(o.value)}, true)"
+                    class="py-2 px-2 rounded-xl border text-xs font-bold transition ${v[d.key] === o.value ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">${escapeHtml(o.label)}</button>
+                `).join('')}
+              </div>
+              ${hint}
+            </div>`;
+        }
+        if (d.type === 'bool') {
+          return `
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs">
+              <span class="font-semibold text-stone-700">${escapeHtml(d.label)}</span>
+              <input type="checkbox" ${v[d.key] ? 'checked' : ''} onchange="setCustomDim('${d.key}', this.checked, true)" class="w-4 h-4 rounded text-stone-900">
+            </label>`;
+        }
+        return `
+          <div>
+            <label for="dim-${d.key}" class="text-xs font-semibold text-stone-700 block mb-1">${escapeHtml(d.label)}</label>
+            <input type="text" id="dim-${d.key}" value="${escapeHtml(v[d.key])}" maxlength="${d.max_len || 24}"
+              oninput="setCustomDim('${d.key}', this.value, false)" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+            ${hint}
+          </div>`;
+      }).join('');
+    }
+
+    function setCustomDim(key, value, rerender) {
+      const M3 = window.Model3D;
+      const d = M3.model(customizer.id).dims.find(x => x.key === key);
+      const raw = { ...customizer.values, [key]: d.type === 'number' ? Number(value) : value };
+      if (d.type === 'text' && !String(value).trim()) raw[key] = '';
+      customizer.values = M3.clean(customizer.id, raw);
+      if (d.type === 'text') customizer.values[key] = String(value).slice(0, d.max_len || 24);
+      if (d.type === 'number') {
+        const n = document.getElementById(`dimn-${key}`), r = document.getElementById(`dim-${key}`);
+        if (n && document.activeElement !== n) n.value = customizer.values[key];
+        if (n && rerender) n.value = customizer.values[key];
+        if (r) r.value = customizer.values[key];
+      }
+      if (rerender && d.type !== 'number') renderCustomDims();
+      document.getElementById('custom-add').disabled = true;
+      clearTimeout(customizer.timer);
+      customizer.timer = setTimeout(() => refreshCustomizer(), 120);
+    }
+
+    function customColorHex() {
+      return (CUSTOM_COLORS.find(c => c.name === customizer.color) || CUSTOM_COLORS[0]).hex;
+    }
+
+    // Przebudowuje podgląd i liczy wagę, czas i cenę
+    function refreshCustomizer(colorOnly) {
+      const M3 = window.Model3D;
+      if (!M3 || !customizer.id || !customizer.viewer) return;
+      const id = customizer.id;
+      const v = { ...customizer.values };
+      if (id === 'plantLabel' && !String(v.text || '').trim()) {
+        document.getElementById('custom-est').textContent = 'Wpisz napis na tabliczce.';
+        document.getElementById('custom-add').disabled = true;
+        return;
+      }
+      try {
+        customizer.viewer.show(id, v, customColorHex());
+        if (!colorOnly || !customizer.est) {
+          const e = M3.estimate(id, v);
+          const s = e.size;
+          customizer.est = {
+            grams: e.grams,
+            hours: e.hours,
+            pieces: e.pieces,
+            maxOnBed: Math.max(1, Math.floor(250 / (s[0] + 5)) * Math.floor(250 / (s[1] + 5))),
+            price: customPrice(e.grams, e.hours)
+          };
+        }
+        const est = customizer.est;
+        document.getElementById('custom-price').textContent = `${est.price.toFixed(2)} zł`;
+        document.getElementById('custom-est').textContent =
+          `ok. ${formatMm(est.grams)} g filamentu, druk ok. ${formatMm(est.hours)} godz.${est.pieces > 1 ? ` · ${est.pieces} części` : ''}`;
+        document.getElementById('custom-add').disabled = false;
+      } catch (err) {
+        document.getElementById('custom-est').textContent = 'Nie udało się zbudować modelu w tych wymiarach. Zmień któryś wymiar.';
+        document.getElementById('custom-add').disabled = true;
+      }
+    }
+
+    function changeCustomQty(delta) {
+      customizer.qty = Math.max(1, customizer.qty + delta);
+      document.getElementById('custom-qty').textContent = customizer.qty;
+    }
+
+    function addCustomToCart() {
+      const M3 = window.Model3D;
+      const p = customProduct(customizer.id);
+      const est = customizer.est;
+      if (!M3 || !p || !est) return;
+      const values = M3.clean(customizer.id, customizer.values);
+      if (customizer.id === 'plantLabel') values.text = String(customizer.values.text || '').trim().slice(0, 16);
+      const summary = M3.model(customizer.id).summary(values);
+      const title = `${p.title} (${summary})`.slice(0, 100);
+      const item = {
+        title,
+        color: customizer.color,
+        unitPrice: est.price,
+        qty: customizer.qty,
+        isBundle: false,
+        variant: null,
+        custom: { model: customizer.id, values, summary, grams: est.grams, hours: est.hours, maxOnBed: est.maxOnBed }
+      };
+      rememberCustomSpec(item);
+      const existing = cart.find(i => i.title === item.title && i.color === item.color);
+      if (existing) existing.qty += item.qty;
+      else cart.push(item);
+      updateCartUI();
+
+      const btn = document.getElementById('custom-add');
+      btn.textContent = '✓ Dodano!';
+      setTimeout(() => {
+        btn.textContent = '+ Dodaj do koszyka';
+        closeCustomizer();
+      }, 600);
+    }
+
+    // Panel: plik 3MF pozycji na wymiar, dokładnie w wymiarach z zamówienia
+    async function downloadCustomItem(orderId, index) {
+      const order = cloudOrders.find(o => String(o.id) === String(orderId));
+      const item = order && getOrderItems(order)[index];
+      if (!item || !item.custom) return;
+      try {
+        const M3 = await loadModel3D();
+        M3.download(item.custom.model, item.custom.values, `ZAM-${order.id} ${item.title} ${item.color || ''}`);
+      } catch (err) {
+        alert('Nie udało się przygotować pliku 3MF: ' + err.message);
+      }
+    }
+
     let activeSeasonKey = 'autumn';
     const productSelectedState = {};
     const quantities = {};
@@ -1220,6 +1587,11 @@
 
     function renderSeasonSelector() {
       const activeState = getSeasonsState();
+      // Podgląd przed włączeniem: adres z ?na-wymiar pokazuje zakładkę „Na wymiar” tylko w tej przeglądarce
+      if (new URLSearchParams(location.search).has('na-wymiar')) {
+        activeState.custom = true;
+        if (!renderSeasonSelector.previewed) { renderSeasonSelector.previewed = true; activeSeasonKey = 'custom'; }
+      }
       const container = document.getElementById('season-selector-bar');
       container.innerHTML = '';
 
@@ -1264,6 +1636,7 @@
       const grid = document.getElementById('products-grid');
       grid.innerHTML = '';
       const currentConfig = CATALOG[activeSeasonKey];
+      if (currentConfig.isCustom) return renderCustomGrid(grid);
 
       currentConfig.products.forEach(p => {
         if (!productSelectedState[p.id]) {
@@ -1521,7 +1894,8 @@
         qty: i.qty,
         unitPrice: i.unitPrice,
         isBundle: i.isBundle || false,
-        variant: i.variant || null
+        variant: i.variant || null,
+        ...(i.custom ? { custom: i.custom } : {})
       }));
 
       try {
@@ -1801,6 +2175,7 @@
 
     function getOrderItems(order) {
       const rawItems = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      rawItems.forEach(rememberCustomSpec);
       return rawItems.map(item => LEGACY_TITLES[item.title] ? { ...item, title: LEGACY_TITLES[item.title] } : item);
     }
 
@@ -1943,9 +2318,9 @@
         }
 
         const rawItems = getOrderItems(order);
-        const itemsSummary = rawItems.map(item => `
+        const itemsSummary = rawItems.map((item, idx) => `
           <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
-            • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}${isBundleItem(item) ? ` <span class="text-stone-500">· dynie: ${escapeHtml(getBundlePumpkinColors(item).join(', '))}</span>` : ''}
+            • <strong>${escapeHtml(item.qty)}x</strong> ${escapeHtml(item.title)}${item.color && item.color !== 'Multikolor' ? ` <span class="text-stone-500">(${escapeHtml(item.color)})</span>` : ''}${isBundleItem(item) ? ` <span class="text-stone-500">· dynie: ${escapeHtml(getBundlePumpkinColors(item).join(', '))}</span>` : ''}${item.custom ? ` <button onclick="downloadCustomItem(${jsArg(order.id)}, ${idx})" title="Plik do Bambu Studio w wymiarach z zamówienia" class="ml-1 px-1.5 py-0.5 rounded-md bg-stone-900 text-white text-[10px] font-bold hover:bg-stone-700">⬇ 3MF</button>` : ''}
           </span>
         `).join(" ");
         const totalPill = order.paid_at
@@ -2576,7 +2951,7 @@
           totalRevenue += getOrderTotal(o);
 
           expanded.forEach(item => {
-            const spec = specs[item.title] || { weight: 45, hours: 1.5 };
+            const spec = specOf(specs, item.title) || { weight: 45, hours: 1.5 };
             totalPiecesCompleted += item.qty;
             totalGramsPrinted += spec.weight * item.qty;
             totalHoursPrinted += (spec.hours || 1.5) * item.qty;
@@ -2746,10 +3121,10 @@
       bar.style.width = `${Math.min(100, pct)}%`;
       bar.className = `h-full ${pct > 100 ? 'bg-rose-500' : 'bg-emerald-500'}`;
 
-      const hours = bedDraft.reduce((sum, i) => sum + (specs[i.title]?.hours || 1.5) * i.qty, 0);
+      const hours = bedDraft.reduce((sum, i) => sum + (specOf(specs, i.title)?.hours || 1.5) * i.qty, 0);
       const gramsByColor = {};
       bedDraft.forEach(i => {
-        gramsByColor[i.color] = (gramsByColor[i.color] || 0) + (specs[i.title]?.weight || 45) * i.qty;
+        gramsByColor[i.color] = (gramsByColor[i.color] || 0) + (specOf(specs, i.title)?.weight || 45) * i.qty;
       });
       document.getElementById('batch-calc-time').textContent = bedDraft.length ? `${hours.toFixed(1).replace('.', ',')} godz.` : '-';
       document.getElementById('batch-calc-grams').textContent = bedDraft.length
@@ -2768,7 +3143,7 @@
       }
       const specs = getSpecs();
       const items = bedDraft.map(i => {
-        const spec = specs[i.title] || { weight: 45, hours: 1.5 };
+        const spec = specOf(specs, i.title) || { weight: 45, hours: 1.5 };
         return { title: i.title, color: i.color, qty: i.qty, unitWeight: spec.weight, hours: spec.hours || 1.5 };
       });
       savePrintJob({ items, startedAt: new Date().toISOString() });
@@ -2854,7 +3229,7 @@
     }
 
     function getMaxOnBed(model) {
-      const spec = getSpecs()[model] || {};
+      const spec = specOf(getSpecs(), model) || {};
       return Math.max(1, parseInt(spec.maxOnBed) || 8);
     }
 
@@ -3761,6 +4136,7 @@
       document.getElementById('setting-season-autumn').checked = seasons.autumn;
       document.getElementById('setting-season-christmas').checked = seasons.christmas;
       document.getElementById('setting-season-easter').checked = seasons.easter;
+      document.getElementById('setting-season-custom').checked = !!seasons.custom;
 
       const container = document.getElementById('specs-editor');
       container.innerHTML = "";
@@ -3810,7 +4186,8 @@
       const newSeasonsState = {
         autumn: document.getElementById('setting-season-autumn').checked,
         christmas: document.getElementById('setting-season-christmas').checked,
-        easter: document.getElementById('setting-season-easter').checked
+        easter: document.getElementById('setting-season-easter').checked,
+        custom: document.getElementById('setting-season-custom').checked
       };
       saveSeasonsState(newSeasonsState);
 

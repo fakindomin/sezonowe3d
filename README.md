@@ -19,6 +19,16 @@ npm run build:css
 
 i zatwierdzić zmieniony `tailwind.css`.
 
+## Na wymiar (`na-wymiar/`)
+Zakładka z modelami w wymiarach klienta: haczyki, uchwyty, doniczka, tabliczka. Jest domyślnie włączona;
+wyłącza się ją w panelu: Ustawienia → Dostępność Kolekcji → „Na wymiar”.
+- `na-wymiar/model3d.js` – podgląd 3D, waga, czas druku i plik 3MF; budowany w repozytorium
+  modelowanie3d poleceniem `npm run build:lite` (plik `dist-lite/model3d.js`), nie edytować ręcznie
+- `na-wymiar/*.webp` – zdjęcia na kafelki
+- cena za sztukę: `CUSTOM_PRICING` w `index.html` (zł za gram + zł za godzinę druku, cena minimalna)
+- pozycja zamówienia ma pole `custom` (model, wymiary, waga, czas); w panelu przy takiej pozycji
+  jest przycisk „⬇ 3MF”, który zapisuje plik w wymiarach z zamówienia
+
 ## Zdjęcia
 Zdjęcia produktów mają 800×800 px (WebP). Nowe zdjęcia warto zmniejszyć do podobnego rozmiaru
 przed dodaniem, żeby strona szybko ładowała się na telefonach.
