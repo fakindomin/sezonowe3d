@@ -192,6 +192,10 @@
             <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor: <strong id="custom-color-name" class="text-stone-800"></strong></span>
             <div id="custom-colors" class="flex flex-wrap items-center gap-2"></div>
           </div>
+          <div id="custom-accent-wrap" class="hidden">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2"><span id="custom-accent-label">Kolor napisu</span>: <strong id="custom-accent-name" class="text-stone-800"></strong></span>
+            <div id="custom-accents" class="flex flex-wrap items-center gap-2"></div>
+          </div>
           <div class="p-3 rounded-2xl bg-stone-50 border border-stone-200 text-xs text-stone-600 space-y-0.5">
             <div class="flex justify-between items-baseline"><span>Cena za sztukę</span><span id="custom-price" class="font-heading font-extrabold text-lg text-stone-900">–</span></div>
             <div id="custom-est" class="text-[11px] text-stone-500"></div>
@@ -1273,7 +1277,8 @@
       { name: 'Czerwony', hex: '#dc2626' },
       { name: 'Różowy', hex: '#f472b6' },
       { name: 'Miętowy', hex: '#2dd4bf' },
-      { name: 'Brązowy', hex: '#78350f' }
+      { name: 'Brązowy', hex: '#78350f' },
+      { name: 'Czarny', hex: '#1c1917' }
     ];
 
     // grams/hours: wartości dla domyślnych wymiarów (cena „od” na kafelku, zanim wczyta się podgląd)
@@ -1285,7 +1290,7 @@
       { id: 'paperTowelHolder', title: 'Uchwyt na ręcznik papierowy', desc: 'Na ścianę, pod szafkę albo nasuwany na półkę. Podajesz szerokość rolki.', grams: 68.9, hours: 3.28, defaultColor: 'Biały' },
       { id: 'pot', title: 'Doniczka z podstawką', desc: 'Okrągła, z otworami odpływowymi. Ustawiasz średnicę u góry i na dole, wysokość i fakturę ścianki.', grams: 112.1, hours: 5.25, defaultColor: 'Biały' },
       { id: 'keyShelf', title: 'Wieszak na klucze z półką', desc: 'Haczyki na klucze i półeczka na portfel albo telefon.', grams: 49.1, hours: 2.38, defaultColor: 'Biały' },
-      { id: 'plantLabel', title: 'Tabliczka do roślin', desc: 'Wbijana tabliczka z Twoim napisem.', grams: 4, hours: 0.33, defaultColor: 'Biały' }
+      { id: 'plantLabel', title: 'Tabliczka do roślin', desc: 'Wbijana tabliczka z Twoim napisem. Kolor tabliczki i napisu wybierasz osobno.', grams: 4, hours: 0.33, defaultColor: 'Biały', defaultAccent: 'Zielony' }
     ];
 
     function customPrice(grams, hours) {
@@ -1369,6 +1374,8 @@
       customizer.qty = 1;
       customizer.est = null;
       customizer.color = customizer.color && CUSTOM_COLORS.some(c => c.name === customizer.color) ? customizer.color : p.defaultColor;
+      customizer.accent = p.defaultAccent || null;
+      if (customizer.accent === customizer.color) customizer.color = p.defaultColor;
       document.getElementById('custom-title').textContent = p.title;
       document.getElementById('custom-desc').textContent = p.desc;
       document.getElementById('custom-qty').textContent = 1;
@@ -1384,6 +1391,8 @@
       try {
         const M3 = await loadModel3D();
         if (customizer.id !== id) return;
+        if (!M3.model(id).accent) customizer.accent = null;
+        renderCustomColors();
         customizer.values = M3.clean(id, {});
         if (!customizer.viewer) customizer.viewer = M3.viewer(document.getElementById('custom-view'));
         document.getElementById('custom-view-status').classList.add('hidden');
@@ -1407,6 +1416,29 @@
           class="swatch-btn ${customizer.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition"
           style="background-color: ${c.hex}; ${c.name === 'Biały' ? 'border: 1px solid #d6d3d1;' : ''}" title="${c.name}"></button>
       `).join('');
+      // Drugi kolor (napis na tabliczce): tylko gdy model go ma
+      const M3 = window.Model3D;
+      const accentLabel = customizer.accent && M3 && customizer.id ? M3.model(customizer.id).accent : null;
+      document.getElementById('custom-accent-wrap').classList.toggle('hidden', !accentLabel);
+      if (!accentLabel) return;
+      document.getElementById('custom-accent-label').textContent = accentLabel;
+      document.getElementById('custom-accent-name').textContent = customizer.accent;
+      document.getElementById('custom-accents').innerHTML = CUSTOM_COLORS.map(c => `
+        <button type="button" onclick="setCustomAccent('${c.name}')"
+          class="swatch-btn ${customizer.accent === c.name ? 'active' : ''} w-7 h-7 rounded-full transition"
+          style="background-color: ${c.hex}; ${c.name === 'Biały' ? 'border: 1px solid #d6d3d1;' : ''}" title="${c.name}"></button>
+      `).join('');
+    }
+
+    function setCustomAccent(name) {
+      customizer.accent = name;
+      renderCustomColors();
+      refreshCustomizer(true);
+    }
+
+    // Kolor w koszyku i zamówieniu: „Biały” albo „Biały, napis Zielony”
+    function customColorText() {
+      return customizer.accent ? `${customizer.color}, napis ${customizer.accent}` : customizer.color;
     }
 
     function setCustomColor(name) {
@@ -1492,8 +1524,14 @@
       customizer.timer = setTimeout(() => refreshCustomizer(), 150);
     }
 
-    function customColorHex() {
-      return (CUSTOM_COLORS.find(c => c.name === customizer.color) || CUSTOM_COLORS[0]).hex;
+    // Dwa filamenty w jednej pozycji („Biały, napis Zielony”): napis to ok. 10% wagi tabliczki
+    function filamentShares(color, grams) {
+      const m = /^(.*), napis (.*)$/.exec(color || '');
+      return m ? [[m[1], grams * 0.9], [m[2], grams * 0.1]] : [[color, grams]];
+    }
+
+    function customColorHex(name = customizer.color) {
+      return (CUSTOM_COLORS.find(c => c.name === name) || CUSTOM_COLORS[0]).hex;
     }
 
     // Przebudowuje podgląd i liczy wagę, czas i cenę
@@ -1508,7 +1546,7 @@
         return;
       }
       try {
-        customizer.viewer.show(id, v, customColorHex());
+        customizer.viewer.show(id, v, customColorHex(), customizer.accent ? { accent: customColorHex(customizer.accent) } : {});
         if (!colorOnly || !customizer.est) {
           const e = M3.estimate(id, v);
           const s = e.size;
@@ -1557,12 +1595,12 @@
       const title = `${p.title} (${summary})`.slice(0, 100);
       const item = {
         title,
-        color: customizer.color,
+        color: customColorText(),
         unitPrice: est.price,
         qty: customizer.qty,
         isBundle: false,
         variant: null,
-        custom: { model: customizer.id, values, summary, grams: est.grams, hours: est.hours, maxOnBed: est.maxOnBed }
+        custom: { model: customizer.id, values, summary, grams: est.grams, hours: est.hours, maxOnBed: est.maxOnBed, ...(customizer.accent ? { baseColor: customizer.color, accentColor: customizer.accent } : {}) }
       };
       rememberCustomSpec(item);
       const existing = cart.find(i => i.title === item.title && i.color === item.color);
@@ -1585,7 +1623,9 @@
       if (!item || !item.custom) return;
       try {
         const M3 = await loadModel3D();
-        M3.download(item.custom.model, item.custom.values, `ZAM-${order.id} ${item.title} ${item.color || ''}`);
+        const c = item.custom;
+        M3.download(c.model, c.values, `ZAM-${order.id} ${item.title} ${item.color || ''}`, '3mf',
+          c.accentColor ? { base: c.baseColor, accent: c.accentColor } : undefined);
       } catch (err) {
         alert('Nie udało się przygotować pliku 3MF: ' + err.message);
       }
@@ -3135,7 +3175,9 @@
       const hours = bedDraft.reduce((sum, i) => sum + (specOf(specs, i.title)?.hours || 1.5) * i.qty, 0);
       const gramsByColor = {};
       bedDraft.forEach(i => {
-        gramsByColor[i.color] = (gramsByColor[i.color] || 0) + (specOf(specs, i.title)?.weight || 45) * i.qty;
+        filamentShares(i.color, (specOf(specs, i.title)?.weight || 45) * i.qty).forEach(([c, g]) => {
+          gramsByColor[c] = (gramsByColor[c] || 0) + g;
+        });
       });
       document.getElementById('batch-calc-time').textContent = bedDraft.length ? `${hours.toFixed(1).replace('.', ',')} godz.` : '-';
       document.getElementById('batch-calc-grams').textContent = bedDraft.length
@@ -3537,7 +3579,9 @@
       items.forEach(item => {
         // Filament schodzi za cały zaplanowany wydruk, także za nieudane sztuki
         const grams = item.qty * item.unitWeight;
-        spools[item.color] = Math.max(0, (spools[item.color] || 1000) - grams);
+        filamentShares(item.color, grams).forEach(([c, g]) => {
+          spools[c] = Math.max(0, (spools[c] || 1000) - g);
+        });
         const done = item.actualQty;
 
         if (item.title === 'Ogonek dyni') {
