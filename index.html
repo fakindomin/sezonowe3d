@@ -1516,11 +1516,11 @@
             grams: e.grams,
             hours: e.hours,
             pieces: e.pieces,
-            maxOnBed: Math.max(1, Math.floor(250 / (s[0] + 5)) * Math.floor(250 / (s[1] + 5))),
+            maxOnBed: Math.max(1, Math.floor(240 / (s[0] + 5)) * Math.floor(240 / (s[1] + 5))),
             price: customPrice(e.grams, e.hours),
             fits: e.fits !== false,
             longest: e.longest,
-            bed: e.bed || 250
+            bed: e.bed || 240
           };
         }
         const est = customizer.est;
