@@ -671,24 +671,7 @@
         <div>
           <h3 class="font-heading font-bold text-sm text-stone-900">Dostępność Kolekcji w Sklepie</h3>
           <p class="text-[11px] text-stone-500 mb-2">Zaznacz, które sezony mają być widoczne i aktywne dla klientów.</p>
-          <div class="space-y-2 text-xs">
-            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
-              <span class="font-semibold text-stone-800">🍂 Kolekcja Jesienna</span>
-              <input type="checkbox" id="setting-season-autumn" class="w-4 h-4 rounded text-orange-600">
-            </label>
-            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
-              <span class="font-semibold text-stone-800">🎄 Kolekcja Bożonarodzeniowa</span>
-              <input type="checkbox" id="setting-season-christmas" class="w-4 h-4 rounded text-red-600">
-            </label>
-            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
-              <span class="font-semibold text-stone-800">🐣 Kolekcja Wielkanocna</span>
-              <input type="checkbox" id="setting-season-easter" class="w-4 h-4 rounded text-emerald-600">
-            </label>
-            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
-              <span class="font-semibold text-stone-800">📐 Na wymiar (haczyki, uchwyty, doniczki)</span>
-              <input type="checkbox" id="setting-season-custom" class="w-4 h-4 rounded text-stone-800">
-            </label>
-          </div>
+          <div id="settings-seasons" class="space-y-2 text-xs"></div>
         </div>
 
         <div class="border-t border-stone-200 pt-3">
@@ -884,6 +867,20 @@
     // ==========================================
     // BAZA KOLEKCJI ZE ZDJĘCIAMI I WYMIARAMI
     // ==========================================
+    // Kolory kolekcji Zima
+    const WINTER_COLORS = [
+      { name: 'Biały', hex: '#f5f5f4' },
+      { name: 'Zielony', hex: '#15803d' },
+      { name: 'Czerwony', hex: '#dc2626' }
+    ];
+
+    function reindeerSvg(hex, sizeClass) {
+      return `<svg viewBox="0 0 64 64" class="${sizeClass} transition-all duration-300 drop-shadow-sm"><path d="M22 20 L16 8 M19 14 L12 12 M42 20 L48 8 M45 14 L52 12" stroke="#78350f" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="32" cy="42" rx="13" ry="16" fill="${hex}" stroke="#a8a29e" stroke-width="0.8"/><circle cx="32" cy="26" r="10" fill="${hex}" stroke="#a8a29e" stroke-width="0.8"/><circle cx="28" cy="24" r="1.6" fill="#1c1917"/><circle cx="36" cy="24" r="1.6" fill="#1c1917"/><circle cx="32" cy="31" r="3" fill="#b91c1c"/></svg>`;
+    }
+
+    // Kolejność kolekcji w sklepie i ustawieniach (klucze bez zmian, żeby zachować zapisane ustawienia)
+    const SEASON_ORDER = ['easter', 'summer', 'autumn', 'christmas', 'custom'];
+
     const CATALOG = {
       autumn: {
         name: 'Jesień',
@@ -951,61 +948,85 @@
         ]
       },
       christmas: {
-        name: 'Boże Narodzenie',
-        icon: '🎄',
-        title: 'Kolekcja Świąteczna 🎄',
-        desc: 'Eleganckie ozdoby świąteczne, figurki i dekoracje w klasycznej palecie barw.',
+        name: 'Zima',
+        icon: '❄️',
+        title: 'Kolekcja Zimowa ❄️',
+        desc: 'Renifery, śnieżki i choinkowe miseczki w bieli, zieleni i czerwieni.',
         themeClass: 'from-red-800 to-emerald-900',
         btnClass: 'bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-800 hover:to-rose-800 text-white shadow-sm',
         products: [
           {
-            id: 'jelonek',
-            title: 'Jelonek',
-            desc: 'Wymiary w przygotowaniu',
+            id: 'renifer',
+            title: 'Renifer',
+            desc: 'Trzy rozmiary do wyboru',
             price: 10,
+            sizes: [
+              { name: 'Mały', price: 5, stockName: 'Renifer mały', scale: 'w-24 h-24' },
+              { name: 'Średni', price: 10, stockName: 'Renifer średni', scale: 'w-32 h-32' },
+              { name: 'Duży', price: 15, stockName: 'Renifer duży', scale: 'w-40 h-40' }
+            ],
+            defaultSize: 'Średni',
             hasColors: true,
             defaultColor: 'Czerwony',
-            colors: [
-              { name: 'Zielony', hex: '#15803d' },
-              { name: 'Biały', hex: '#f5f5f4' },
-              { name: 'Czerwony', hex: '#dc2626' }
-            ],
-            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><path d="M20 18 L26 12 L30 18 M44 18 L38 12 L34 18" stroke="#78350f" stroke-width="3" stroke-linecap="round"/><ellipse cx="32" cy="38" rx="14" ry="18" fill="currentColor"/><circle cx="32" cy="24" r="9" fill="currentColor"/><circle cx="32" cy="26" r="3" fill="#1c1917"/></svg>`
+            colors: WINTER_COLORS,
+            renderVisual: (sel) => reindeerSvg(sel.hex, (sel.sizeScale || 'w-32 h-32'))
           },
           {
-            id: 'mikolaj',
-            title: 'Mikołaj',
-            desc: 'Wymiary w przygotowaniu',
+            id: 'sniezki',
+            title: 'Śnieżki',
+            desc: 'Komplet 5 szt.',
             price: 10,
             hasColors: true,
-            defaultColor: 'Czerwony',
-            colors: [
-              { name: 'Zielony', hex: '#15803d' },
-              { name: 'Biały', hex: '#f5f5f4' },
-              { name: 'Czerwony', hex: '#dc2626' }
-            ],
-            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><polygon points="32,8 20,28 44,28" fill="currentColor"/><circle cx="32" cy="8" r="4" fill="#f5f5f4"/><ellipse cx="32" cy="42" rx="15" ry="16" fill="currentColor"/><path d="M22 30 Q32 44 42 30" fill="#f5f5f4"/></svg>`
+            defaultColor: 'Biały',
+            colors: WINTER_COLORS,
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-36 h-36 transition-colors duration-300 drop-shadow-sm">${[[32, 30, 1], [14, 16, 0.55], [50, 14, 0.5], [14, 48, 0.5], [50, 48, 0.55]].map(([x, y, k]) => `<g transform="translate(${x} ${y}) scale(${k})" stroke="${sel.hex}" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M0 -14 V14 M-12 -7 L12 7 M-12 7 L12 -7 M-4 -11 L0 -7 L4 -11 M-4 11 L0 7 L4 11"/></g><g transform="translate(${x} ${y}) scale(${k})" stroke="#a8a29e" stroke-width="0.6" fill="none"><path d="M0 -14 V14 M-12 -7 L12 7 M-12 7 L12 -7"/></g>`).join('')}</svg>`
           },
           {
-            id: 'bombka',
-            title: 'Bombka',
-            desc: 'Wymiary w przygotowaniu',
+            id: 'choinki_miseczki',
+            title: 'Choinki-miseczki',
+            desc: 'Komplet 3 szt. · PETG',
+            price: 20,
+            note: 'Wydrukowane z PETG – przeznaczone tylko na suche przekąski (cukierki, orzechy, ciastka). Nie na mokre i tłuste jedzenie. Myć ręcznie w letniej wodzie.',
+            hasColors: true,
+            defaultColor: 'Zielony',
+            colors: WINTER_COLORS,
+            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-36 h-36 transition-colors duration-300 drop-shadow-sm">${[[18, 0.7], [46, 0.7], [32, 1]].map(([x, k]) => `<g transform="translate(${x} 34) scale(${k})"><polygon points="0,-24 -16,18 16,18" fill="${sel.hex}" stroke="#78716c" stroke-width="0.8"/><ellipse cx="0" cy="14" rx="11" ry="3.5" fill="#1c1917" fill-opacity="0.18"/><rect x="-3" y="18" width="6" height="5" fill="#92400e"/></g>`).join('')}</svg>`
+          },
+          {
+            id: 'reniferki',
+            title: 'Reniferki',
+            desc: 'Komplet 3 szt.',
             price: 10,
             hasColors: true,
             defaultColor: 'Czerwony',
-            colors: [
-              { name: 'Zielony', hex: '#15803d' },
-              { name: 'Biały', hex: '#f5f5f4' },
-              { name: 'Czerwony', hex: '#dc2626' }
-            ],
-            renderVisual: (sel) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${sel.hex};"><rect x="28" y="10" width="8" height="6" rx="2" fill="#d97706"/><circle cx="32" cy="38" r="20" fill="currentColor"/><circle cx="32" cy="38" r="14" fill="white" fill-opacity="0.15"/></svg>`
+            colors: WINTER_COLORS,
+            renderVisual: (sel) => `<div class="flex items-end justify-center -space-x-4">${reindeerSvg(sel.hex, 'w-16 h-16')}${reindeerSvg(sel.hex, 'w-20 h-20')}${reindeerSvg(sel.hex, 'w-16 h-16')}</div>`
+          },
+          {
+            id: 'reniferek_kinderek',
+            title: 'Reniferek-Kinderek',
+            desc: '1 szt.',
+            price: 5,
+            hasColors: true,
+            defaultColor: 'Czerwony',
+            colors: WINTER_COLORS,
+            renderVisual: (sel) => `<div class="relative">${reindeerSvg(sel.hex, 'w-28 h-28')}<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-6 rounded-md bg-amber-900 border-2 border-white shadow-sm"></div></div>`
           }
         ]
       },
+      summer: {
+        name: 'Lato',
+        icon: '☀️',
+        title: 'Kolekcja Letnia ☀️',
+        desc: 'Letnie dekoracje już wkrótce.',
+        themeClass: 'from-sky-500 to-cyan-700',
+        btnClass: 'bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white shadow-sm',
+        products: []
+      },
       easter: {
-        name: 'Wielkanoc',
-        icon: '🐣',
-        title: 'Kolekcja Wiosenna 🐣',
+        name: 'Wiosna',
+        icon: '🌷',
+        title: 'Kolekcja Wiosenna 🌷',
         desc: 'Pastelowe zające w trzech rozmiarach i niespodzianki na wielkanocny stół.',
         themeClass: 'from-emerald-600 to-teal-700',
         btnClass: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm',
@@ -1076,9 +1097,13 @@
       'Wiewiórka': { weight: 50, hours: 2.0, maxOnBed: 14 },
       'Taca': { weight: 110, hours: 3.3, maxOnBed: 1 },
       'Ogonek dyni': { weight: 2, hours: 0.15, maxOnBed: 40 },
-      'Jelonek': { weight: 48, hours: 1.8, maxOnBed: 10 },
-      'Mikołaj': { weight: 52, hours: 2.1, maxOnBed: 10 },
-      'Bombka': { weight: 38, hours: 1.5, maxOnBed: 12 },
+      'Renifer mały': { weight: 25, hours: 1.0, maxOnBed: 12 },
+      'Renifer średni': { weight: 50, hours: 2.0, maxOnBed: 6 },
+      'Renifer duży': { weight: 90, hours: 3.5, maxOnBed: 3 },
+      'Śnieżka': { weight: 4, hours: 0.3, maxOnBed: 30 },
+      'Choinka-miseczka': { weight: 35, hours: 1.5, maxOnBed: 6 },
+      'Reniferek': { weight: 10, hours: 0.5, maxOnBed: 20 },
+      'Reniferek-Kinderek': { weight: 12, hours: 0.6, maxOnBed: 16 },
       'Zajączek mały': { weight: 28, hours: 1.1, maxOnBed: 20 },
       'Zajączek średni': { weight: 48, hours: 1.8, maxOnBed: 10 },
       'Zajączek duży': { weight: 75, hours: 2.9, maxOnBed: 6 },
@@ -1087,9 +1112,19 @@
 
     const ALL_PRICES = {
       'Dynia': 10, 'Lisek': 5, 'Wiewiórka': 5, 'Taca': 10, 'Zestaw Jesienny': 40,
-      'Jelonek': 10, 'Mikołaj': 10, 'Bombka': 10,
+      'Renifer mały': 5, 'Renifer średni': 10, 'Renifer duży': 15,
+      'Śnieżki': 10, 'Choinki-miseczki': 20, 'Reniferki': 10, 'Reniferek-Kinderek': 5,
       'Zajączek mały': 5, 'Zajączek średni': 10, 'Zajączek duży': 15, 'Jajko niespodzianka': 10
     };
+
+    // Komplety ze sklepu: ile i jakich sztuk zawierają (w kolorze kompletu)
+    const SET_PIECES = {
+      'Śnieżki': { piece: 'Śnieżka', count: 5 },
+      'Choinki-miseczki': { piece: 'Choinka-miseczka', count: 3 },
+      'Reniferki': { piece: 'Reniferek', count: 3 }
+    };
+
+    const WINTER_MODELS = ['Renifer mały', 'Renifer średni', 'Renifer duży', 'Śnieżka', 'Choinka-miseczka', 'Reniferek', 'Reniferek-Kinderek', ...Object.keys(SET_PIECES)];
 
     // Cena z cennika; zestawy mają w nazwie wariant, np. "Zestaw Jesienny (Z liskiem)"
     function getUnitPrice(title) {
@@ -1139,7 +1174,7 @@
     // WSPÓLNY STAN W CHMURZE (tabela app_state)
     // ==========================================
     const APP_STATE_DEFAULTS = {
-      seasons: { autumn: true, christmas: false, easter: false, custom: true },
+      seasons: { easter: false, summer: false, autumn: true, christmas: false, custom: true },
       specs: DEFAULT_SPECS,
       costs: DEFAULT_COSTS,
       spools: DEFAULT_SPOOLS,
@@ -1298,9 +1333,9 @@
     }
 
     CATALOG.custom = {
-      name: 'Na wymiar',
+      name: 'Akcesoria',
       icon: '📐',
-      title: 'Na wymiar 📐',
+      title: 'Akcesoria na wymiar 📐',
       desc: 'Haczyki, uchwyty i doniczki dopasowane do Twojego domu: ustaw wymiary, a wydrukujemy dokładnie taki model.',
       themeClass: 'from-stone-700 to-stone-900',
       btnClass: 'bg-stone-900 hover:bg-stone-800 text-white shadow-sm',
@@ -1647,11 +1682,12 @@
       container.innerHTML = '';
 
       if (!activeState[activeSeasonKey]) {
-        const firstEnabled = Object.keys(activeState).find(k => activeState[k]);
+        const firstEnabled = SEASON_ORDER.find(k => CATALOG[k] && activeState[k]);
         activeSeasonKey = firstEnabled || 'autumn';
       }
 
-      Object.entries(CATALOG).forEach(([key, config]) => {
+      SEASON_ORDER.filter(key => CATALOG[key]).forEach(key => {
+        const config = CATALOG[key];
         const isEnabled = activeState[key] === true;
         const isCurrent = key === activeSeasonKey;
 
@@ -1689,6 +1725,11 @@
       const currentConfig = CATALOG[activeSeasonKey];
       if (currentConfig.isCustom) return renderCustomGrid(grid);
 
+      if (currentConfig.products.length === 0) {
+        grid.innerHTML = `<div class="col-span-full p-8 text-center bg-white rounded-3xl border border-stone-200 text-sm text-stone-500">Ta kolekcja jest w przygotowaniu – zajrzyj wkrótce!</div>`;
+        return;
+      }
+
       currentConfig.products.forEach(p => {
         if (!productSelectedState[p.id]) {
           if (p.isBundle) {
@@ -1698,13 +1739,16 @@
             productSelectedState[p.id] = {
               color: defCol.name,
               hex: defCol.hex,
-              img: defCol.img || null
+              img: defCol.img || null,
+              size: p.sizes ? (p.defaultSize || p.sizes[0].name) : null
             };
           }
         }
         if (!quantities[p.id]) quantities[p.id] = 1;
 
         const currentSel = productSelectedState[p.id];
+        const selectedSize = getSelectedSize(p, currentSel);
+        if (selectedSize) currentSel.sizeScale = selectedSize.scale;
         const card = document.createElement('div');
         card.className = "bg-white rounded-3xl p-5 border border-stone-200 shadow-xs hover:shadow-md transition flex flex-col justify-between";
 
@@ -1734,7 +1778,24 @@
             </button>
           `).join('');
 
+          const sizesHtml = p.sizes ? `
+            <div class="mt-4">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
+                Rozmiar: <strong class="text-stone-800">${selectedSize.name}</strong>
+              </span>
+              <div class="grid grid-cols-3 gap-2">
+                ${p.sizes.map(sz => `
+                  <button type="button" onclick="setProductSize('${p.id}', '${sz.name}')"
+                    class="py-2 px-2 rounded-xl border text-xs font-bold transition ${selectedSize.name === sz.name ? 'border-stone-900 bg-stone-900 text-white shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
+                    ${sz.name}<span class="block text-[10px] font-semibold opacity-80">${sz.price} zł</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : '';
+
           optionsHtml = `
+            ${sizesHtml}
             <div class="mt-4">
               <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
                 Kolor: <strong class="text-stone-800">${currentSel.color}</strong>
@@ -1768,9 +1829,10 @@
                 <h3 class="font-heading font-bold text-base text-stone-900">${p.title}</h3>
                 <p class="text-xs font-semibold text-stone-500 mt-0.5 tracking-tight">${p.desc}</p>
               </div>
-              <span class="font-heading font-extrabold text-lg text-stone-900">${p.price.toFixed(2)} zł</span>
+              <span class="font-heading font-extrabold text-lg text-stone-900">${getProductPrice(p, currentSel).toFixed(2)} zł</span>
             </div>
             ${optionsHtml}
+            ${p.note ? `<p class="mt-3 text-[11px] leading-relaxed text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-2.5">ℹ️ ${p.note}</p>` : ''}
           </div>
 
           <div class="mt-5 pt-4 border-t border-stone-100 flex items-center gap-2.5">
@@ -1789,8 +1851,24 @@
     }
 
     function setProductColor(productId, colorName, hexCode, imgPath) {
-      productSelectedState[productId] = { color: colorName, hex: hexCode, img: imgPath || null };
+      productSelectedState[productId] = { ...productSelectedState[productId], color: colorName, hex: hexCode, img: imgPath || null };
       renderProductsGrid();
+    }
+
+    function setProductSize(productId, sizeName) {
+      productSelectedState[productId] = { ...productSelectedState[productId], size: sizeName };
+      renderProductsGrid();
+    }
+
+    function getSelectedSize(product, state) {
+      if (!product.sizes) return null;
+      return product.sizes.find(sz => sz.name === (state && state.size)) || product.sizes[0];
+    }
+
+    // Cena produktu z uwzględnieniem wybranego rozmiaru
+    function getProductPrice(product, state) {
+      const size = getSelectedSize(product, state);
+      return size ? size.price : product.price;
     }
 
     function setBundleVariant(productId, variantName) {
@@ -1807,12 +1885,13 @@
     function addToCart(productId) {
       const product = CATALOG[activeSeasonKey].products.find(p => p.id === productId);
       if (!product) return;
-      const unitPrice = product.price;
       const state = productSelectedState[productId] || {};
+      const unitPrice = getProductPrice(product, state);
+      const size = getSelectedSize(product, state);
       const count = quantities[productId] || 1;
 
       // Nazwa magazynowa (jak w planerze i na półce), a nie opisowa nazwa ze sklepu
-      let itemTitle = product.stockName || product.title;
+      let itemTitle = size ? size.stockName : (product.stockName || product.title);
       let itemColor = 'Pomarańczowy';
       let isBundle = false;
       let variant = null;
@@ -2258,6 +2337,13 @@
             });
             expanded.push({ title: 'Taca', color: 'Biały', qty: 1, fromBundle: true });
             expanded.push({ title: animalName, color: 'Pomarańczowy', qty: 1, fromBundle: true });
+          }
+        } else if (SET_PIECES[item.title]) {
+          // Komplet: każda sztuka kompletu osobno (do druku i pakowania)
+          const set = SET_PIECES[item.title];
+          const sets = Math.max(0, parseInt(item.qty) || 0);
+          for (let q = 0; q < sets * set.count; q++) {
+            expanded.push({ title: set.piece, color: item.color, qty: 1, fromBundle: true });
           }
         } else {
           // Każda sztuka to osobna pozycja na checkliście pakowania
@@ -3271,6 +3357,7 @@
       if (model.startsWith('Zestaw Jesienny')) return ['Multikolor'];
       if (model === 'Taca') return ['Biały'];
       if (model === 'Ogonek dyni') return ['Brązowy'];
+      if (WINTER_MODELS.includes(model)) return WINTER_COLORS.map(c => c.name);
 
       for (const season of Object.values(CATALOG)) {
         const product = season.products.find(p => (p.stockName || p.title) === model);
@@ -4188,15 +4275,17 @@
       document.getElementById('setting-cost-filament').value = costs.filamentKg;
       document.getElementById('setting-cost-energy').value = costs.energyKwh;
 
-      document.getElementById('setting-season-autumn').checked = seasons.autumn;
-      document.getElementById('setting-season-christmas').checked = seasons.christmas;
-      document.getElementById('setting-season-easter').checked = seasons.easter;
-      document.getElementById('setting-season-custom').checked = !!seasons.custom;
+      document.getElementById('settings-seasons').innerHTML = SEASON_ORDER.filter(key => CATALOG[key]).map(key => `
+        <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
+          <span class="font-semibold text-stone-800">${CATALOG[key].icon} ${escapeHtml(CATALOG[key].name)}${CATALOG[key].products.length === 0 ? ' <span class="text-[10px] text-stone-400 font-normal">(brak produktów)</span>' : ''}</span>
+          <input type="checkbox" id="setting-season-${key}" ${seasons[key] ? 'checked' : ''} class="w-4 h-4 rounded">
+        </label>
+      `).join('');
 
       const container = document.getElementById('specs-editor');
       container.innerHTML = "";
 
-      Object.keys(specs).forEach(name => {
+      Object.keys(DEFAULT_SPECS).forEach(name => {
         const item = specs[name];
         const row = document.createElement("div");
         row.className = "p-2 bg-stone-50 rounded-xl border border-stone-200 space-y-1.5";
@@ -4225,7 +4314,7 @@
 
     function saveSettingsAll() {
       const specs = getSpecs();
-      Object.keys(specs).forEach(name => {
+      Object.keys(DEFAULT_SPECS).forEach(name => {
         const w = parseInt(document.getElementById(`spec-weight-${name}`).value) || 0;
         const timeValRaw = document.getElementById(`spec-time-${name}`).value.replace(",", ".");
         const h = parseFloat(timeValRaw) || 1.0;
@@ -4238,12 +4327,10 @@
       const eKwh = parseFloat(document.getElementById('setting-cost-energy').value) || 1.15;
       saveCosts({ filamentKg: fKg, energyKwh: eKwh });
 
-      const newSeasonsState = {
-        autumn: document.getElementById('setting-season-autumn').checked,
-        christmas: document.getElementById('setting-season-christmas').checked,
-        easter: document.getElementById('setting-season-easter').checked,
-        custom: document.getElementById('setting-season-custom').checked
-      };
+      const newSeasonsState = {};
+      SEASON_ORDER.filter(key => CATALOG[key]).forEach(key => {
+        newSeasonsState[key] = document.getElementById(`setting-season-${key}`).checked;
+      });
       saveSeasonsState(newSeasonsState);
 
       alert("Zapisano ustawienia kolekcji, kosztów i parametrów stołu!");
