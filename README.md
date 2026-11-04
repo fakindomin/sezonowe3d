@@ -28,6 +28,9 @@ wyłącza się ją w panelu: Ustawienia → Dostępność Kolekcji → „Na wym
 - cena za sztukę: `CUSTOM_PRICING` w `index.html` (zł za gram + zł za godzinę druku, cena minimalna)
 - pozycja zamówienia ma pole `custom` (model, wymiary, waga, czas); w panelu przy takiej pozycji
   jest przycisk „⬇ 3MF”, który zapisuje plik w wymiarach z zamówienia
+- tabliczka do roślin ma dwa kolory (tabliczka i napis, w zamówieniu „Biały, napis Zielony”); jej 3MF
+  to jeden obiekt z dwiema częściami nazwanymi kolorami, więc w Bambu Studio każdej części
+  przypisujesz filament z AMS (albo zmiana filamentu na wysokości 2 mm)
 
 ## Zdjęcia
 Zdjęcia produktów mają 800×800 px (WebP). Nowe zdjęcia warto zmniejszyć do podobnego rozmiaru
