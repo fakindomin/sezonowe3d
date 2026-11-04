@@ -1587,6 +1587,11 @@
 
     function renderSeasonSelector() {
       const activeState = getSeasonsState();
+      // Podgląd przed włączeniem: adres z ?na-wymiar pokazuje zakładkę „Na wymiar” tylko w tej przeglądarce
+      if (new URLSearchParams(location.search).has('na-wymiar')) {
+        activeState.custom = true;
+        if (!renderSeasonSelector.previewed) { renderSeasonSelector.previewed = true; activeSeasonKey = 'custom'; }
+      }
       const container = document.getElementById('season-selector-bar');
       container.innerHTML = '';
 
