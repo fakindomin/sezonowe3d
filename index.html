@@ -27,13 +27,64 @@
     h1, h2, h3, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
     
     .swatch-btn.active {
-      outline: 2px solid #1c1917;
+      outline: 2px solid var(--s-accent);
       outline-offset: 2px;
       transform: scale(1.1);
     }
+
+    /* Motyw kolekcji: body[data-season] ustawia kolory całego sklepu (domyślnie jesień) */
+    :root {
+      --s-from: #ea580c; --s-to: #b45309;
+      --s-accent: #c2410c; --s-accent-hover: #9a3412;
+      --s-soft: #fff7ed; --s-soft-border: #fed7aa; --s-ink: #7c2d12;
+      --s-eyebrow: #fde68a; --s-sub: rgba(254, 243, 199, 0.9);
+      --s-page: #faf6f0; --s-bar: #1c1917; --s-bar-accent: #fcd34d;
+    }
+    body[data-season="easter"] {
+      --s-from: #059669; --s-to: #0f766e;
+      --s-accent: #047857; --s-accent-hover: #065f46;
+      --s-soft: #ecfdf5; --s-soft-border: #a7f3d0; --s-ink: #064e3b;
+      --s-eyebrow: #a7f3d0; --s-sub: rgba(209, 250, 229, 0.9);
+      --s-page: #f4f9f4; --s-bar: #062e24; --s-bar-accent: #6ee7b7;
+    }
+    body[data-season="summer"] {
+      --s-from: #0ea5e9; --s-to: #0e7490;
+      --s-accent: #0369a1; --s-accent-hover: #075985;
+      --s-soft: #f0f9ff; --s-soft-border: #bae6fd; --s-ink: #0c4a6e;
+      --s-eyebrow: #e0f2fe; --s-sub: rgba(224, 242, 254, 0.92);
+      --s-page: #f3f8fb; --s-bar: #082f49; --s-bar-accent: #7dd3fc;
+    }
+    body[data-season="christmas"] {
+      --s-from: #991b1b; --s-to: #064e3b;
+      --s-accent: #b91c1c; --s-accent-hover: #991b1b;
+      --s-soft: #fef2f2; --s-soft-border: #fecaca; --s-ink: #7f1d1d;
+      --s-eyebrow: #fecaca; --s-sub: rgba(254, 226, 226, 0.9);
+      --s-page: #f4f6f7; --s-bar: #0b2a1f; --s-bar-accent: #fca5a5;
+    }
+    body[data-season="custom"] {
+      --s-from: #44403c; --s-to: #1c1917;
+      --s-accent: #292524; --s-accent-hover: #1c1917;
+      --s-soft: #f5f5f4; --s-soft-border: #d6d3d1; --s-ink: #1c1917;
+      --s-eyebrow: #d6d3d1; --s-sub: rgba(245, 245, 244, 0.85);
+      --s-page: #f5f5f4; --s-bar: #1c1917; --s-bar-accent: #e7e5e4;
+    }
+    body { background-color: var(--s-page); transition: background-color 0.3s; }
+    .s-gradient { background-image: linear-gradient(to bottom right, var(--s-from), var(--s-to)); }
+    .s-btn { background-color: var(--s-accent); color: #fff; }
+    .s-btn:hover { background-color: var(--s-accent-hover); }
+    .s-text-accent { color: var(--s-accent); }
+    .s-soft { background-color: var(--s-soft); border-color: var(--s-soft-border); color: var(--s-ink); }
+    .s-selected { background-color: var(--s-soft); border-color: var(--s-accent) !important; color: var(--s-ink); }
+    .s-chip-active { background-color: var(--s-accent); border-color: var(--s-accent) !important; color: #fff; }
+    .s-eyebrow { color: var(--s-eyebrow); }
+    .s-sub { color: var(--s-sub); }
+    .s-bar { background-color: var(--s-bar); }
+    .s-bar-accent { color: var(--s-bar-accent); }
+    .s-bar-btn { background-color: var(--s-soft); color: var(--s-ink); }
+    .s-bar-btn:hover { background-color: #fff; }
   </style>
 </head>
-<body class="bg-[#faf6f0] text-stone-800 pb-28">
+<body class="text-stone-800 pb-28">
 
   <!-- ========================================== -->
   <!-- 1. SKLEP DLA KLIENTA                      -->
@@ -42,7 +93,7 @@
     <header class="bg-white/90 backdrop-blur-md border-b border-stone-200 sticky top-0 z-30 px-4 py-3 shadow-xs">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-center justify-center p-1 shadow-xs">
+          <div class="w-10 h-10 rounded-xl s-soft border flex items-center justify-center p-1 shadow-xs transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" fill="none">
               <defs>
                 <linearGradient id="brassGradH" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -74,7 +125,7 @@
             </svg>
           </div>
           <div>
-            <span class="font-heading font-extrabold text-lg text-stone-900 leading-none tracking-tight block">sezonowe<span class="text-orange-600">3d</span><span class="text-stone-400 text-xs font-normal">.pl</span></span>
+            <span class="font-heading font-extrabold text-lg text-stone-900 leading-none tracking-tight block">sezonowe<span class="s-text-accent">3d</span><span class="text-stone-400 text-xs font-normal">.pl</span></span>
             <p class="text-[10px] text-stone-500 font-semibold tracking-wider uppercase mt-0.5">Pracownia Druku 3D</p>
           </div>
         </div>
@@ -90,43 +141,43 @@
         <span class="text-[11px] font-semibold text-stone-400 shrink-0 hidden sm:inline">Kolekcje sezonowe</span>
       </div>
 
-      <div id="season-banner" class="p-6 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 text-white shadow-md relative overflow-hidden transition-all duration-300">
+      <div id="season-banner" class="p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300">
         <div class="relative z-10 max-w-md">
-          <span class="text-xs uppercase font-extrabold tracking-widest text-amber-200 block mb-1">Limitowana Seria</span>
+          <span class="text-xs uppercase font-extrabold tracking-widest s-eyebrow block mb-1">Limitowana Seria</span>
           <h2 class="text-2xl sm:text-3xl font-heading font-bold" id="banner-title">Kolekcja Jesienna 🍂</h2>
-          <p class="text-xs sm:text-sm text-amber-100/90 mt-1" id="banner-desc">Ręcznie konfekcjonowane dekoracje i geometryczne figurki drukowane w technologii FDM.</p>
+          <p class="text-xs sm:text-sm s-sub mt-1" id="banner-desc">Ręcznie konfekcjonowane dekoracje i geometryczne figurki drukowane w technologii FDM.</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="products-grid"></div>
 
       <!-- SEKCJA KONTAKTOWA W POMARAŃCZOWYM KAFELKU -->
-      <footer class="mt-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 text-white shadow-md relative overflow-hidden">
+      <footer class="mt-12 p-6 sm:p-8 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300">
         <div class="relative z-10 text-center max-w-lg mx-auto space-y-3">
-          <span class="text-[11px] uppercase font-extrabold tracking-widest text-amber-200 block">Masz pytania? Skontaktuj się z nami</span>
+          <span class="text-[11px] uppercase font-extrabold tracking-widest s-eyebrow block">Masz pytania? Skontaktuj się z nami</span>
           <h3 class="font-heading font-extrabold text-xl sm:text-2xl tracking-tight">Kontakt z Pracownią</h3>
-          <p class="text-xs text-amber-100/90 leading-relaxed">Chętnie pomożemy z zamówieniem, kolorami lub realizacjami indywidualnymi.</p>
+          <p class="text-xs s-sub leading-relaxed">Chętnie pomożemy z zamówieniem, kolorami lub realizacjami indywidualnymi.</p>
 
           <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="tel:665532647" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white text-stone-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm hover:bg-amber-50 transition active:scale-95">
+            <a href="tel:665532647" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white text-stone-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm hover:bg-white/90 transition active:scale-95">
               <span>📞</span> <span>Zadzwoń: <strong>665 532 647</strong></span>
             </a>
-            <a href="mailto:sezonowe3d@gmail.com" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-amber-500/30 hover:bg-amber-500/40 text-white font-bold text-xs border border-amber-300/40 flex items-center justify-center gap-2 transition active:scale-95">
+            <a href="mailto:sezonowe3d@gmail.com" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/30 flex items-center justify-center gap-2 transition active:scale-95">
               <span>✉️</span> <span>Napisz: <strong>sezonowe3d@gmail.com</strong></span>
             </a>
           </div>
-          <p class="text-[10px] text-amber-200/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D · <a href="polityka-prywatnosci.html" class="underline hover:text-amber-100">Polityka prywatności</a></p>
+          <p class="text-[10px] text-white/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D · <a href="polityka-prywatnosci.html" class="underline hover:text-white">Polityka prywatności</a></p>
         </div>
       </footer>
     </main>
 
     <div id="sticky-bar" class="fixed bottom-4 inset-x-4 max-w-md mx-auto hidden z-40">
-      <div class="bg-stone-900 text-amber-50 p-4 rounded-2xl shadow-xl flex items-center justify-between border border-stone-800">
+      <div class="s-bar text-white p-4 rounded-2xl shadow-xl flex items-center justify-between border border-white/10 transition-colors">
         <div>
           <div class="text-xs text-stone-400"><span id="cart-count">0</span> szt. w koszyku</div>
-          <div class="text-base font-extrabold text-amber-300" id="cart-total">0,00 zł</div>
+          <div class="text-base font-extrabold s-bar-accent" id="cart-total">0,00 zł</div>
         </div>
-        <button onclick="openCheckout()" class="bg-amber-100 hover:bg-white text-stone-900 px-5 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 shadow-sm">
+        <button onclick="openCheckout()" class="s-bar-btn px-5 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 shadow-sm">
           Przejdź do kasy →
         </button>
       </div>
@@ -143,7 +194,7 @@
 
         <div class="flex justify-between items-center pt-2 font-bold text-sm text-stone-900 border-t border-stone-200">
           <span>Do zapłaty:</span>
-          <span id="modal-total" class="text-amber-900 text-lg">0,00 zł</span>
+          <span id="modal-total" class="s-text-accent text-lg">0,00 zł</span>
         </div>
 
         <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 pt-2">
@@ -160,7 +211,7 @@
             <input id="form-notes" type="text" placeholder="np. odbiór w piątek po południu" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
 
-          <button id="submit-btn" type="submit" class="w-full mt-3 bg-stone-900 hover:bg-stone-800 text-amber-50 font-bold py-3.5 rounded-2xl text-xs transition active:scale-[0.99]">
+          <button id="submit-btn" type="submit" class="w-full mt-3 s-btn font-bold py-3.5 rounded-2xl text-xs transition active:scale-[0.99]">
             Złóż zamówienie
           </button>
           <p class="text-[10px] text-stone-500 text-center leading-relaxed">
@@ -1693,7 +1744,7 @@
 
         const btn = document.createElement('button');
         if (isEnabled) {
-          btn.className = `px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${isCurrent ? 'bg-stone-900 text-white shadow-sm' : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'}`;
+          btn.className = `px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${isCurrent ? 's-chip-active border shadow-sm' : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'}`;
           btn.innerHTML = `<span>${config.icon}</span> <span>${config.name}</span>`;
           btn.onclick = () => switchSeason(key);
         } else {
@@ -1705,11 +1756,12 @@
       });
 
       const currentConfig = CATALOG[activeSeasonKey];
+      document.body.dataset.season = activeSeasonKey;
       document.getElementById('banner-title').textContent = currentConfig.title;
       document.getElementById('banner-desc').textContent = currentConfig.desc;
       
       const banner = document.getElementById('season-banner');
-      banner.className = `p-6 rounded-3xl bg-gradient-to-br ${currentConfig.themeClass} text-white shadow-md relative overflow-hidden transition-all duration-300`;
+      banner.className = 'p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300';
 
       renderProductsGrid();
     }
@@ -1762,7 +1814,7 @@
               <div class="grid grid-cols-2 gap-2">
                 ${p.variants.map(v => `
                   <button type="button" onclick="setBundleVariant('${p.id}', '${v.name}')" 
-                    class="py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${currentSel.variant === v.name ? 'border-orange-600 bg-orange-50 text-orange-950 shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
+                    class="py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${currentSel.variant === v.name ? 's-selected shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
                     <span>${v.icon}</span> <span>${v.name}</span>
                   </button>
                 `).join('')}
@@ -1786,7 +1838,7 @@
               <div class="grid grid-cols-3 gap-2">
                 ${p.sizes.map(sz => `
                   <button type="button" onclick="setProductSize('${p.id}', '${sz.name}')"
-                    class="py-2 px-2 rounded-xl border text-xs font-bold transition ${selectedSize.name === sz.name ? 'border-stone-900 bg-stone-900 text-white shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
+                    class="py-2 px-2 rounded-xl border text-xs font-bold transition ${selectedSize.name === sz.name ? 's-chip-active shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
                     ${sz.name}<span class="block text-[10px] font-semibold opacity-80">${sz.price} zł</span>
                   </button>
                 `).join('')}
@@ -1817,7 +1869,7 @@
           `;
         }
 
-        const seasonBtnClass = currentConfig.btnClass || 'bg-stone-900 hover:bg-stone-800 text-white';
+        const seasonBtnClass = 's-btn shadow-sm';
 
         card.innerHTML = `
           <div>
@@ -2065,6 +2117,8 @@
 
       if (hash === "#admin") {
         document.getElementById("client-app").classList.add("hidden");
+        // Panel admina zawsze w neutralnych kolorach, niezależnie od kolekcji
+        delete document.body.dataset.season;
         if (isAuth) {
           document.getElementById("admin-login").classList.add("hidden");
           document.getElementById("admin-app").classList.remove("hidden");
