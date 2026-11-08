@@ -32,14 +32,29 @@ wyłącza się ją w panelu: Ustawienia → Dostępność Kolekcji → „Na wym
   to jeden obiekt z dwiema częściami nazwanymi kolorami, więc w Bambu Studio każdej części
   przypisujesz filament z AMS (albo zmiana filamentu na wysokości 2 mm)
 
+## Produkty w sklepie (edytor w panelu)
+Panel → Ustawienia → „🛍️ Produkty w sklepie”. Tam dodajesz, ukrywasz, przestawiasz i usuwasz produkty,
+zmieniasz opisy, ceny (jedna cena, rozmiary albo komplet), kolory i zdjęcia (główne i osobne dla koloru),
+a także paletę kolorów i cennik akcesoriów na wymiar.
+- zdjęcia są same zmniejszane do 800 px i trafiają do Supabase Storage (`product-images`)
+- nazwy produktu nie da się zmienić, dopóki aktywne zamówienia mają starą nazwę
+- Dynia, Lisek i Wiewiórka mają zablokowaną nazwę (używa ich Zestaw Jesienny); zestaw i akcesoria
+  na wymiar mają tylko opis, cenę, zdjęcie i widoczność
+- gdy baza nie odpowie, sklep pokazuje katalog zapisany w kodzie (`index.html`)
+
+## Statystyki w menu głównym
+Przychód, koszty i zysk liczą się z zamówień odhaczonych jako zapłacone. Przycisk „🔄 Zeruj (nowy sezon)”
+zapamiętuje dzień startu (w `app_state.costs.statsSince`) i od tej pory liczy tylko płatności od tego dnia.
+„Pokaż wszystko” cofa zerowanie. Zamówienia i płatności nie są usuwane.
+
 ## Zdjęcia
-Zdjęcia produktów mają 800×800 px (WebP). Nowe zdjęcia warto zmniejszyć do podobnego rozmiaru
-przed dodaniem, żeby strona szybko ładowała się na telefonach.
+Zdjęcia produktów mają 800×800 px (WebP). Edytor produktów zmniejsza je sam.
 
 ## Baza (Supabase)
 - `orders` – zamówienia; klienci dodają je tylko przez funkcję `place_order()`,
   czytać i zmieniać może tylko admin
 - `app_state` – wspólny stan warsztatu (sezony, półka, szpule, ustawienia, pakowanie)
+- `products`, `shop_settings` – katalog sklepu, paleta kolorów i cennik akcesoriów (czyta każdy, zmienia admin)
 - `admins` – e-maile kont z dostępem do panelu (konta zakłada się w Supabase: Authentication → Users)
 
 ## Powiadomienia e-mail o zamówieniach

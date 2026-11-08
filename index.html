@@ -32,36 +32,36 @@
       transform: scale(1.1);
     }
 
-    /* Motyw kolekcji: body[data-season] ustawia kolory całego sklepu (domyślnie jesień) */
-    :root {
+    /* Motyw kolekcji: [data-season] (body sklepu lub podgląd w edytorze) ustawia kolory całego sklepu (domyślnie jesień) */
+    :root, [data-season="autumn"] {
       --s-from: #ea580c; --s-to: #b45309;
       --s-accent: #c2410c; --s-accent-hover: #9a3412;
       --s-soft: #fff7ed; --s-soft-border: #fed7aa; --s-ink: #7c2d12;
       --s-eyebrow: #fde68a; --s-sub: rgba(254, 243, 199, 0.9);
       --s-page: #faf6f0; --s-bar: #1c1917; --s-bar-accent: #fcd34d;
     }
-    body[data-season="easter"] {
+    [data-season="easter"] {
       --s-from: #059669; --s-to: #0f766e;
       --s-accent: #047857; --s-accent-hover: #065f46;
       --s-soft: #ecfdf5; --s-soft-border: #a7f3d0; --s-ink: #064e3b;
       --s-eyebrow: #a7f3d0; --s-sub: rgba(209, 250, 229, 0.9);
       --s-page: #f4f9f4; --s-bar: #062e24; --s-bar-accent: #6ee7b7;
     }
-    body[data-season="summer"] {
+    [data-season="summer"] {
       --s-from: #0ea5e9; --s-to: #0e7490;
       --s-accent: #0369a1; --s-accent-hover: #075985;
       --s-soft: #f0f9ff; --s-soft-border: #bae6fd; --s-ink: #0c4a6e;
       --s-eyebrow: #e0f2fe; --s-sub: rgba(224, 242, 254, 0.92);
       --s-page: #f3f8fb; --s-bar: #082f49; --s-bar-accent: #7dd3fc;
     }
-    body[data-season="christmas"] {
+    [data-season="christmas"] {
       --s-from: #991b1b; --s-to: #064e3b;
       --s-accent: #b91c1c; --s-accent-hover: #991b1b;
       --s-soft: #fef2f2; --s-soft-border: #fecaca; --s-ink: #7f1d1d;
       --s-eyebrow: #fecaca; --s-sub: rgba(254, 226, 226, 0.9);
       --s-page: #f4f6f7; --s-bar: #0b2a1f; --s-bar-accent: #fca5a5;
     }
-    body[data-season="custom"] {
+    [data-season="custom"] {
       --s-from: #44403c; --s-to: #1c1917;
       --s-accent: #292524; --s-accent-hover: #1c1917;
       --s-soft: #f5f5f4; --s-soft-border: #d6d3d1; --s-ink: #1c1917;
@@ -354,6 +354,13 @@
           <div class="text-base font-bold text-amber-200 mt-0.5" id="stat-profit">0 zł</div>
           <span class="text-[9px] text-stone-400">Na 2 osoby</span>
         </div>
+      </div>
+      <div class="flex items-center justify-between gap-2 -mt-2 px-1 text-[10px] text-stone-500">
+        <span id="stat-since-label">Od początku</span>
+        <span class="flex gap-1.5">
+          <button id="stat-undo-reset" onclick="undoStatsReset()" class="hidden px-2 py-1 rounded-lg border border-stone-300 bg-white font-semibold">Pokaż wszystko</button>
+          <button onclick="resetStats()" class="px-2 py-1 rounded-lg border border-stone-300 bg-white font-semibold">🔄 Zeruj (nowy sezon)</button>
+        </span>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -716,8 +723,53 @@
       <p class="text-[10px] text-stone-400 text-center">Ta zakładka jest tylko informacyjna – nie zmienia szpul, kosztów ani statystyk.</p>
     </div>
 
+    <!-- WIDOK G: PRODUKTY W SKLEPIE (edytor katalogu) -->
+    <div id="admin-tab-catalog" class="space-y-4 hidden">
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+        <div>
+          <h3 class="font-heading font-bold text-sm text-stone-900">Produkty w sklepie</h3>
+          <p class="text-[11px] text-stone-500">Wybierz kolekcję. Zmiany od razu widać w sklepie.</p>
+        </div>
+        <div id="catalog-collection-tabs" class="flex gap-1.5 overflow-x-auto pb-1 text-xs"></div>
+        <div id="catalog-list" class="space-y-2 text-xs"></div>
+        <button id="catalog-add-btn" onclick="openProductEditor(null)" class="w-full py-2.5 bg-stone-900 text-white rounded-xl text-xs font-bold">+ Dodaj produkt</button>
+        <div id="catalog-pricing" class="hidden p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2 text-xs">
+          <div class="font-bold text-stone-800">Cena akcesoriów na wymiar (za sztukę)</div>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="block"><span class="block text-[10px] text-stone-500 mb-0.5">zł za gram</span>
+              <input id="pricing-per-gram" type="number" min="0" step="0.01" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5 font-bold"></label>
+            <label class="block"><span class="block text-[10px] text-stone-500 mb-0.5">zł za godz. druku</span>
+              <input id="pricing-per-hour" type="number" min="0" step="0.1" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5 font-bold"></label>
+            <label class="block"><span class="block text-[10px] text-stone-500 mb-0.5">Cena min. (zł)</span>
+              <input id="pricing-min" type="number" min="0" step="1" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5 font-bold"></label>
+          </div>
+          <button onclick="savePricing()" class="w-full py-2 bg-stone-900 text-white rounded-lg font-bold">Zapisz cennik</button>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 text-xs">
+        <div>
+          <h3 class="font-heading font-bold text-sm text-stone-900">Paleta kolorów</h3>
+          <p class="text-[11px] text-stone-500">Kolory filamentów do wyboru w produktach. Nowy kolor dostaje też szpulę (1000 g).</p>
+        </div>
+        <div id="palette-editor" class="space-y-1.5"></div>
+        <div class="flex gap-2 items-center">
+          <input id="palette-new-hex" type="color" value="#7c3aed" class="w-10 h-9 rounded-lg border border-stone-300 bg-white p-0.5 shrink-0" aria-label="Kolor">
+          <input id="palette-new-name" type="text" maxlength="30" placeholder="Nazwa, np. Fioletowy" class="flex-1 min-w-0 bg-white border border-stone-300 rounded-lg px-2 py-2">
+          <button onclick="addPaletteColor()" class="px-3 py-2 bg-stone-900 text-white rounded-lg font-bold shrink-0">+ Dodaj</button>
+        </div>
+      </div>
+    </div>
+
     <!-- WIDOK F: USTAWIENIA -->
     <div id="admin-tab-settings" class="space-y-4 hidden">
+      <button onclick="switchAdminTab('catalog')" class="w-full flex items-center justify-between p-4 bg-white rounded-2xl border border-stone-200 hover:bg-stone-50 transition text-left">
+        <span>
+          <span class="block font-heading font-bold text-sm text-stone-900">🛍️ Produkty w sklepie</span>
+          <span class="block text-[11px] text-stone-500">Dodawanie produktów, zdjęcia, opisy, kolory i ceny</span>
+        </span>
+        <span class="text-stone-400 font-bold">›</span>
+      </button>
       <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-4">
         <div>
           <h3 class="font-heading font-bold text-sm text-stone-900">Dostępność Kolekcji w Sklepie</h3>
@@ -844,6 +896,21 @@
       <button onclick="saveOrderEdits()" class="w-full py-2.5 bg-stone-900 text-white font-bold rounded-xl text-xs mt-2">
         Zapisz zmiany
       </button>
+    </div>
+  </div>
+
+  <!-- MODAL EDYCJI PRODUKTU -->
+  <div id="product-editor-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl max-w-md w-full mx-auto p-5 max-h-[92vh] overflow-y-auto space-y-3">
+      <div class="flex justify-between items-center border-b border-stone-200 pb-2">
+        <h3 id="pe-heading" class="font-bold text-sm text-stone-900">Produkt</h3>
+        <button onclick="closeProductEditor()" class="text-stone-400 font-bold text-sm" aria-label="Zamknij">✕</button>
+      </div>
+      <div id="pe-body" class="space-y-3 text-xs"></div>
+      <div class="sticky bottom-0 bg-white pt-2 flex gap-2">
+        <button onclick="closeProductEditor()" class="py-2.5 px-4 bg-white border border-stone-300 rounded-xl text-xs font-semibold">Anuluj</button>
+        <button id="pe-save" onclick="saveProductEditor()" class="flex-1 py-2.5 bg-stone-900 text-white font-bold rounded-xl text-xs">Zapisz produkt</button>
+      </div>
     </div>
   </div>
 
@@ -2332,7 +2399,7 @@
     }
 
     function switchAdminTab(tabName) {
-      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'payments', 'filaments', 'settings'];
+      const tabs = ['hub', 'orders', 'batcher', 'shelf', 'spools', 'payments', 'filaments', 'settings', 'catalog'];
       tabs.forEach(t => {
         const el = document.getElementById(`admin-tab-${t}`);
         if (el) el.classList.add('hidden');
@@ -2374,6 +2441,9 @@
         } else if (tabName === 'settings') {
           title.textContent = "Ustawienia Kolekcji i Stołu";
           renderSettingsView();
+        } else if (tabName === 'catalog') {
+          title.textContent = "Produkty w sklepie";
+          renderCatalogEditor();
         }
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2410,6 +2480,21 @@
           { event: 'DELETE', schema: 'public', table: 'orders' },
           () => fetchOrdersFromCloud()
         )
+        .subscribe();
+
+      // Katalog produktów zmieniony na drugim telefonie
+      let catalogReloadTimer = null;
+      const reloadCatalogSoon = () => {
+        clearTimeout(catalogReloadTimer);
+        catalogReloadTimer = setTimeout(async () => {
+          await loadCatalog();
+          if (!document.getElementById('admin-tab-catalog').classList.contains('hidden')) renderCatalogEditor();
+        }, 400);
+      };
+      supabaseClient
+        .channel('public:catalog_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, reloadCatalogSoon)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'shop_settings' }, reloadCatalogSoon)
         .subscribe();
 
       // Rozliczenie filamentów zmienione na drugim telefonie
@@ -3268,6 +3353,21 @@
     // ==========================================
     // STATYSTYKI & FINANSE
     // ==========================================
+    // Zerowanie przychodu, kosztów i zysku: zamówienia i płatności zostają, liczymy od dziś
+    function resetStats() {
+      if (!confirm('Wyzerować przychód, koszty i zysk?\n\nOd teraz liczą się tylko płatności odhaczone od dziś. Zamówienia i historia płatności zostają, a zerowanie można cofnąć przyciskiem „Pokaż wszystko”.')) return;
+      saveCosts({ ...getCosts(), statsSince: new Date().toISOString() });
+      updateHubStats();
+    }
+
+    function undoStatsReset() {
+      if (!confirm('Cofnąć zerowanie i znowu liczyć wszystko od początku?')) return;
+      const costs = getCosts();
+      delete costs.statsSince;
+      saveCosts(costs);
+      updateHubStats();
+    }
+
     function updateHubStats() {
       const activeOrders = cloudOrders.filter(o => o.status !== "Zrealizowane" && o.status !== "Anulowane");
       document.getElementById('badge-active-orders').textContent = activeOrders.length;
@@ -3297,9 +3397,16 @@
       let totalGramsPrinted = 0;
       let totalHoursPrinted = 0;
 
+      // Po „Zeruj (nowy sezon)” liczą się tylko płatności od tego dnia
+      const statsSince = costs.statsSince ? new Date(costs.statsSince) : null;
+      document.getElementById('stat-since-label').textContent = statsSince
+        ? `Od ${statsSince.toLocaleDateString('pl-PL')} (nowy sezon)`
+        : 'Od początku';
+      document.getElementById('stat-undo-reset').classList.toggle('hidden', !statsSince);
+
       cloudOrders.forEach(o => {
         // Liczą się tylko zamówienia odhaczone w Płatnościach jako zapłacone
-        if (o.paid_at && o.status !== "Anulowane") {
+        if (o.paid_at && o.status !== "Anulowane" && (!statsSince || new Date(o.paid_at) >= statsSince)) {
           const expanded = getExpandedOrderItems(o);
 
           totalRevenue += getOrderTotal(o);
@@ -3579,7 +3686,8 @@
       if (row && row.colors.length) return row.colors;
 
       for (const season of Object.values(CATALOG)) {
-        const product = season.products.find(p => (p.stockName || p.title) === model);
+        const product = season.products.find(p => (p.stockName || p.title) === model ||
+          (SET_PIECES[p.stockName || p.title] || {}).piece === model);
         if (!product) continue;
         if (product.hasColors) return product.colors.map(c => c.name);
         return [product.defaultColor || 'Pomarańczowy'];
@@ -4486,6 +4594,646 @@
       }
     }
 
+    // ==========================================
+    // EDYTOR PRODUKTÓW (Ustawienia → Produkty w sklepie)
+    // ==========================================
+    const PRODUCT_BUCKET = 'product-images';
+    const BUCKET_URL_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/${PRODUCT_BUCKET}/`;
+    const RESERVED_MODELS = ['Taca', 'Ogonek dyni', 'Zestaw Jesienny'];
+    const BUNDLE_PART_IDS = ['dynia', 'lisek', 'wiewiorka'];   // używane przez Zestaw Jesienny: nazwa zablokowana
+    let catalogEditorCollection = 'autumn';
+    let pe = null;               // szkic edytowanego produktu
+    let peUploadTarget = null;   // 'main' albo nazwa koloru
+
+    function bucketPath(url) {
+      return typeof url === 'string' && url.startsWith(BUCKET_URL_PREFIX) ? decodeURIComponent(url.slice(BUCKET_URL_PREFIX.length)) : null;
+    }
+
+    function rowImageUrls(images) {
+      const im = images || {};
+      return [im.main, ...Object.values(im.byColor || {})].filter(Boolean);
+    }
+
+    function rowPriceLabel(r) {
+      const variants = r.variants || [];
+      if (r.kind === 'custom') return 'wg wymiarów';
+      if (variants.length) return variants.map(v => `${formatPLN(Number(v.price))}`).join(' / ');
+      return formatPLN(Number(r.price)) + (r.set_count ? ` za ${r.set_count} szt.` : '');
+    }
+
+    // Nazwy modeli w aktywnych zamówieniach (do sprawdzania zmian nazw i usuwania)
+    function activeOrderModelNames() {
+      const names = new Set();
+      cloudOrders.filter(o => o.status !== 'Zrealizowane' && o.status !== 'Anulowane').forEach(o => {
+        getOrderItems(o).forEach(i => names.add(i.title));
+        getExpandedOrderItems(o).forEach(i => names.add(i.title));
+      });
+      return names;
+    }
+
+    function renderCatalogEditor() {
+      document.getElementById('catalog-collection-tabs').innerHTML = SEASON_ORDER.filter(k => CATALOG[k]).map(k => `
+        <button onclick="setCatalogEditorCollection(${jsArg(k)})" class="px-3 py-1.5 rounded-full border font-bold whitespace-nowrap ${k === catalogEditorCollection ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-stone-200'}">
+          ${CATALOG[k].icon} ${escapeHtml(CATALOG[k].name)}
+        </button>`).join('');
+
+      const rows = catalogRows.filter(r => r.collection === catalogEditorCollection);
+      const list = document.getElementById('catalog-list');
+      if (catalogRows.length === 0) {
+        list.innerHTML = `<p class="text-stone-500 p-3 bg-stone-50 rounded-xl">Nie udało się wczytać katalogu z bazy. Odśwież stronę.</p>`;
+      } else if (rows.length === 0) {
+        list.innerHTML = `<p class="text-stone-500 p-3 bg-stone-50 rounded-xl text-center">Brak produktów w tej kolekcji. Dodaj pierwszy przyciskiem niżej.</p>`;
+      } else {
+        list.innerHTML = rows.map((r, idx) => {
+          const thumb = (r.images || {}).main || Object.values((r.images || {}).byColor || {})[0];
+          const colorDots = (r.colors || []).map(c => `<span class="w-2.5 h-2.5 rounded-full border border-stone-300 inline-block" style="background:${escapeHtml(paletteHex(c))}" title="${escapeHtml(c)}"></span>`).join('');
+          const kindBadge = r.kind === 'bundle' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">ZESTAW</span>'
+            : r.kind === 'custom' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-stone-200 text-stone-700 font-bold">NA WYMIAR</span>' : '';
+          return `
+          <div class="flex items-center gap-2 p-2 rounded-xl border ${r.visible ? 'border-stone-200 bg-white' : 'border-dashed border-stone-300 bg-stone-50 opacity-70'}">
+            <div class="w-12 h-12 rounded-lg bg-stone-100 border border-stone-200 overflow-hidden shrink-0 flex items-center justify-center">
+              ${thumb ? `<img src="${escapeHtml(thumb)}" alt="" class="w-full h-full object-contain">` : '<span class="text-stone-300 text-lg">📦</span>'}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-stone-900 truncate">${escapeHtml(r.title)}</div>
+              <div class="text-[10px] text-stone-500 truncate">${kindBadge} ${escapeHtml(rowPriceLabel(r))}${r.visible ? '' : ' · ukryty'}</div>
+              <div class="flex gap-1 mt-0.5">${colorDots}</div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="moveProduct(${jsArg(r.id)}, -1)" ${idx === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-stone-200 disabled:opacity-30" aria-label="W górę">↑</button>
+              <button onclick="moveProduct(${jsArg(r.id)}, 1)" ${idx === rows.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-stone-200 disabled:opacity-30" aria-label="W dół">↓</button>
+              <button onclick="toggleProductVisible(${jsArg(r.id)})" class="w-7 h-7 rounded-lg border border-stone-200" title="${r.visible ? 'Ukryj w sklepie' : 'Pokaż w sklepie'}" aria-label="${r.visible ? 'Ukryj' : 'Pokaż'}">${r.visible ? '👁️' : '🚫'}</button>
+              <button onclick="openProductEditor(${jsArg(r.id)})" class="w-7 h-7 rounded-lg border border-stone-200" aria-label="Edytuj">✏️</button>
+              ${r.kind === 'simple' && !BUNDLE_PART_IDS.includes(r.id) ? `<button onclick="deleteProduct(${jsArg(r.id)})" class="w-7 h-7 rounded-lg border border-rose-200 text-rose-600" aria-label="Usuń">🗑️</button>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      const isCustom = catalogEditorCollection === 'custom';
+      document.getElementById('catalog-add-btn').classList.toggle('hidden', isCustom);
+      document.getElementById('catalog-pricing').classList.toggle('hidden', !isCustom);
+      if (isCustom) {
+        document.getElementById('pricing-per-gram').value = CUSTOM_PRICING.perGram;
+        document.getElementById('pricing-per-hour').value = CUSTOM_PRICING.perHour;
+        document.getElementById('pricing-min').value = CUSTOM_PRICING.min;
+      }
+      renderPaletteEditor();
+    }
+
+    function setCatalogEditorCollection(key) {
+      catalogEditorCollection = key;
+      renderCatalogEditor();
+    }
+
+    async function refreshCatalogAfterChange() {
+      await loadCatalog();
+      renderCatalogEditor();
+    }
+
+    async function toggleProductVisible(id) {
+      const r = catalogRows.find(x => x.id === id);
+      if (!r) return;
+      const { error } = await supabaseClient.from('products').update({ visible: !r.visible, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) return alert('Błąd zapisu: ' + error.message);
+      await refreshCatalogAfterChange();
+    }
+
+    async function moveProduct(id, dir) {
+      const rows = catalogRows.filter(r => r.collection === catalogEditorCollection);
+      const i = rows.findIndex(r => r.id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= rows.length) return;
+      // Nowa kolejność całej kolekcji (pozycje mogą się powtarzać po starych zmianach)
+      const ordered = rows.slice();
+      [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+      const base = Math.min(...rows.map(r => r.position));
+      const updates = ordered.map((r, k) => ({ id: r.id, position: base + k })).filter(u => rows.find(r => r.id === u.id).position !== u.position);
+      for (const u of updates) {
+        const { error } = await supabaseClient.from('products').update({ position: u.position }).eq('id', u.id);
+        if (error) return alert('Błąd zmiany kolejności: ' + error.message);
+      }
+      await refreshCatalogAfterChange();
+    }
+
+    async function removeBucketFiles(urls) {
+      const paths = [...new Set(urls.map(bucketPath).filter(Boolean))];
+      if (!paths.length) return;
+      const { error } = await supabaseClient.storage.from(PRODUCT_BUCKET).remove(paths);
+      if (error) console.error('Nie udało się usunąć zdjęć:', error.message);
+    }
+
+    async function deleteProduct(id) {
+      const r = catalogRows.find(x => x.id === id);
+      if (!r || r.kind !== 'simple' || BUNDLE_PART_IDS.includes(r.id)) return;
+      const inOrders = rowModelNames(r).concat(r.stock_name || r.title).filter(n => activeOrderModelNames().has(n));
+      let msg = `Usunąć produkt „${r.title}” ze sklepu razem ze zdjęciami?`;
+      if (inOrders.length) msg += `\n\nUwaga: aktywne zamówienia mają ten produkt (${[...new Set(inOrders)].join(', ')}). Zostaną w zamówieniach, ale zniknie on z planera. Jeśli chcesz go tylko schować, użyj 👁️.`;
+      if (!confirm(msg)) return;
+      const { error } = await supabaseClient.from('products').delete().eq('id', id);
+      if (error) return alert('Błąd usuwania: ' + error.message);
+      // Wszystkie pliki z folderu produktu
+      const { data: files } = await supabaseClient.storage.from(PRODUCT_BUCKET).list(id, { limit: 100 });
+      const urls = (files || []).map(f => BUCKET_URL_PREFIX + `${id}/${f.name}`);
+      await removeBucketFiles(urls.concat(rowImageUrls(r.images)));
+      await refreshCatalogAfterChange();
+    }
+
+    async function savePricing() {
+      const value = {
+        perGram: parseFloat(document.getElementById('pricing-per-gram').value),
+        perHour: parseFloat(document.getElementById('pricing-per-hour').value),
+        min: parseFloat(document.getElementById('pricing-min').value)
+      };
+      if (!Object.values(value).every(v => Number.isFinite(v) && v >= 0)) return alert('Wpisz liczby (0 lub więcej) we wszystkich polach cennika.');
+      const { error } = await supabaseClient.from('shop_settings').upsert({ key: 'pricing', value, updated_at: new Date().toISOString() });
+      if (error) return alert('Błąd zapisu cennika: ' + error.message);
+      await refreshCatalogAfterChange();
+      alert('Zapisano cennik akcesoriów.');
+    }
+
+    // ---------- Paleta kolorów ----------
+    function renderPaletteEditor() {
+      const used = colorName => catalogRows.filter(r => (r.colors || []).includes(colorName)).map(r => r.title);
+      document.getElementById('palette-editor').innerHTML = shopPalette.map(c => {
+        const u = used(c.name);
+        return `
+        <div class="flex items-center gap-2 p-1.5 rounded-xl border border-stone-200 bg-stone-50">
+          <input type="color" value="${escapeHtml(c.hex)}" onchange="setPaletteHex(${jsArg(c.name)}, this.value)" class="w-9 h-8 rounded-lg border border-stone-300 bg-white p-0.5 shrink-0" aria-label="Kolor ${escapeHtml(c.name)}">
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-stone-800">${escapeHtml(c.name)}</div>
+            <div class="text-[10px] text-stone-500 truncate">${u.length ? 'w: ' + escapeHtml(u.join(', ')) : 'nieużywany'}</div>
+          </div>
+          <button onclick="removePaletteColor(${jsArg(c.name)})" class="w-7 h-7 rounded-lg border border-rose-200 text-rose-600 shrink-0" aria-label="Usuń kolor">✕</button>
+        </div>`;
+      }).join('');
+    }
+
+    async function savePalette(palette) {
+      const { error } = await supabaseClient.from('shop_settings').upsert({ key: 'palette', value: palette, updated_at: new Date().toISOString() });
+      if (error) { alert('Błąd zapisu palety: ' + error.message); return false; }
+      await refreshCatalogAfterChange();
+      return true;
+    }
+
+    async function addPaletteColor() {
+      const name = document.getElementById('palette-new-name').value.trim();
+      const hex = document.getElementById('palette-new-hex').value;
+      if (!name) return alert('Wpisz nazwę koloru.');
+      if (name.length > 30) return alert('Nazwa koloru może mieć najwyżej 30 znaków.');
+      if (shopPalette.some(c => c.name.toLowerCase() === name.toLowerCase()) || name === 'Multikolor') return alert('Taki kolor już jest w palecie.');
+      if (await savePalette([...shopPalette, { name, hex }])) document.getElementById('palette-new-name').value = '';
+    }
+
+    async function setPaletteHex(name, hex) {
+      await savePalette(shopPalette.map(c => c.name === name ? { ...c, hex } : c));
+    }
+
+    async function removePaletteColor(name) {
+      const users = catalogRows.filter(r => (r.colors || []).includes(name)).map(r => r.title);
+      if (users.length) return alert(`Kolor „${name}” jest używany w: ${users.join(', ')}.\nNajpierw odznacz go w tych produktach.`);
+      if (shopPalette.length <= 1) return alert('Paleta musi mieć przynajmniej jeden kolor.');
+      if (!confirm(`Usunąć kolor „${name}” z palety? Szpula i stan półki zostają.`)) return;
+      await savePalette(shopPalette.filter(c => c.name !== name));
+    }
+
+    // ---------- Okno edycji produktu ----------
+    function specFor(name) {
+      const s = specOf(getSpecs(), name) || {};
+      return { weight: s.weight ?? 50, hours: s.hours ?? 2, maxOnBed: s.maxOnBed ?? 8 };
+    }
+
+    function openProductEditor(id) {
+      const row = id ? catalogRows.find(r => r.id === id) : null;
+      if (id && !row) return;
+      const collection = row ? row.collection : catalogEditorCollection;
+      const variants = row ? (row.variants || []) : [];
+      const title = row ? row.title : '';
+      pe = {
+        isNew: !row,
+        original: row,
+        id: row ? row.id : `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+        kind: row ? row.kind : 'simple',
+        collection,
+        visible: row ? row.visible : true,
+        title,
+        description: row ? row.description : '',
+        note: row ? row.note : '',
+        priceMode: variants.length ? 'variants' : (row && row.set_count ? 'set' : 'single'),
+        price: row ? Number(row.price) : 10,
+        variants: variants.map(v => ({ name: v.name, price: Number(v.price), spec: specFor(v.stockName) })),
+        setCount: row && row.set_count ? row.set_count : 3,
+        setPiece: row && row.set_piece ? row.set_piece : '',
+        specSingle: specFor(row ? (row.stock_name || row.title) : ''),
+        specSet: specFor(row && row.set_piece ? row.set_piece : ''),
+        colors: row ? [...(row.colors || [])] : [shopPalette[0].name],
+        defaultColor: row ? (row.default_color || (row.colors || [])[0]) : shopPalette[0].name,
+        images: { main: (row && row.images && row.images.main) || null, byColor: { ...((row && row.images && row.images.byColor) || {}) } },
+        visual: row ? row.visual : null,
+        uploaded: [],
+        uploading: 0
+      };
+      document.getElementById('pe-heading').textContent = row ? `Edycja: ${row.title}` : 'Nowy produkt';
+      renderProductEditor();
+      document.getElementById('product-editor-modal').classList.remove('hidden');
+    }
+
+    function peInput(label, field, value, opts = {}) {
+      const attrs = `oninput="peSet(${jsArg(field)}, this.value${opts.number ? ', true' : ''})" ${opts.disabled ? 'disabled' : ''} ${opts.maxlength ? `maxlength="${opts.maxlength}"` : ''}`;
+      const cls = `w-full border border-stone-300 rounded-lg px-2.5 py-1.5 ${opts.disabled ? 'bg-stone-100 text-stone-500' : 'bg-stone-50'}`;
+      return `<label class="block"><span class="block font-semibold text-stone-700 mb-0.5">${label}</span>
+        ${opts.textarea
+          ? `<textarea rows="2" ${attrs} class="${cls}">${escapeHtml(value)}</textarea>`
+          : `<input type="${opts.number ? 'number' : 'text'}" ${opts.number ? 'min="0" step="0.5"' : ''} value="${escapeHtml(value)}" ${attrs} class="${cls}">`}
+        ${opts.hint ? `<span class="block text-[10px] text-stone-400 mt-0.5">${opts.hint}</span>` : ''}</label>`;
+    }
+
+    function peImageSlot(label, url, target, small = false) {
+      const size = small ? 'w-14 h-14' : 'w-20 h-20';
+      return `
+        <div class="flex items-center gap-2">
+          <div class="${size} rounded-lg bg-stone-100 border border-stone-200 overflow-hidden shrink-0 flex items-center justify-center">
+            ${url ? `<img src="${escapeHtml(url)}" alt="" class="w-full h-full object-contain">` : '<span class="text-stone-300">brak</span>'}
+          </div>
+          <div class="flex flex-col gap-1">
+            ${label ? `<span class="text-[10px] text-stone-500">${label}</span>` : ''}
+            <div class="flex gap-1">
+              <button type="button" onclick="pePickImage(${jsArg(target)})" class="px-2 py-1 rounded-lg bg-stone-900 text-white font-bold text-[11px]">📷 ${url ? 'Zmień' : 'Dodaj'}</button>
+              ${url ? `<button type="button" onclick="peRemoveImage(${jsArg(target)})" class="px-2 py-1 rounded-lg border border-stone-300 text-[11px]">Usuń</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function peSpecInputs(path, spec) {
+      const f = (key, label, step) => `<label class="block"><span class="text-[10px] text-stone-500 block">${label}</span>
+        <input type="number" min="0" step="${step}" value="${spec[key]}" oninput="peSetSpec(${jsArg(path)}, ${jsArg(key)}, this.value)" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white"></label>`;
+      return `<div class="grid grid-cols-3 gap-2">${f('weight', 'Waga (g)', 1)}${f('hours', 'Czas (godz)', 0.1)}${f('maxOnBed', 'Maks/stół', 1)}</div>`;
+    }
+
+    function renderProductEditor() {
+      const body = document.getElementById('pe-body');
+      const isSimple = pe.kind === 'simple';
+      const titleLocked = pe.kind === 'bundle' || BUNDLE_PART_IDS.includes(pe.id);
+      const sections = [];
+
+      sections.push(`
+        <div class="space-y-2">
+          ${peInput('Nazwa *', 'title', pe.title, { disabled: titleLocked, maxlength: 60, hint: titleLocked ? 'Tej nazwy nie można zmienić (używa jej Zestaw Jesienny).' : (pe.isNew ? 'Tak produkt będzie się nazywał w sklepie, w zamówieniach i w planerze.' : '') })}
+          ${peInput('Opis', 'description', pe.description, { textarea: true, maxlength: 200 })}
+          ${pe.kind !== 'custom' ? peInput('Uwaga (np. „Tylko suche jedzenie”)', 'note', pe.note, { maxlength: 300, hint: 'Pokazuje się w żółtej ramce pod kartą. Zostaw puste, jeśli nie trzeba.' }) : ''}
+          <div class="grid grid-cols-2 gap-2">
+            ${isSimple ? `<label class="block"><span class="block font-semibold text-stone-700 mb-0.5">Kolekcja</span>
+              <select onchange="peSet('collection', this.value)" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-2 py-1.5">
+                ${SEASON_ORDER.filter(k => k !== 'custom' && CATALOG[k]).map(k => `<option value="${k}" ${k === pe.collection ? 'selected' : ''}>${CATALOG[k].icon} ${escapeHtml(CATALOG[k].name)}</option>`).join('')}
+              </select></label>` : '<div></div>'}
+            <label class="flex items-center gap-2 mt-4"><input type="checkbox" ${pe.visible ? 'checked' : ''} onchange="peSet('visible', this.checked)" class="w-4 h-4"> <span class="font-semibold">Widoczny w sklepie</span></label>
+          </div>
+        </div>`);
+
+      if (pe.kind !== 'custom') {
+        let priceHtml = '';
+        if (isSimple) {
+          const modeBtn = (mode, label) => `<button type="button" onclick="peSetPriceMode(${jsArg(mode)})" class="py-1.5 rounded-lg border font-bold ${pe.priceMode === mode ? 'bg-stone-900 text-white border-stone-900' : 'bg-white border-stone-200 text-stone-600'}">${label}</button>`;
+          priceHtml += `<div class="grid grid-cols-3 gap-1.5 text-[11px]">${modeBtn('single', 'Jedna cena')}${modeBtn('variants', 'Rozmiary')}${modeBtn('set', 'Komplet')}</div>`;
+        }
+        if (pe.priceMode === 'variants' && isSimple) {
+          priceHtml += `<div class="space-y-1.5">${pe.variants.map((v, i) => `
+            <div class="flex gap-1.5 items-center">
+              <input type="text" maxlength="20" value="${escapeHtml(v.name)}" placeholder="np. Mały" oninput="peSetVariant(${i}, 'name', this.value)" class="flex-1 min-w-0 bg-stone-50 border border-stone-300 rounded-lg px-2 py-1.5">
+              <input type="number" min="0" step="0.5" value="${v.price}" oninput="peSetVariant(${i}, 'price', this.value)" class="w-20 bg-stone-50 border border-stone-300 rounded-lg px-2 py-1.5 font-bold" aria-label="Cena">
+              <span class="text-stone-500">zł</span>
+              <button type="button" onclick="peRemoveVariant(${i})" class="w-7 h-7 rounded-lg border border-rose-200 text-rose-600 shrink-0" aria-label="Usuń rozmiar">✕</button>
+            </div>`).join('')}
+            ${pe.variants.length < 3 ? `<button type="button" onclick="peAddVariant()" class="w-full py-1.5 border border-dashed border-stone-300 rounded-lg font-semibold text-stone-600">+ Dodaj rozmiar</button>` : '<p class="text-[10px] text-stone-400">Najwyżej 3 rozmiary.</p>'}
+          </div>`;
+        } else {
+          priceHtml += `<div class="grid grid-cols-2 gap-2">
+            ${peInput(pe.priceMode === 'set' && isSimple ? 'Cena za komplet (zł) *' : 'Cena (zł) *', 'price', pe.price, { number: true })}
+            ${pe.priceMode === 'set' && isSimple ? peInput('Sztuk w komplecie *', 'setCount', pe.setCount, { number: true }) : ''}
+          </div>
+          ${pe.priceMode === 'set' && isSimple ? peInput('Nazwa jednej sztuki (do planera) *', 'setPiece', pe.setPiece, { maxlength: 40, hint: 'Np. „Śnieżka”. W planerze drukujesz sztuki, a sklep sprzedaje komplety.' }) : ''}`;
+        }
+        sections.push(`<div class="space-y-2 border-t border-stone-200 pt-3"><div class="font-bold text-stone-900">Cena</div>${priceHtml}</div>`);
+      }
+
+      if (isSimple) {
+        sections.push(`
+          <div class="space-y-2 border-t border-stone-200 pt-3">
+            <div class="font-bold text-stone-900">Kolory i zdjęcia</div>
+            <p class="text-[10px] text-stone-500">Zaznacz kolory do wyboru. ● oznacza kolor wybrany na start. Każdy kolor może mieć swoje zdjęcie; bez niego pokazuje się zdjęcie główne.</p>
+            ${peImageSlot('Zdjęcie główne', pe.images.main, 'main')}
+            <div class="space-y-1.5">
+              ${shopPalette.map(c => {
+                const on = pe.colors.includes(c.name);
+                return `<div class="p-1.5 rounded-xl border ${on ? 'border-stone-300 bg-white' : 'border-stone-200 bg-stone-50'}">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" ${on ? 'checked' : ''} onchange="peToggleColor(${jsArg(c.name)}, this.checked)" class="w-4 h-4" aria-label="${escapeHtml(c.name)}">
+                    <span class="w-4 h-4 rounded-full border border-stone-300" style="background:${escapeHtml(c.hex)}"></span>
+                    <span class="flex-1 font-semibold">${escapeHtml(c.name)}</span>
+                    ${on ? `<label class="flex items-center gap-1 text-[10px] text-stone-500"><input type="radio" name="pe-default-color" ${pe.defaultColor === c.name ? 'checked' : ''} onchange="peSet('defaultColor', ${jsArg(c.name)})"> na start</label>` : ''}
+                  </div>
+                  ${on ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[c.name] || null, c.name, true)}</div>` : ''}
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`);
+
+        const specBlocks = pe.priceMode === 'variants'
+          ? pe.variants.map((v, i) => `<div class="space-y-1"><div class="font-semibold text-stone-700" id="pe-spec-label-v${i}"></div>${peSpecInputs('v' + i, v.spec)}</div>`).join('')
+          : pe.priceMode === 'set'
+            ? `<div class="space-y-1"><div class="font-semibold text-stone-700" id="pe-spec-label-set"></div>${peSpecInputs('set', pe.specSet)}</div>`
+            : `<div class="space-y-1"><div class="font-semibold text-stone-700" id="pe-spec-label-single"></div>${peSpecInputs('single', pe.specSingle)}</div>`;
+        sections.push(`
+          <div class="space-y-2 border-t border-stone-200 pt-3">
+            <div class="font-bold text-stone-900">Parametry druku <span class="font-normal text-stone-500">(jedna sztuka)</span></div>
+            ${specBlocks}
+          </div>`);
+      } else {
+        sections.push(`<div class="space-y-2 border-t border-stone-200 pt-3"><div class="font-bold text-stone-900">Zdjęcie</div>${peImageSlot('', pe.images.main, 'main')}</div>`);
+      }
+
+      if (pe.kind !== 'custom') {
+        sections.push(`<div class="space-y-2 border-t border-stone-200 pt-3">
+          <div class="font-bold text-stone-900">Podgląd w sklepie</div>
+          <div id="pe-preview" class="rounded-2xl p-3 bg-stone-100"></div>
+        </div>`);
+      }
+      sections.push(`<input type="file" id="pe-file" accept="image/*" class="hidden" onchange="peUploadSelected(this)">`);
+      body.innerHTML = sections.join('');
+      refreshProductPreview();
+    }
+
+    function peModelSlots() {
+      const title = pe.title.trim();
+      if (pe.kind !== 'simple') return [];
+      if (pe.priceMode === 'variants') return pe.variants.map((v, i) => ({ slot: 'v' + i, name: `${title} ${v.name.trim().toLowerCase()}`.trim() }));
+      if (pe.priceMode === 'set') return [{ slot: 'set', name: pe.setPiece.trim() }];
+      return [{ slot: 'single', name: title }];
+    }
+
+    // Szkic -> wiersz tabeli products
+    function peToRow() {
+      const title = pe.title.trim();
+      const row = {
+        id: pe.id,
+        collection: pe.collection,
+        kind: pe.kind,
+        visible: pe.visible,
+        title,
+        description: pe.description.trim(),
+        note: pe.note.trim(),
+        price: Number(pe.price) || 0,
+        images: { ...(pe.images.main ? { main: pe.images.main } : {}), byColor: {} },
+        visual: pe.visual || null
+      };
+      if (pe.kind !== 'simple') return row;
+      row.stock_name = title;
+      row.colors = shopPalette.map(c => c.name).filter(n => pe.colors.includes(n));
+      row.default_color = row.colors.includes(pe.defaultColor) ? pe.defaultColor : (row.colors[0] || null);
+      row.colors.forEach(n => { if (pe.images.byColor[n]) row.images.byColor[n] = pe.images.byColor[n]; });
+      row.variants = pe.priceMode === 'variants'
+        ? pe.variants.map(v => ({ name: v.name.trim(), price: Number(v.price) || 0, stockName: `${title} ${v.name.trim().toLowerCase()}` }))
+        : [];
+      if (row.variants.length) row.price = row.variants[0].price;
+      row.set_count = pe.priceMode === 'set' ? (parseInt(pe.setCount) || 0) : null;
+      row.set_piece = pe.priceMode === 'set' ? pe.setPiece.trim() : null;
+      return row;
+    }
+
+    function refreshProductPreview() {
+      peModelSlots().forEach(s => {
+        const el = document.getElementById(`pe-spec-label-${s.slot}`);
+        if (el) el.textContent = s.name || '(wpisz nazwę)';
+      });
+      const box = document.getElementById('pe-preview');
+      if (!box) return;
+      const row = peToRow();
+      if (!row.title && pe.kind === 'simple') row.title = 'Nazwa produktu';
+      if (pe.kind === 'simple' && !row.colors.length) {
+        box.innerHTML = '<p class="text-stone-500 text-center p-4">Zaznacz przynajmniej jeden kolor.</p>';
+        return;
+      }
+      const product = { ...productFromRow(row), id: '__preview' };
+      delete productSelectedState.__preview;
+      delete quantities.__preview;
+      box.dataset.season = pe.collection;
+      box.innerHTML = '';
+      box.appendChild(createProductCard(product, true));
+    }
+
+    function peSet(field, value, isNumber = false) {
+      pe[field] = isNumber ? value.replace(',', '.') : value;
+      if (field === 'collection') { renderProductEditor(); return; }
+      refreshProductPreview();
+    }
+
+    function peSetPriceMode(mode) {
+      pe.priceMode = mode;
+      if (mode === 'variants' && pe.variants.length === 0) {
+        const p = Number(pe.price) || 5;
+        pe.variants = [
+          { name: 'Mały', price: p, spec: { ...pe.specSingle } },
+          { name: 'Duży', price: p * 2, spec: { ...pe.specSingle } }
+        ];
+      }
+      renderProductEditor();
+    }
+
+    function peSetVariant(i, key, value) {
+      pe.variants[i][key] = key === 'price' ? value.replace(',', '.') : value;
+      refreshProductPreview();
+    }
+    function peAddVariant() {
+      const last = pe.variants[pe.variants.length - 1];
+      pe.variants.push({ name: '', price: last ? last.price : 10, spec: last ? { ...last.spec } : specFor('') });
+      renderProductEditor();
+    }
+    function peRemoveVariant(i) {
+      pe.variants.splice(i, 1);
+      renderProductEditor();
+    }
+
+    function peSetSpec(path, key, value) {
+      const spec = path === 'single' ? pe.specSingle : path === 'set' ? pe.specSet : pe.variants[parseInt(path.slice(1))].spec;
+      spec[key] = value.replace(',', '.');
+    }
+
+    function peToggleColor(name, on) {
+      if (on && !pe.colors.includes(name)) pe.colors.push(name);
+      if (!on) pe.colors = pe.colors.filter(c => c !== name);
+      if (!pe.colors.includes(pe.defaultColor)) pe.defaultColor = pe.colors[0] || null;
+      renderProductEditor();
+    }
+
+    function pePickImage(target) {
+      peUploadTarget = target;
+      const input = document.getElementById('pe-file');
+      input.value = '';
+      input.click();
+    }
+
+    function peRemoveImage(target) {
+      if (target === 'main') pe.images.main = null;
+      else delete pe.images.byColor[target];
+      renderProductEditor();
+    }
+
+    // Zmniejsza zdjęcie do maks. 800 px (WebP, a gdy przeglądarka nie umie – JPEG)
+    async function resizeImageFile(file) {
+      const url = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.onerror = () => reject(new Error('To nie wygląda na zdjęcie (spróbuj JPG lub PNG).'));
+          el.src = url;
+        });
+        const scale = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const toBlob = (type, q) => new Promise(r => canvas.toBlob(r, type, q));
+        let blob = await toBlob('image/webp', 0.85);
+        if (!blob || blob.type !== 'image/webp') blob = await toBlob('image/jpeg', 0.88);
+        if (!blob) throw new Error('Nie udało się przygotować zdjęcia.');
+        return blob;
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    async function peUploadSelected(input) {
+      const file = input.files && input.files[0];
+      const target = peUploadTarget;
+      if (!file || !pe || !target) return;
+      const draft = pe;
+      draft.uploading++;
+      document.getElementById('pe-save').disabled = true;
+      document.getElementById('pe-save').textContent = 'Wysyłam zdjęcie…';
+      try {
+        const blob = await resizeImageFile(file);
+        const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+        const path = `${draft.id}/${Date.now()}${Math.random().toString(36).slice(2, 6)}.${ext}`;
+        const { error } = await supabaseClient.storage.from(PRODUCT_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+        if (error) throw error;
+        const publicUrl = supabaseClient.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
+        draft.uploaded.push(publicUrl);
+        if (target === 'main') draft.images.main = publicUrl;
+        else draft.images.byColor[target] = publicUrl;
+      } catch (err) {
+        alert('Nie udało się dodać zdjęcia: ' + err.message);
+      } finally {
+        draft.uploading--;
+        if (pe === draft) {
+          document.getElementById('pe-save').disabled = draft.uploading > 0;
+          document.getElementById('pe-save').textContent = 'Zapisz produkt';
+          renderProductEditor();
+        }
+      }
+    }
+
+    function closeProductEditor() {
+      if (!pe) return;
+      const draft = pe;
+      pe = null;
+      document.getElementById('product-editor-modal').classList.add('hidden');
+      removeBucketFiles(draft.uploaded);   // zdjęcia dodane w tym oknie, ale niezapisane
+    }
+
+    function validateProductRow(row) {
+      if (row.kind === 'custom') return row.title ? null : 'Wpisz nazwę.';
+      if (row.kind === 'bundle') return Number.isFinite(row.price) && row.price > 0 ? null : 'Wpisz cenę większą od zera.';
+      if (!row.title) return 'Wpisz nazwę produktu.';
+      if (!row.colors.length) return 'Zaznacz przynajmniej jeden kolor.';
+      if (row.variants.length) {
+        if (row.variants.length < 2) return 'Rozmiary: dodaj co najmniej dwa (albo wybierz „Jedna cena”).';
+        if (row.variants.some(v => !v.name)) return 'Każdy rozmiar musi mieć nazwę.';
+        if (row.variants.some(v => !(v.price > 0))) return 'Każdy rozmiar musi mieć cenę większą od zera.';
+        if (new Set(row.variants.map(v => v.name.toLowerCase())).size !== row.variants.length) return 'Nazwy rozmiarów muszą się różnić.';
+      } else if (!(row.price > 0)) return 'Wpisz cenę większą od zera.';
+      if (row.set_count !== null) {
+        if (!(row.set_count >= 2 && row.set_count <= 50)) return 'Komplet musi mieć od 2 do 50 sztuk.';
+        if (!row.set_piece) return 'Wpisz nazwę jednej sztuki z kompletu.';
+        if (row.set_piece === row.title) return 'Nazwa sztuki musi się różnić od nazwy kompletu (np. „Śnieżki” i „Śnieżka”).';
+      }
+      // Nazwy w zamówieniach i planerze muszą być jednoznaczne
+      const mine = new Set([row.stock_name, ...rowModelNames(row)]);
+      const taken = new Set(RESERVED_MODELS);
+      catalogRows.filter(r => r.id !== row.id && r.kind === 'simple').forEach(r => {
+        taken.add(r.stock_name || r.title);
+        rowModelNames(r).forEach(n => taken.add(n));
+      });
+      const clash = [...mine].find(n => taken.has(n));
+      if (clash) return `Nazwa „${clash}” jest już używana przez inny produkt. Wybierz inną.`;
+      return null;
+    }
+
+    async function saveProductEditor() {
+      if (!pe || pe.uploading > 0) return;
+      const row = peToRow();
+      const problem = validateProductRow(row);
+      if (problem) return alert(problem);
+
+      const orig = pe.original;
+      if (orig && orig.kind === 'simple') {
+        // Zmiana nazwy, gdy są aktywne zamówienia ze starą nazwą, rozjechałaby planer i półkę
+        const newNames = new Set([row.stock_name, ...rowModelNames(row)]);
+        const active = activeOrderModelNames();
+        const lost = [orig.stock_name || orig.title, ...rowModelNames(orig)].filter(n => !newNames.has(n) && active.has(n));
+        if (lost.length) return alert(`Aktywne zamówienia mają „${[...new Set(lost)].join('”, „')}”.\nZmień nazwę dopiero, gdy te zamówienia zostaną wydane (albo zostaw starą nazwę).`);
+        const removedColors = (orig.colors || []).filter(c => !row.colors.includes(c));
+        if (removedColors.length) {
+          const used = cloudOrders.some(o => o.status !== 'Zrealizowane' && o.status !== 'Anulowane' &&
+            getExpandedOrderItems(o).some(i => rowModelNames(orig).includes(i.title) && removedColors.includes(i.color)));
+          if (used && !confirm(`Aktywne zamówienia mają ten produkt w kolorze: ${removedColors.join(', ')}. Te zamówienia zostaną bez zmian. Zapisać?`)) return;
+        }
+      }
+
+      if (pe.isNew) {
+        const inCollection = catalogRows.filter(r => r.collection === row.collection);
+        row.position = (inCollection.length ? Math.max(...inCollection.map(r => r.position)) : catalogRows.length * 10) + 1;
+      } else if (orig.collection !== row.collection) {
+        const inCollection = catalogRows.filter(r => r.collection === row.collection);
+        row.position = (inCollection.length ? Math.max(...inCollection.map(r => r.position)) : 0) + 1;
+      }
+      row.updated_at = new Date().toISOString();
+
+      const saveBtn = document.getElementById('pe-save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Zapisuję…';
+      const { error } = pe.isNew
+        ? await supabaseClient.from('products').insert(row)
+        : await supabaseClient.from('products').update(row).eq('id', row.id);
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Zapisz produkt';
+      if (error) return alert('Błąd zapisu produktu: ' + error.message);
+
+      // Parametry druku dla modeli z tego produktu
+      if (row.kind === 'simple') {
+        const specs = getSpecs();
+        const num = (v, d) => { const n = parseFloat(String(v).replace(',', '.')); return Number.isFinite(n) && n >= 0 ? n : d; };
+        const toSpec = s => ({ weight: num(s.weight, 50), hours: num(s.hours, 2) || 0.1, maxOnBed: Math.max(1, Math.round(num(s.maxOnBed, 8))) });
+        peModelSlots().forEach(s => {
+          const src = s.slot === 'single' ? pe.specSingle : s.slot === 'set' ? pe.specSet : pe.variants[parseInt(s.slot.slice(1))].spec;
+          specs[s.name] = toSpec(src);
+        });
+        saveSpecs(specs);
+      }
+
+      // Sprzątanie zdjęć: nieużyte nowe i zastąpione stare
+      const keep = new Set(rowImageUrls(row.images));
+      const draft = pe;
+      draft.uploaded = draft.uploaded.filter(u => !keep.has(u));
+      const replaced = orig ? rowImageUrls(orig.images).filter(u => !keep.has(u)) : [];
+      pe = null;
+      document.getElementById('product-editor-modal').classList.add('hidden');
+      await removeBucketFiles(draft.uploaded.concat(replaced));
+      catalogEditorCollection = row.collection;
+      await refreshCatalogAfterChange();
+    }
+
     function renderSettingsView() {
       const specs = getSpecs();
       const costs = getCosts();
@@ -4511,19 +5259,19 @@
         const hoursDisplay = (item.hours !== undefined ? item.hours : 1.5).toString().replace(".", ",");
 
         row.innerHTML = `
-          <div class="font-bold text-stone-900">${name}</div>
+          <div class="font-bold text-stone-900">${escapeHtml(name)}</div>
           <div class="grid grid-cols-3 gap-2">
             <div>
               <span class="text-[10px] text-stone-500 block">Waga (g):</span>
-              <input type="number" id="spec-weight-${name}" value="${item.weight}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white">
+              <input type="number" id="spec-weight-${escapeHtml(name)}" value="${item.weight}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white">
             </div>
             <div>
               <span class="text-[10px] text-stone-500 block">Czas (godz):</span>
-              <input type="text" id="spec-time-${name}" value="${hoursDisplay}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white">
+              <input type="text" id="spec-time-${escapeHtml(name)}" value="${hoursDisplay}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white">
             </div>
             <div>
               <span class="text-[10px] text-stone-500 block">Maks/stół:</span>
-              <input type="number" id="spec-max-${name}" value="${item.maxOnBed || 8}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white text-orange-700">
+              <input type="number" id="spec-max-${escapeHtml(name)}" value="${item.maxOnBed || 8}" class="w-full px-2 py-1 rounded border border-stone-300 font-bold bg-white text-orange-700">
             </div>
           </div>
         `;
@@ -4544,7 +5292,7 @@
 
       const fKg = parseFloat(document.getElementById('setting-cost-filament').value) || 80;
       const eKwh = parseFloat(document.getElementById('setting-cost-energy').value) || 1.15;
-      saveCosts({ filamentKg: fKg, energyKwh: eKwh });
+      saveCosts({ ...getCosts(), filamentKg: fKg, energyKwh: eKwh });
 
       const newSeasonsState = {};
       SEASON_ORDER.filter(key => CATALOG[key]).forEach(key => {
