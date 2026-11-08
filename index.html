@@ -1175,8 +1175,6 @@
       'Reniferki': { piece: 'Reniferek', count: 3 }
     };
 
-    const WINTER_MODELS = ['Renifer mały', 'Renifer średni', 'Renifer duży', 'Śnieżka', 'Choinka-miseczka', 'Reniferek', 'Reniferek-Kinderek', ...Object.keys(SET_PIECES)];
-
     // Cena z cennika; zestawy mają w nazwie wariant, np. "Zestaw Jesienny (Z liskiem)"
     function getUnitPrice(title) {
       if (title && title.startsWith('Zestaw Jesienny')) return ALL_PRICES['Zestaw Jesienny'];
@@ -1303,7 +1301,9 @@
     }
 
     function getSpools() {
-      return { ...DEFAULT_SPOOLS, ...readState('spools') };
+      // Każdy kolor z palety ma swoją szpulę (nowy kolor startuje z 1000 g)
+      const fromPalette = Object.fromEntries(shopPalette.filter(c => c.name !== 'Multikolor').map(c => [c.name, 1000]));
+      return { ...DEFAULT_SPOOLS, ...fromPalette, ...readState('spools') };
     }
     function saveSpools(spools) {
       writeState('spools', spools);
@@ -1394,6 +1394,148 @@
       products: CUSTOM_PRODUCTS
     };
 
+    // ==========================================
+    // KATALOG PRODUKTÓW Z BAZY (Ustawienia → Produkty w sklepie)
+    // ==========================================
+    // Wbudowane rysunki dla produktów bez zdjęć (produkty dodane przed edytorem)
+    const BUILTIN_VISUALS = {
+      'reindeer': (hex, sel) => reindeerSvg(hex, sel.sizeScale || 'w-32 h-32'),
+      'snowflakes': (hex) => `<svg viewBox="0 0 64 64" class="w-36 h-36 transition-colors duration-300 drop-shadow-sm">${[[32, 30, 1], [14, 16, 0.55], [50, 14, 0.5], [14, 48, 0.5], [50, 48, 0.55]].map(([x, y, k]) => `<g transform="translate(${x} ${y}) scale(${k})" stroke="${hex}" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M0 -14 V14 M-12 -7 L12 7 M-12 7 L12 -7 M-4 -11 L0 -7 L4 -11 M-4 11 L0 7 L4 11"/></g><g transform="translate(${x} ${y}) scale(${k})" stroke="#a8a29e" stroke-width="0.6" fill="none"><path d="M0 -14 V14 M-12 -7 L12 7 M-12 7 L12 -7"/></g>`).join('')}</svg>`,
+      'treebowls': (hex) => `<svg viewBox="0 0 64 64" class="w-36 h-36 transition-colors duration-300 drop-shadow-sm">${[[18, 0.7], [46, 0.7], [32, 1]].map(([x, k]) => `<g transform="translate(${x} 34) scale(${k})"><polygon points="0,-24 -16,18 16,18" fill="${hex}" stroke="#78716c" stroke-width="0.8"/><ellipse cx="0" cy="14" rx="11" ry="3.5" fill="#1c1917" fill-opacity="0.18"/><rect x="-3" y="18" width="6" height="5" fill="#92400e"/></g>`).join('')}</svg>`,
+      'reindeers3': (hex) => `<div class="flex items-end justify-center -space-x-4">${reindeerSvg(hex, 'w-16 h-16')}${reindeerSvg(hex, 'w-20 h-20')}${reindeerSvg(hex, 'w-16 h-16')}</div>`,
+      'kinderek': (hex) => `<div class="relative">${reindeerSvg(hex, 'w-28 h-28')}<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-6 rounded-md bg-amber-900 border-2 border-white shadow-sm"></div></div>`,
+      'bunny-s': (hex) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${hex};"><ellipse cx="26" cy="18" rx="4" ry="12" fill="currentColor"/><ellipse cx="38" cy="18" rx="4" ry="12" fill="currentColor"/><ellipse cx="32" cy="42" rx="12" ry="14" fill="currentColor"/><circle cx="32" cy="30" r="8" fill="currentColor"/></svg>`,
+      'bunny-m': (hex) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${hex};"><ellipse cx="26" cy="16" rx="5" ry="14" fill="currentColor"/><ellipse cx="38" cy="16" rx="5" ry="14" fill="currentColor"/><ellipse cx="32" cy="42" rx="14" ry="16" fill="currentColor"/><circle cx="32" cy="28" r="9" fill="currentColor"/></svg>`,
+      'bunny-l': (hex) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${hex};"><ellipse cx="25" cy="14" rx="6" ry="16" fill="currentColor"/><ellipse cx="39" cy="14" rx="6" ry="16" fill="currentColor"/><ellipse cx="32" cy="42" rx="16" ry="18" fill="currentColor"/><circle cx="32" cy="26" r="11" fill="currentColor"/></svg>`,
+      'egg': (hex) => `<svg viewBox="0 0 64 64" class="w-32 h-32 transition-colors duration-300 drop-shadow-sm" style="color: ${hex};"><ellipse cx="32" cy="36" rx="18" ry="24" fill="currentColor"/><path d="M14 36 Q32 30 50 36 Q32 42 14 36" fill="white" fill-opacity="0.25"/></svg>`
+    };
+    const VARIANT_SCALES = ['w-24 h-24', 'w-32 h-32', 'w-40 h-40'];
+
+    // Produkty z kodu: Zestaw Jesienny (logika wariantów) i katalog awaryjny, gdy baza nie odpowie
+    const CODE_PRODUCTS = {};
+    SEASON_ORDER.forEach(key => { CODE_PRODUCTS[key] = CATALOG[key].products.slice(); });
+    const CUSTOM_PRODUCT_DEFS = CUSTOM_PRODUCTS.map(p => ({ ...p }));
+    const BASE_SPECS = { ...DEFAULT_SPECS };
+
+    let shopPalette = CUSTOM_COLORS.map(c => ({ ...c }));
+    let catalogRows = [];
+
+    function paletteHex(name) {
+      return (shopPalette.find(c => c.name === name) || {}).hex || '#a8a29e';
+    }
+
+    function productImageTag(src, alt) {
+      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async" class="w-full h-full object-contain drop-shadow-sm transition-all duration-300">`;
+    }
+
+    function placeholderVisual() {
+      return `<div class="flex flex-col items-center gap-2 text-stone-300"><svg viewBox="0 0 24 24" class="w-16 h-16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg><span class="text-[11px] font-semibold">Zdjęcie wkrótce</span></div>`;
+    }
+
+    // Wiersz z bazy -> produkt w formacie sklepu
+    function productFromRow(row) {
+      const images = row.images || {};
+      if (row.kind === 'bundle') {
+        const base = CODE_PRODUCTS.autumn.find(p => p.isBundle);
+        return {
+          ...base, desc: row.description, note: row.note, price: Number(row.price),
+          renderVisual: images.main ? () => productImageTag(images.main, base.title) : base.renderVisual
+        };
+      }
+      const byColor = images.byColor || {};
+      const colors = (row.colors || []).map(name => ({ name, hex: paletteHex(name), img: byColor[name] || images.main || null }));
+      const variants = row.variants || [];
+      const visual = BUILTIN_VISUALS[row.visual];
+      return {
+        id: row.id,
+        title: row.title,
+        stockName: row.stock_name || row.title,
+        desc: row.description,
+        note: row.note,
+        price: Number(row.price),
+        hasColors: colors.length > 1,
+        colors,
+        defaultColor: row.default_color || (colors[0] && colors[0].name),
+        sizes: variants.length ? variants.map((v, i) => ({ name: v.name, price: Number(v.price), stockName: v.stockName, scale: VARIANT_SCALES[Math.min(i, 2)] })) : null,
+        defaultSize: variants.length ? variants[0].name : null,
+        renderVisual: (sel) => sel.img ? productImageTag(sel.img, row.title) : (visual ? visual(sel.hex, sel) : placeholderVisual())
+      };
+    }
+
+    // Nazwy modeli (do planera, półki i specyfikacji druku) dla wiersza produktu
+    function rowModelNames(row) {
+      if (row.kind !== 'simple') return [];
+      const variants = row.variants || [];
+      if (variants.length) return variants.map(v => v.stockName);
+      if (row.set_count && row.set_piece) return [row.set_piece];
+      return [row.stock_name || row.title];
+    }
+
+    function applyCatalog(rows, settings) {
+      if (Array.isArray(settings.palette) && settings.palette.length) {
+        shopPalette = settings.palette;
+        CUSTOM_COLORS.splice(0, CUSTOM_COLORS.length, ...shopPalette.map(c => ({ ...c })));
+      }
+      if (settings.pricing) Object.assign(CUSTOM_PRICING, settings.pricing);
+      if (!rows || rows.length === 0) return;   // brak katalogu w bazie: zostaje katalog z kodu
+
+      catalogRows = [...rows].sort((a, b) => a.position - b.position);
+      SEASON_ORDER.forEach(key => {
+        const visible = catalogRows.filter(r => r.collection === key && r.visible);
+        if (key === 'custom') {
+          const list = visible.map(r => {
+            const def = CUSTOM_PRODUCT_DEFS.find(d => d.id === r.id);
+            return def ? { ...def, title: r.title, desc: r.description, image: (r.images || {}).main || null } : null;
+          }).filter(Boolean);
+          CUSTOM_PRODUCTS.splice(0, CUSTOM_PRODUCTS.length, ...list);
+        } else {
+          CATALOG[key].products = visible.map(productFromRow);
+        }
+      });
+      rebuildCatalogDerived();
+    }
+
+    // Cennik, modele do planera i komplety wyliczane z katalogu
+    function rebuildCatalogDerived() {
+      const models = new Set(['Dynia', 'Lisek', 'Wiewiórka', 'Taca', 'Ogonek dyni']);
+      const prices = { 'Taca': 10 };
+      Object.keys(SET_PIECES).forEach(k => delete SET_PIECES[k]);
+
+      catalogRows.forEach(r => {
+        if (r.kind === 'custom') return;
+        if (r.kind === 'bundle') { prices['Zestaw Jesienny'] = Number(r.price); return; }
+        const variants = r.variants || [];
+        if (variants.length) {
+          variants.forEach(v => { prices[v.stockName] = Number(v.price); });
+        } else {
+          const name = r.stock_name || r.title;
+          prices[name] = Number(r.price);
+          if (r.set_count && r.set_piece) SET_PIECES[name] = { piece: r.set_piece, count: r.set_count };
+        }
+        rowModelNames(r).forEach(m => models.add(m));
+      });
+
+      Object.keys(ALL_PRICES).forEach(k => delete ALL_PRICES[k]);
+      Object.assign(ALL_PRICES, prices);
+      Object.keys(DEFAULT_SPECS).forEach(k => delete DEFAULT_SPECS[k]);
+      models.forEach(m => { DEFAULT_SPECS[m] = BASE_SPECS[m] || { weight: 50, hours: 2, maxOnBed: 8 }; });
+    }
+
+    async function loadCatalog() {
+      const [products, settings] = await Promise.all([
+        supabaseClient.from('products').select('*').order('position'),
+        supabaseClient.from('shop_settings').select('key, value')
+      ]);
+      if (products.error || settings.error) {
+        console.error('Błąd pobierania katalogu:', (products.error || settings.error).message);
+        return false;
+      }
+      const map = {};
+      (settings.data || []).forEach(r => { map[r.key] = r.value; });
+      applyCatalog(products.data || [], map);
+      return true;
+    }
+
     // Waga i czas pozycji na wymiar (do planera i statystyk), klucz: tytuł pozycji
     const CUSTOM_SPECS = {};
     function rememberCustomSpec(item) {
@@ -1426,12 +1568,12 @@
         card.innerHTML = `
           <div>
             <button type="button" onclick="openCustomizer('${p.id}')" class="w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden">
-              <img src="na-wymiar/${p.id}.webp" alt="${p.title}" loading="lazy" decoding="async" width="600" height="600" class="w-full h-full object-contain drop-shadow-sm">
+              <img src="${escapeHtml(p.image || `na-wymiar/${p.id}.webp`)}" alt="${escapeHtml(p.title)}" loading="lazy" decoding="async" width="600" height="600" class="w-full h-full object-contain drop-shadow-sm">
             </button>
             <div class="flex justify-between items-start gap-3">
               <div>
-                <h3 class="font-heading font-bold text-base text-stone-900">${p.title}</h3>
-                <p class="text-xs font-semibold text-stone-500 mt-0.5 tracking-tight">${p.desc}</p>
+                <h3 class="font-heading font-bold text-base text-stone-900">${escapeHtml(p.title)}</h3>
+                <p class="text-xs font-semibold text-stone-500 mt-0.5 tracking-tight">${escapeHtml(p.desc)}</p>
               </div>
               <span class="font-heading font-extrabold text-lg text-stone-900 whitespace-nowrap"><span class="text-xs font-semibold text-stone-500">od</span> ${customPrice(p.grams, p.hours).toFixed(2)} zł</span>
             </div>
@@ -1782,12 +1924,16 @@
         return;
       }
 
-      currentConfig.products.forEach(p => {
+      currentConfig.products.forEach(p => grid.appendChild(createProductCard(p)));
+    }
+
+    // Karta produktu w sklepie (preview = podgląd w edytorze, bez klikania)
+    function createProductCard(p, preview = false) {
         if (!productSelectedState[p.id]) {
           if (p.isBundle) {
             productSelectedState[p.id] = { variant: p.defaultVariant || 'Z liskiem' };
           } else {
-            const defCol = p.hasColors ? p.colors.find(c => c.name === p.defaultColor) : { name: 'Pomarańczowy', hex: '#c2410c' };
+            const defCol = (p.colors && (p.colors.find(c => c.name === p.defaultColor) || p.colors[0])) || { name: 'Pomarańczowy', hex: '#c2410c' };
             productSelectedState[p.id] = {
               color: defCol.name,
               hex: defCol.hex,
@@ -1802,7 +1948,7 @@
         const selectedSize = getSelectedSize(p, currentSel);
         if (selectedSize) currentSel.sizeScale = selectedSize.scale;
         const card = document.createElement('div');
-        card.className = "bg-white rounded-3xl p-5 border border-stone-200 shadow-xs hover:shadow-md transition flex flex-col justify-between";
+        card.className = `bg-white rounded-3xl p-5 border border-stone-200 shadow-xs hover:shadow-md transition flex flex-col justify-between${preview ? ' pointer-events-none' : ''}`;
 
         let optionsHtml = '';
         if (p.isBundle) {
@@ -1813,9 +1959,9 @@
               </span>
               <div class="grid grid-cols-2 gap-2">
                 ${p.variants.map(v => `
-                  <button type="button" onclick="setBundleVariant('${p.id}', '${v.name}')" 
+                  <button type="button" onclick="setBundleVariant(${jsArg(p.id)}, ${jsArg(v.name)})" 
                     class="py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${currentSel.variant === v.name ? 's-selected shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
-                    <span>${v.icon}</span> <span>${v.name}</span>
+                    <span>${v.icon}</span> <span>${escapeHtml(v.name)}</span>
                   </button>
                 `).join('')}
               </div>
@@ -1823,23 +1969,23 @@
           `;
         } else if (p.hasColors) {
           const swatches = p.colors.map(c => `
-            <button type="button" onclick="setProductColor('${p.id}', '${c.name}', '${c.hex}', '${c.img || ''}')" 
+            <button type="button" onclick="setProductColor(${jsArg(p.id)}, ${jsArg(c.name)}, ${jsArg(c.hex)}, ${jsArg(c.img || '')})" 
               class="swatch-btn ${currentSel.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition" 
-              style="background-color: ${c.hex}; ${c.name === 'Biały' ? 'border: 1px solid #d6d3d1;' : ''}" 
-              title="${c.name}">
+              style="background-color: ${escapeHtml(c.hex)}; border: 1px solid #d6d3d1;" 
+              title="${escapeHtml(c.name)}" aria-label="${escapeHtml(c.name)}">
             </button>
           `).join('');
 
           const sizesHtml = p.sizes ? `
             <div class="mt-4">
               <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
-                Rozmiar: <strong class="text-stone-800">${selectedSize.name}</strong>
+                Wariant: <strong class="text-stone-800">${escapeHtml(selectedSize.name)}</strong>
               </span>
               <div class="grid grid-cols-3 gap-2">
                 ${p.sizes.map(sz => `
-                  <button type="button" onclick="setProductSize('${p.id}', '${sz.name}')"
+                  <button type="button" onclick="setProductSize(${jsArg(p.id)}, ${jsArg(sz.name)})"
                     class="py-2 px-2 rounded-xl border text-xs font-bold transition ${selectedSize.name === sz.name ? 's-chip-active shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
-                    ${sz.name}<span class="block text-[10px] font-semibold opacity-80">${sz.price} zł</span>
+                    ${escapeHtml(sz.name)}<span class="block text-[10px] font-semibold opacity-80">${sz.price} zł</span>
                   </button>
                 `).join('')}
               </div>
@@ -1850,56 +1996,72 @@
             ${sizesHtml}
             <div class="mt-4">
               <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
-                Kolor: <strong class="text-stone-800">${currentSel.color}</strong>
+                Kolor: <strong class="text-stone-800">${escapeHtml(currentSel.color)}</strong>
               </span>
-              <div class="flex items-center gap-2">
+              <div class="flex flex-wrap items-center gap-2">
                 ${swatches}
               </div>
             </div>
           `;
         } else {
+          const sizesHtml = p.sizes ? `
+            <div class="mt-4">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
+                Wariant: <strong class="text-stone-800">${escapeHtml(selectedSize.name)}</strong>
+              </span>
+              <div class="grid grid-cols-3 gap-2">
+                ${p.sizes.map(sz => `
+                  <button type="button" onclick="setProductSize(${jsArg(p.id)}, ${jsArg(sz.name)})"
+                    class="py-2 px-2 rounded-xl border text-xs font-bold transition ${selectedSize.name === sz.name ? 's-chip-active shadow-xs' : 'border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100'}">
+                    ${escapeHtml(sz.name)}<span class="block text-[10px] font-semibold opacity-80">${sz.price} zł</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : '';
           optionsHtml = `
+            ${sizesHtml}
             <div class="mt-4">
               <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">Kolor figurki</span>
-              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200">
-                <span class="w-3.5 h-3.5 rounded-full bg-[#c2410c]"></span>
-                <span class="text-xs font-bold text-orange-950">Pomarańczowy</span>
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl s-soft border">
+                <span class="w-3.5 h-3.5 rounded-full border border-stone-300" style="background-color: ${escapeHtml(currentSel.hex)}"></span>
+                <span class="text-xs font-bold">${escapeHtml(currentSel.color)}</span>
               </div>
             </div>
           `;
         }
 
         const seasonBtnClass = 's-btn shadow-sm';
+        const cardId = preview ? 'preview' : p.id;
 
         card.innerHTML = `
           <div>
             <div class="w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden">
               ${p.renderVisual(currentSel)}
             </div>
-            <div class="flex justify-between items-start">
+            <div class="flex justify-between items-start gap-3">
               <div>
-                <h3 class="font-heading font-bold text-base text-stone-900">${p.title}</h3>
-                <p class="text-xs font-semibold text-stone-500 mt-0.5 tracking-tight">${p.desc}</p>
+                <h3 class="font-heading font-bold text-base text-stone-900">${escapeHtml(p.title)}</h3>
+                <p class="text-xs font-semibold text-stone-500 mt-0.5 tracking-tight">${escapeHtml(p.desc)}</p>
               </div>
-              <span class="font-heading font-extrabold text-lg text-stone-900">${getProductPrice(p, currentSel).toFixed(2)} zł</span>
+              <span class="font-heading font-extrabold text-lg text-stone-900 whitespace-nowrap">${getProductPrice(p, currentSel).toFixed(2)} zł</span>
             </div>
             ${optionsHtml}
-            ${p.note ? `<p class="mt-3 text-[11px] leading-relaxed text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-2.5">ℹ️ ${p.note}</p>` : ''}
+            ${p.note ? `<p class="mt-3 text-[11px] leading-relaxed text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-2.5">ℹ️ ${escapeHtml(p.note)}</p>` : ''}
           </div>
 
           <div class="mt-5 pt-4 border-t border-stone-100 flex items-center gap-2.5">
             <div class="flex items-center border border-stone-200 rounded-2xl bg-stone-50 p-1">
-              <button onclick="changeQty('${p.id}', -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
-              <span id="qty-${p.id}" class="w-8 text-center text-xs font-bold text-stone-900">${quantities[p.id]}</span>
-              <button onclick="changeQty('${p.id}', 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
+              <button onclick="changeQty(${jsArg(p.id)}, -1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">-</button>
+              <span id="qty-${cardId}" class="w-8 text-center text-xs font-bold text-stone-900">${quantities[p.id]}</span>
+              <button onclick="changeQty(${jsArg(p.id)}, 1)" class="w-8 h-8 font-bold text-stone-700 hover:bg-stone-200 rounded-xl transition">+</button>
             </div>
-            <button id="btn-add-${p.id}" onclick="addToCart('${p.id}')" class="flex-1 py-3 ${seasonBtnClass} rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
+            <button id="btn-add-${cardId}" onclick="addToCart(${jsArg(p.id)})" class="flex-1 py-3 ${seasonBtnClass} rounded-2xl text-xs font-bold transition-all duration-200 active:scale-95">
               + Dodaj do koszyka
             </button>
           </div>
         `;
-        grid.appendChild(card);
-      });
+        return card;
     }
 
     function setProductColor(productId, colorName, hexCode, imgPath) {
@@ -2125,6 +2287,7 @@
           if (await loadAppState(Object.keys(APP_STATE_DEFAULTS))) {
             await migrateLocalState();
           }
+          await loadCatalog();
           fetchOrdersFromCloud();
           setupRealtimeListener();
           switchAdminTab('hub');
@@ -2136,7 +2299,7 @@
         document.getElementById("admin-login").classList.add("hidden");
         document.getElementById("admin-app").classList.add("hidden");
         document.getElementById("client-app").classList.remove("hidden");
-        await loadAppState(['seasons']);
+        await Promise.all([loadAppState(['seasons']), loadCatalog()]);
         renderSeasonSelector();
       }
     }
@@ -3411,7 +3574,9 @@
       if (model.startsWith('Zestaw Jesienny')) return ['Multikolor'];
       if (model === 'Taca') return ['Biały'];
       if (model === 'Ogonek dyni') return ['Brązowy'];
-      if (WINTER_MODELS.includes(model)) return WINTER_COLORS.map(c => c.name);
+      const row = catalogRows.find(r => r.kind === 'simple' &&
+        ((r.stock_name || r.title) === model || r.set_piece === model || (r.variants || []).some(v => v.stockName === model)));
+      if (row && row.colors.length) return row.colors;
 
       for (const season of Object.values(CATALOG)) {
         const product = season.products.find(p => (p.stockName || p.title) === model);
