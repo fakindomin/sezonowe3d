@@ -274,8 +274,13 @@
             <input id="form-name" required type="text" placeholder="np. Kasia Kowalska" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-stone-700 mb-1">Telefon lub e-mail *</label>
-            <input id="form-contact" required type="text" placeholder="np. 600 700 800" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Telefon *</label>
+            <input id="form-contact" required type="tel" autocomplete="tel" maxlength="40" placeholder="np. 600 700 800" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">E-mail <span class="font-normal text-stone-500">(opcjonalnie)</span></label>
+            <input id="form-email" type="email" autocomplete="email" maxlength="254" placeholder="np. kasia@gmail.com" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+            <span class="block text-[10px] text-stone-500 mt-1">Wyślemy na niego potwierdzenie zamówienia z podsumowaniem.</span>
           </div>
           <div>
             <label class="block text-xs font-semibold text-stone-700 mb-1">Uwagi do zamówienia</label>
@@ -2440,6 +2445,7 @@
 
       const customerName = document.getElementById("form-name").value.trim();
       const customerContact = document.getElementById("form-contact").value.trim();
+      const customerEmail = document.getElementById("form-email").value.trim();
       const customerNotes = document.getElementById("form-notes").value.trim();
 
       const itemsPayload = cart.map(i => ({
@@ -2457,6 +2463,7 @@
         const { data: orderId, error: dbError } = await supabaseClient.rpc('place_order', {
           p_customer: customerName,
           p_contact: customerContact,
+          p_email: customerEmail || null,
           p_notes: customerNotes,
           p_items: itemsPayload
         });
@@ -2974,7 +2981,7 @@
                 </div>
                 <span class="text-[11px] text-stone-500 block">📅 ${escapeHtml(formatOrderDate(order.created_at))}</span>
                 <span class="font-semibold text-stone-800 text-xs">${escapeHtml(order.customer)}</span>
-                <span class="text-xs text-stone-500 block">${escapeHtml(order.contact)}</span>
+                <span class="text-xs text-stone-500 block">${escapeHtml(order.contact)}${order.email ? ` · <a href="mailto:${escapeHtml(order.email)}" class="underline">${escapeHtml(order.email)}</a>` : ''}</span>
               </div>
               ${badgeHtml}
             </div>
