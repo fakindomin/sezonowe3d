@@ -75,6 +75,8 @@
     /* Ozdoby kolekcji (Zima: pionowe łańcuchy lampek po bokach ekranu, lekko migoczące) */
     #season-decor { display: none; position: fixed; inset: 0; z-index: 20; pointer-events: none; overflow: hidden; }
     [data-season="christmas"] #season-decor { display: block; }
+    /* lekko przygaszone, żeby nie odciągały uwagi od produktów */
+    #season-decor { opacity: 0.85; filter: saturate(0.8); }
     #season-decor .chain { position: absolute; top: 0; bottom: 0; width: 44px; background-repeat: repeat-y; }
     #season-decor .left { left: -13px; }
     #season-decor .right { right: -13px; transform: scaleX(-1); background-position-y: 88px; }
