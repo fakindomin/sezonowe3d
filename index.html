@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="tailwind.css">
+  <link rel="stylesheet" href="tailwind.css?v=0d42395bae">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -2026,7 +2026,7 @@
       
       const banner = document.getElementById('season-banner');
       const photo = currentConfig.bannerImg;
-      banner.className = `p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300${photo ? ' min-h-[170px] sm:min-h-[230px] flex items-center' : ''}`;
+      banner.className = `p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300${photo ? ' sm:p-10 min-h-[190px] sm:min-h-[300px] flex items-center' : ''}`;
       document.getElementById('banner-photo').classList.toggle('hidden', !photo);
       document.getElementById('banner-text').className = `relative z-10 ${photo ? 'max-w-[58%] sm:max-w-[42%]' : 'max-w-md'}`;
       if (photo) {

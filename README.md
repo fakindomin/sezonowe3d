@@ -17,7 +17,8 @@ npm install
 npm run build:css
 ```
 
-i zatwierdzić zmieniony `tailwind.css`.
+i zatwierdzić zmieniony `tailwind.css` oraz pliki HTML: polecenie dopisuje do linku stylów wersję (`tailwind.css?v=...`),
+żeby przeglądarki nie trzymały starych stylów w pamięci.
 
 ## Na wymiar (`na-wymiar/`)
 Zakładka z modelami w wymiarach klienta: haczyki, uchwyty, doniczka, tabliczka. Jest domyślnie włączona;
