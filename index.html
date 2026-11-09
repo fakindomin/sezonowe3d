@@ -1506,6 +1506,14 @@
     let shopPalette = CUSTOM_COLORS.map(c => ({ ...c }));
     let catalogRows = [];
 
+    // „Mix kolorów”: sztuki zamówienia w różnych kolorach produktu (rozdzielane w planerze)
+    const MIX_COLOR = 'Mix kolorów';
+    function mixGradient(hexes) {
+      if (hexes.length < 2) return hexes[0] || '#a8a29e';
+      const step = 360 / hexes.length;
+      return `conic-gradient(${hexes.map((h, i) => `${h} ${Math.round(i * step)}deg ${Math.round((i + 1) * step)}deg`).join(', ')})`;
+    }
+
     function paletteHex(name) {
       return (shopPalette.find(c => c.name === name) || {}).hex || '#a8a29e';
     }
@@ -1530,6 +1538,9 @@
       }
       const byColor = images.byColor || {};
       const colors = (row.colors || []).map(name => ({ name, hex: paletteHex(name), img: byColor[name] || images.main || null }));
+      if (row.allow_mix && colors.length > 1) {
+        colors.push({ name: MIX_COLOR, hex: colors[0].hex, swatch: mixGradient(colors.map(c => c.hex)), img: byColor[MIX_COLOR] || images.main || null });
+      }
       const variants = row.variants || [];
       const visual = BUILTIN_VISUALS[row.visual];
       return {
@@ -2059,7 +2070,7 @@
           const swatches = p.colors.map(c => `
             <button type="button" onclick="setProductColor(${jsArg(p.id)}, ${jsArg(c.name)}, ${jsArg(c.hex)}, ${jsArg(c.img || '')})" 
               class="swatch-btn ${currentSel.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition" 
-              style="background-color: ${escapeHtml(c.hex)}; border: 1px solid #d6d3d1;" 
+              style="background: ${escapeHtml(c.swatch || c.hex)}; border: 1px solid #d6d3d1;" 
               title="${escapeHtml(c.name)}" aria-label="${escapeHtml(c.name)}">
             </button>
           `).join('');
@@ -2653,6 +2664,15 @@
       return BUNDLE_PUMPKIN_COLORS;
     }
 
+    // Kolor n-tej sztuki: przy „Mix kolorów” kolejno kolory produktu (start zależny od numeru zamówienia)
+    function mixColorPicker(order, item, model) {
+      if (item.color !== MIX_COLOR) return () => item.color;
+      const colors = getModelColors(model).filter(c => c !== MIX_COLOR);
+      if (!colors.length) return () => item.color;
+      const start = (parseInt(order && order.id) || 0) % colors.length;
+      return n => colors[(start + n) % colors.length];
+    }
+
     function getExpandedOrderItems(order) {
       const rawItems = getOrderItems(order);
       const expanded = [];
@@ -2675,14 +2695,16 @@
           // Komplet: każda sztuka kompletu osobno (do druku i pakowania)
           const set = SET_PIECES[item.title];
           const sets = Math.max(0, parseInt(item.qty) || 0);
+          const colorOf = mixColorPicker(order, item, set.piece);
           for (let q = 0; q < sets * set.count; q++) {
-            expanded.push({ title: set.piece, color: item.color, qty: 1, fromBundle: true });
+            expanded.push({ title: set.piece, color: colorOf(q), qty: 1, fromBundle: true });
           }
         } else {
           // Każda sztuka to osobna pozycja na checkliście pakowania
           const pieces = Math.max(0, parseInt(item.qty) || 0);
+          const colorOf = mixColorPicker(order, item, item.title);
           for (let q = 0; q < pieces; q++) {
-            expanded.push({ ...item, qty: 1 });
+            expanded.push({ ...item, color: colorOf(q), qty: 1 });
           }
         }
       });
@@ -3708,6 +3730,12 @@
     }
 
     // Kolory, w których dany model jest w ofercie
+    function modelAllowsMix(title) {
+      const row = catalogRows.find(r => r.kind === 'simple' &&
+        ((r.stock_name || r.title) === title || (r.variants || []).some(v => v.stockName === title)));
+      return !!(row && row.allow_mix);
+    }
+
     function getModelColors(model) {
       if (model.startsWith('Zestaw Jesienny')) return ['Multikolor'];
       if (model === 'Taca') return ['Biały'];
@@ -4331,7 +4359,9 @@
 
     function updateProductColorSelect(prefix) {
       const title = document.getElementById(`${prefix}-add-title`).value;
-      document.getElementById(`${prefix}-add-color`).innerHTML = getModelColors(title)
+      const colors = [...getModelColors(title)];
+      if (modelAllowsMix(title) && colors.length > 1) colors.push(MIX_COLOR);
+      document.getElementById(`${prefix}-add-color`).innerHTML = colors
         .map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
         .join('');
     }
@@ -4858,6 +4888,7 @@
         specSingle: specFor(row ? (row.stock_name || row.title) : ''),
         specSet: specFor(row && row.set_piece ? row.set_piece : ''),
         colors: row ? [...(row.colors || [])] : [shopPalette[0].name],
+        allowMix: row ? !!row.allow_mix : false,
         defaultColor: row ? (row.default_color || (row.colors || [])[0]) : shopPalette[0].name,
         images: { main: (row && row.images && row.images.main) || null, byColor: { ...((row && row.images && row.images.byColor) || {}) } },
         visual: row ? row.visual : null,
@@ -4968,6 +4999,15 @@
                 </div>`;
               }).join('')}
             </div>
+            ${pe.colors.length > 1 ? `<div class="p-1.5 rounded-xl border ${pe.allowMix ? 'border-stone-300 bg-white' : 'border-stone-200 bg-stone-50'}">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" ${pe.allowMix ? 'checked' : ''} onchange="peSetMix(this.checked)" class="w-4 h-4">
+                <span class="w-4 h-4 rounded-full border border-stone-300" style="background:${escapeHtml(mixGradient(pe.colors.map(paletteHex)))}"></span>
+                <span class="flex-1 font-semibold">${MIX_COLOR}</span>
+              </label>
+              <p class="text-[10px] text-stone-500 pl-6 mt-0.5">Klient wybiera „mix”, a w planerze sztuki rozkładają się po kolei na zaznaczone kolory.</p>
+              ${pe.allowMix ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[MIX_COLOR] || null, MIX_COLOR, true)}</div>` : ''}
+            </div>` : ''}
           </div>`);
 
         const specBlocks = pe.priceMode === 'variants'
@@ -5022,7 +5062,8 @@
       row.stock_name = title;
       row.colors = shopPalette.map(c => c.name).filter(n => pe.colors.includes(n));
       row.default_color = row.colors.includes(pe.defaultColor) ? pe.defaultColor : (row.colors[0] || null);
-      row.colors.forEach(n => { if (pe.images.byColor[n]) row.images.byColor[n] = pe.images.byColor[n]; });
+      row.allow_mix = pe.allowMix && row.colors.length > 1;
+      [...row.colors, ...(row.allow_mix ? [MIX_COLOR] : [])].forEach(n => { if (pe.images.byColor[n]) row.images.byColor[n] = pe.images.byColor[n]; });
       row.variants = pe.priceMode === 'variants'
         ? pe.variants.map(v => ({ name: v.name.trim(), price: Number(v.price) || 0, stockName: `${title} ${v.name.trim().toLowerCase()}` }))
         : [];
@@ -5094,6 +5135,11 @@
       if (on && !pe.colors.includes(name)) pe.colors.push(name);
       if (!on) pe.colors = pe.colors.filter(c => c !== name);
       if (!pe.colors.includes(pe.defaultColor)) pe.defaultColor = pe.colors[0] || null;
+      renderProductEditor();
+    }
+
+    function peSetMix(on) {
+      pe.allowMix = on;
       renderProductEditor();
     }
 
