@@ -41,7 +41,7 @@ a także paletę kolorów i cennik akcesoriów na wymiar.
 - Dynia, Lisek i Wiewiórka mają zablokowaną nazwę (używa ich Zestaw Jesienny); zestaw i akcesoria
   na wymiar mają tylko opis, cenę, zdjęcie i widoczność
 - gdy baza nie odpowie, sklep pokazuje katalog zapisany w kodzie (`index.html`)
-- „Mix kolorów” włącza się w edytorze osobno dla produktu (gdy ma co najmniej 2 kolory); w zamówieniu
+- „Mix kolorów” zaznaczasz w edytorze na liście kolorów produktu (gdy ma co najmniej 2 kolory); w zamówieniu
   zostaje kolor „Mix kolorów”, a planer i pakowanie rozkładają sztuki po kolei na kolory produktu
 
 ## Statystyki w menu głównym

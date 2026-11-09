@@ -4998,16 +4998,16 @@
                   ${on ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[c.name] || null, c.name, true)}</div>` : ''}
                 </div>`;
               }).join('')}
+              <div class="p-1.5 rounded-xl border ${pe.allowMix ? 'border-stone-300 bg-white' : 'border-stone-200 bg-stone-50'}">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" ${pe.allowMix ? 'checked' : ''} onchange="peSetMix(this.checked)" class="w-4 h-4" aria-label="${MIX_COLOR}">
+                  <span class="w-4 h-4 rounded-full border border-stone-300" style="background:${escapeHtml(mixGradient((pe.colors.length ? pe.colors : shopPalette.map(c => c.name)).map(paletteHex)))}"></span>
+                  <span class="flex-1 font-semibold">${MIX_COLOR}</span>
+                </div>
+                ${pe.allowMix && pe.colors.length < 2 ? '<p class="text-[10px] text-amber-700 pl-6 mt-0.5">Zaznacz też co najmniej 2 kolory, z których składa się mix.</p>' : ''}
+                ${pe.allowMix ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[MIX_COLOR] || null, MIX_COLOR, true)}</div>` : ''}
+              </div>
             </div>
-            ${pe.colors.length > 1 ? `<div class="p-1.5 rounded-xl border ${pe.allowMix ? 'border-stone-300 bg-white' : 'border-stone-200 bg-stone-50'}">
-              <label class="flex items-center gap-2">
-                <input type="checkbox" ${pe.allowMix ? 'checked' : ''} onchange="peSetMix(this.checked)" class="w-4 h-4">
-                <span class="w-4 h-4 rounded-full border border-stone-300" style="background:${escapeHtml(mixGradient(pe.colors.map(paletteHex)))}"></span>
-                <span class="flex-1 font-semibold">${MIX_COLOR}</span>
-              </label>
-              <p class="text-[10px] text-stone-500 pl-6 mt-0.5">Klient wybiera „mix”, a w planerze sztuki rozkładają się po kolei na zaznaczone kolory.</p>
-              ${pe.allowMix ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[MIX_COLOR] || null, MIX_COLOR, true)}</div>` : ''}
-            </div>` : ''}
           </div>`);
 
         const specBlocks = pe.priceMode === 'variants'
@@ -5250,6 +5250,7 @@
     async function saveProductEditor() {
       if (!pe || pe.uploading > 0) return;
       const row = peToRow();
+      if (pe.kind === 'simple' && pe.allowMix && row.colors.length < 2) return alert('„Mix kolorów” wymaga co najmniej 2 zaznaczonych kolorów.');
       const problem = validateProductRow(row);
       if (problem) return alert(problem);
 
