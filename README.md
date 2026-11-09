@@ -36,7 +36,8 @@ wyłącza się ją w panelu: Ustawienia → Dostępność Kolekcji → „Na wym
 Panel → Ustawienia → „🛍️ Produkty w sklepie”. Tam dodajesz, ukrywasz, przestawiasz i usuwasz produkty,
 zmieniasz opisy, ceny (jedna cena, rozmiary albo komplet), kolory i zdjęcia (główne i osobne dla koloru),
 a także paletę kolorów i cennik akcesoriów na wymiar.
-- zdjęcia są same zmniejszane do 800 px i trafiają do Supabase Storage (`product-images`)
+- zdjęcia są same zmniejszane do 800 px (domyślnie na biały kwadrat) i trafiają do Supabase Storage (`product-images`);
+  każdy kolor może mieć kilka zdjęć (w sklepie strzałki, kropki i przesuwanie palcem)
 - nazwy produktu nie da się zmienić, dopóki aktywne zamówienia mają starą nazwę
 - Dynia, Lisek i Wiewiórka mają zablokowaną nazwę (używa ich Zestaw Jesienny); zestaw i akcesoria
   na wymiar mają tylko opis, cenę, zdjęcie i widoczność

@@ -1514,6 +1514,12 @@
       return `conic-gradient(${hexes.map((h, i) => `${h} ${Math.round(i * step)}deg ${Math.round((i + 1) * step)}deg`).join(', ')})`;
     }
 
+    // Zdjęcia koloru zapisane jako jeden adres (stare wpisy) albo lista adresów
+    function photoList(byColor, name) {
+      const v = (byColor || {})[name];
+      return (Array.isArray(v) ? v : [v]).filter(Boolean);
+    }
+
     function paletteHex(name) {
       return (shopPalette.find(c => c.name === name) || {}).hex || '#a8a29e';
     }
@@ -1536,10 +1542,12 @@
           renderVisual: images.main ? () => productImageTag(images.main, base.title) : base.renderVisual
         };
       }
-      const byColor = images.byColor || {};
-      const colors = (row.colors || []).map(name => ({ name, hex: paletteHex(name), img: byColor[name] || images.main || null }));
+      // Zdjęcia koloru: lista (kilka ujęć), a gdy brak – zdjęcie główne
+      const photosOf = name => { const list = photoList(images.byColor, name); return list.length ? list : (images.main ? [images.main] : []); };
+      const withPhotos = c => { const imgs = photosOf(c.name); return { ...c, imgs, img: imgs[0] || null }; };
+      const colors = (row.colors || []).map(name => withPhotos({ name, hex: paletteHex(name) }));
       if (row.allow_mix && colors.length > 1) {
-        colors.push({ name: MIX_COLOR, hex: colors[0].hex, swatch: mixGradient(colors.map(c => c.hex)), img: byColor[MIX_COLOR] || images.main || null });
+        colors.push(withPhotos({ name: MIX_COLOR, hex: colors[0].hex, swatch: mixGradient(colors.map(c => c.hex)) }));
       }
       const variants = row.variants || [];
       const visual = BUILTIN_VISUALS[row.visual];
@@ -1555,7 +1563,11 @@
         defaultColor: row.default_color || (colors[0] && colors[0].name),
         sizes: variants.length ? variants.map((v, i) => ({ name: v.name, price: Number(v.price), stockName: v.stockName, scale: VARIANT_SCALES[Math.min(i, 2)] })) : null,
         defaultSize: variants.length ? variants[0].name : null,
-        renderVisual: (sel) => sel.img ? productImageTag(sel.img, row.title) : (visual ? visual(sel.hex, sel) : placeholderVisual())
+        renderVisual: (sel) => {
+          const imgs = sel.imgs && sel.imgs.length ? sel.imgs : (sel.img ? [sel.img] : []);
+          if (!imgs.length) return visual ? visual(sel.hex, sel) : placeholderVisual();
+          return productImageTag(imgs[Math.min(sel.photo || 0, imgs.length - 1)], row.title);
+        }
       };
     }
 
@@ -2037,6 +2049,8 @@
               color: defCol.name,
               hex: defCol.hex,
               img: defCol.img || null,
+              imgs: defCol.imgs || null,
+              photo: 0,
               size: p.sizes ? (p.defaultSize || p.sizes[0].name) : null
             };
           }
@@ -2068,7 +2082,7 @@
           `;
         } else if (p.hasColors) {
           const swatches = p.colors.map(c => `
-            <button type="button" onclick="setProductColor(${jsArg(p.id)}, ${jsArg(c.name)}, ${jsArg(c.hex)}, ${jsArg(c.img || '')})" 
+            <button type="button" onclick="setProductColor(${jsArg(p.id)}, ${jsArg(c.name)})" 
               class="swatch-btn ${currentSel.color === c.name ? 'active' : ''} w-7 h-7 rounded-full transition" 
               style="background: ${escapeHtml(c.swatch || c.hex)}; border: 1px solid #d6d3d1;" 
               title="${escapeHtml(c.name)}" aria-label="${escapeHtml(c.name)}">
@@ -2132,11 +2146,20 @@
 
         const seasonBtnClass = 's-btn shadow-sm';
         const cardId = preview ? 'preview' : p.id;
+        const photoCount = (!p.isBundle && currentSel.imgs) ? currentSel.imgs.length : 0;
+        const photoIdx = Math.min(currentSel.photo || 0, Math.max(0, photoCount - 1));
 
         card.innerHTML = `
           <div>
-            <div class="w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden">
+            <div class="relative w-full aspect-square rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-center p-4 mb-4 overflow-hidden"
+              ${photoCount > 1 ? `ontouchstart="photoTouchStart(event)" ontouchend="photoTouchEnd(event, ${jsArg(p.id)})"` : ''}>
               ${p.renderVisual(currentSel)}
+              ${photoCount > 1 ? `
+                <button type="button" onclick="setProductPhoto(${jsArg(p.id)}, ${photoIdx - 1})" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-stone-200 shadow-sm font-bold text-stone-700" aria-label="Poprzednie zdjęcie">‹</button>
+                <button type="button" onclick="setProductPhoto(${jsArg(p.id)}, ${photoIdx + 1})" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-stone-200 shadow-sm font-bold text-stone-700" aria-label="Następne zdjęcie">›</button>
+                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  ${currentSel.imgs.map((_, i) => `<button type="button" onclick="setProductPhoto(${jsArg(p.id)}, ${i})" class="w-2 h-2 rounded-full ${i === photoIdx ? 's-chip-active' : 'bg-stone-300'}" aria-label="Zdjęcie ${i + 1}"></button>`).join('')}
+                </div>` : ''}
             </div>
             <div class="flex justify-between items-start gap-3">
               <div>
@@ -2163,9 +2186,30 @@
         return card;
     }
 
-    function setProductColor(productId, colorName, hexCode, imgPath) {
-      productSelectedState[productId] = { ...productSelectedState[productId], color: colorName, hex: hexCode, img: imgPath || null };
+    function setProductColor(productId, colorName) {
+      const product = (CATALOG[activeSeasonKey].products || []).find(p => p.id === productId);
+      const c = product && (product.colors || []).find(x => x.name === colorName);
+      if (!c) return;
+      productSelectedState[productId] = { ...productSelectedState[productId], color: c.name, hex: c.hex, img: c.img || null, imgs: c.imgs || null, photo: 0 };
       renderProductsGrid();
+    }
+
+    // Kilka zdjęć jednego koloru: strzałki, kropki i przesuwanie palcem
+    function setProductPhoto(productId, index) {
+      const st = productSelectedState[productId];
+      if (!st || !st.imgs || st.imgs.length < 2) return;
+      st.photo = (index + st.imgs.length) % st.imgs.length;
+      renderProductsGrid();
+    }
+    let photoTouchX = null;
+    function photoTouchStart(e) { photoTouchX = e.touches[0].clientX; }
+    function photoTouchEnd(e, productId) {
+      if (photoTouchX === null) return;
+      const dx = e.changedTouches[0].clientX - photoTouchX;
+      photoTouchX = null;
+      if (Math.abs(dx) < 40) return;
+      const st = productSelectedState[productId] || {};
+      setProductPhoto(productId, (st.photo || 0) + (dx < 0 ? 1 : -1));
     }
 
     function setProductSize(productId, sizeName) {
@@ -4672,7 +4716,7 @@
 
     function rowImageUrls(images) {
       const im = images || {};
-      return [im.main, ...Object.values(im.byColor || {})].filter(Boolean);
+      return [im.main, ...Object.values(im.byColor || {}).flat()].filter(Boolean);
     }
 
     function rowPriceLabel(r) {
@@ -4706,7 +4750,7 @@
         list.innerHTML = `<p class="text-stone-500 p-3 bg-stone-50 rounded-xl text-center">Brak produktów w tej kolekcji. Dodaj pierwszy przyciskiem niżej.</p>`;
       } else {
         list.innerHTML = rows.map((r, idx) => {
-          const thumb = (r.images || {}).main || Object.values((r.images || {}).byColor || {})[0];
+          const thumb = rowImageUrls(r.images)[0];
           const colorDots = (r.colors || []).map(c => `<span class="w-2.5 h-2.5 rounded-full border border-stone-300 inline-block" style="background:${escapeHtml(paletteHex(c))}" title="${escapeHtml(c)}"></span>`).join('');
           const kindBadge = r.kind === 'bundle' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">ZESTAW</span>'
             : r.kind === 'custom' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-stone-200 text-stone-700 font-bold">NA WYMIAR</span>' : '';
@@ -4890,7 +4934,11 @@
         colors: row ? [...(row.colors || [])] : [shopPalette[0].name],
         allowMix: row ? !!row.allow_mix : false,
         defaultColor: row ? (row.default_color || (row.colors || [])[0]) : shopPalette[0].name,
-        images: { main: (row && row.images && row.images.main) || null, byColor: { ...((row && row.images && row.images.byColor) || {}) } },
+        images: {
+          main: (row && row.images && row.images.main) || null,
+          byColor: Object.fromEntries(Object.keys((row && row.images && row.images.byColor) || {}).map(k => [k, photoList(row.images.byColor, k)]))
+        },
+        squareWhite: true,
         visual: row ? row.visual : null,
         uploaded: [],
         uploading: 0
@@ -4925,6 +4973,28 @@
             </div>
           </div>
         </div>`;
+    }
+
+    // Kilka zdjęć jednego koloru (pierwsze pokazuje się na start)
+    function peGallerySlot(target) {
+      const list = photoList(pe.images.byColor, target);
+      return `
+        <div class="flex flex-wrap items-center gap-1.5">
+          ${list.map((url, i) => `
+            <div class="relative w-14 h-14 rounded-lg bg-stone-100 border ${i === 0 ? 'border-stone-500' : 'border-stone-200'} overflow-hidden">
+              <img src="${escapeHtml(url)}" alt="" class="w-full h-full object-contain">
+              <button type="button" onclick="peRemoveImage(${jsArg(target)}, ${i})" class="absolute top-0 right-0 w-5 h-5 bg-white/90 text-rose-600 text-[10px] font-bold rounded-bl-lg" aria-label="Usuń zdjęcie">✕</button>
+              ${i > 0 ? `<button type="button" onclick="peMovePhoto(${jsArg(target)}, ${i})" class="absolute bottom-0 left-0 w-5 h-5 bg-white/90 text-stone-700 text-[10px] font-bold rounded-tr-lg" aria-label="Przesuń wcześniej">◀</button>` : ''}
+            </div>`).join('')}
+          <button type="button" onclick="pePickImage(${jsArg(target)})" class="w-14 h-14 rounded-lg border border-dashed border-stone-300 text-stone-500 text-[10px] font-bold leading-tight">📷<br>${list.length ? 'Dodaj' : 'Zdjęcia'}</button>
+        </div>`;
+    }
+
+    function peMovePhoto(target, i) {
+      const list = photoList(pe.images.byColor, target);
+      [list[i - 1], list[i]] = [list[i], list[i - 1]];
+      pe.images.byColor[target] = list;
+      renderProductEditor();
     }
 
     function peSpecInputs(path, spec) {
@@ -4983,7 +5053,8 @@
         sections.push(`
           <div class="space-y-2 border-t border-stone-200 pt-3">
             <div class="font-bold text-stone-900">Kolory i zdjęcia</div>
-            <p class="text-[10px] text-stone-500">Zaznacz kolory do wyboru. ● oznacza kolor wybrany na start. Każdy kolor może mieć swoje zdjęcie; bez niego pokazuje się zdjęcie główne.</p>
+            <p class="text-[10px] text-stone-500">Zaznacz kolory do wyboru i ten na start. Każdy kolor może mieć kilka zdjęć (np. otwarte i zamknięte) – pierwsze pokazuje się na start, ◀ przesuwa wcześniej. Bez zdjęć koloru pokazuje się zdjęcie główne.</p>
+            <label class="flex items-center gap-2 text-[11px]"><input type="checkbox" ${pe.squareWhite ? 'checked' : ''} onchange="pe.squareWhite = this.checked" class="w-4 h-4"> Nowe zdjęcia: kwadrat z białym tłem (jak reszta sklepu)</label>
             ${peImageSlot('Zdjęcie główne', pe.images.main, 'main')}
             <div class="space-y-1.5">
               ${shopPalette.map(c => {
@@ -4995,7 +5066,7 @@
                     <span class="flex-1 font-semibold">${escapeHtml(c.name)}</span>
                     ${on ? `<label class="flex items-center gap-1 text-[10px] text-stone-500"><input type="radio" name="pe-default-color" ${pe.defaultColor === c.name ? 'checked' : ''} onchange="peSet('defaultColor', ${jsArg(c.name)})"> na start</label>` : ''}
                   </div>
-                  ${on ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[c.name] || null, c.name, true)}</div>` : ''}
+                  ${on ? `<div class="mt-1.5 pl-6">${peGallerySlot(c.name)}</div>` : ''}
                 </div>`;
               }).join('')}
               <div class="p-1.5 rounded-xl border ${pe.allowMix ? 'border-stone-300 bg-white' : 'border-stone-200 bg-stone-50'}">
@@ -5005,7 +5076,7 @@
                   <span class="flex-1 font-semibold">${MIX_COLOR}</span>
                 </div>
                 ${pe.allowMix && pe.colors.length < 2 ? '<p class="text-[10px] text-amber-700 pl-6 mt-0.5">Zaznacz też co najmniej 2 kolory, z których składa się mix.</p>' : ''}
-                ${pe.allowMix ? `<div class="mt-1.5 pl-6">${peImageSlot('', pe.images.byColor[MIX_COLOR] || null, MIX_COLOR, true)}</div>` : ''}
+                ${pe.allowMix ? `<div class="mt-1.5 pl-6">${peGallerySlot(MIX_COLOR)}</div>` : ''}
               </div>
             </div>
           </div>`);
@@ -5030,7 +5101,7 @@
           <div id="pe-preview" class="rounded-2xl p-3 bg-stone-100"></div>
         </div>`);
       }
-      sections.push(`<input type="file" id="pe-file" accept="image/*" class="hidden" onchange="peUploadSelected(this)">`);
+      sections.push(`<input type="file" id="pe-file" accept="image/*" multiple class="hidden" onchange="peUploadSelected(this)">`);
       body.innerHTML = sections.join('');
       refreshProductPreview();
     }
@@ -5063,7 +5134,10 @@
       row.colors = shopPalette.map(c => c.name).filter(n => pe.colors.includes(n));
       row.default_color = row.colors.includes(pe.defaultColor) ? pe.defaultColor : (row.colors[0] || null);
       row.allow_mix = pe.allowMix && row.colors.length > 1;
-      [...row.colors, ...(row.allow_mix ? [MIX_COLOR] : [])].forEach(n => { if (pe.images.byColor[n]) row.images.byColor[n] = pe.images.byColor[n]; });
+      [...row.colors, ...(row.allow_mix ? [MIX_COLOR] : [])].forEach(n => {
+        const list = photoList(pe.images.byColor, n);
+        if (list.length) row.images.byColor[n] = list;
+      });
       row.variants = pe.priceMode === 'variants'
         ? pe.variants.map(v => ({ name: v.name.trim(), price: Number(v.price) || 0, stockName: `${title} ${v.name.trim().toLowerCase()}` }))
         : [];
@@ -5150,14 +5224,18 @@
       input.click();
     }
 
-    function peRemoveImage(target) {
+    function peRemoveImage(target, index) {
       if (target === 'main') pe.images.main = null;
-      else delete pe.images.byColor[target];
+      else {
+        const list = photoList(pe.images.byColor, target);
+        list.splice(index, 1);
+        pe.images.byColor[target] = list;
+      }
       renderProductEditor();
     }
 
     // Zmniejsza zdjęcie do maks. 800 px (WebP, a gdy przeglądarka nie umie – JPEG)
-    async function resizeImageFile(file) {
+    async function resizeImageFile(file, squareWhite = false) {
       const url = URL.createObjectURL(file);
       try {
         const img = await new Promise((resolve, reject) => {
@@ -5167,10 +5245,22 @@
           el.src = url;
         });
         const scale = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.max(1, Math.round(img.naturalWidth * scale));
+        const h = Math.max(1, Math.round(img.naturalHeight * scale));
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        if (squareWhite) {
+          // Całe zdjęcie na środku białego kwadratu (nic nie jest ucinane)
+          const side = Math.max(w, h);
+          canvas.width = canvas.height = side;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, side, side);
+          ctx.drawImage(img, Math.round((side - w) / 2), Math.round((side - h) / 2), w, h);
+        } else {
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+        }
         const toBlob = (type, q) => new Promise(r => canvas.toBlob(r, type, q));
         let blob = await toBlob('image/webp', 0.85);
         if (!blob || blob.type !== 'image/webp') blob = await toBlob('image/jpeg', 0.88);
@@ -5182,23 +5272,26 @@
     }
 
     async function peUploadSelected(input) {
-      const file = input.files && input.files[0];
       const target = peUploadTarget;
-      if (!file || !pe || !target) return;
+      // Zdjęcie główne jest jedno; do koloru można wybrać kilka naraz
+      const files = [...(input.files || [])].slice(0, target === 'main' ? 1 : 8);
+      if (!files.length || !pe || !target) return;
       const draft = pe;
       draft.uploading++;
       document.getElementById('pe-save').disabled = true;
-      document.getElementById('pe-save').textContent = 'Wysyłam zdjęcie…';
+      document.getElementById('pe-save').textContent = files.length > 1 ? `Wysyłam zdjęcia (${files.length})…` : 'Wysyłam zdjęcie…';
       try {
-        const blob = await resizeImageFile(file);
-        const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-        const path = `${draft.id}/${Date.now()}${Math.random().toString(36).slice(2, 6)}.${ext}`;
-        const { error } = await supabaseClient.storage.from(PRODUCT_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
-        if (error) throw error;
-        const publicUrl = supabaseClient.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
-        draft.uploaded.push(publicUrl);
-        if (target === 'main') draft.images.main = publicUrl;
-        else draft.images.byColor[target] = publicUrl;
+        for (const file of files) {
+          const blob = await resizeImageFile(file, draft.squareWhite);
+          const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+          const path = `${draft.id}/${Date.now()}${Math.random().toString(36).slice(2, 6)}.${ext}`;
+          const { error } = await supabaseClient.storage.from(PRODUCT_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+          if (error) throw error;
+          const publicUrl = supabaseClient.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
+          draft.uploaded.push(publicUrl);
+          if (target === 'main') draft.images.main = publicUrl;
+          else draft.images.byColor[target] = [...photoList(draft.images.byColor, target), publicUrl];
+        }
       } catch (err) {
         alert('Nie udało się dodać zdjęcia: ' + err.message);
       } finally {
