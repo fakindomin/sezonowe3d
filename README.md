@@ -74,6 +74,6 @@ Po zamówieniu klienta funkcja `place_order()` wywołuje funkcję Edge `order-no
 - `orders.notified_at` zapisuje, kiedy wyszedł mail; każde zamówienie jest wysyłane najwyżej raz
 - zamówienia ręczne z panelu nie wysyłają maila
 - klient może podać e-mail (`orders.email`); wtedy dostaje potwierdzenie zamówienia z osobnego szablonu
-  EmailJS, którego ID jest w sekrecie `EMAILJS_CUSTOMER_TEMPLATE_ID` (szablon: To Email `{{to_email}}`,
+  EmailJS `template_szv564o` (stała w kodzie funkcji; sekret `EMAILJS_CUSTOMER_TEMPLATE_ID` może ją nadpisać; szablon: To Email `{{to_email}}`,
   Subject `{{subject}}`, Reply To `{{reply_to}}`, treść `{{{message_html}}}`); `orders.customer_notified_at`
-  zapisuje, kiedy wyszedł. Bez tego sekretu mail do klienta jest pomijany
+  zapisuje, kiedy wyszedł

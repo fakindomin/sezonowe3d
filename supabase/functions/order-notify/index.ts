@@ -1,6 +1,6 @@
 // Wysyła powiadomienia e-mail o nowym zamówieniu przez EmailJS (z prywatnym kluczem):
-// 1) do pracowni, 2) potwierdzenie do klienta, jeśli podał e-mail i ustawiony jest szablon
-//    EMAILJS_CUSTOMER_TEMPLATE_ID (sekret funkcji; bez niego mail do klienta jest pomijany).
+// 1) do pracowni, 2) potwierdzenie do klienta, jeśli podał e-mail (osobny szablon EmailJS;
+//    sekret EMAILJS_CUSTOMER_TEMPLATE_ID może go nadpisać).
 // Wywoływana przez bazę po złożeniu zamówienia w place_order(). Przyjmuje tylko numer
 // zamówienia; treść maili pochodzi z bazy, a każdy mail jest wysyłany najwyżej raz.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -8,6 +8,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const EMAILJS_SERVICE_ID = "service_psuou7z";
 const EMAILJS_TEMPLATE_ID = "template_1mzt0sy";
 const EMAILJS_PUBLIC_KEY = "V4t-nC9pkZvdySwll";
+// Szablon „Potwierdzenie dla klienta”: To {{to_email}}, Subject {{subject}}, Reply To {{reply_to}}, treść {{{message_html}}}
+const EMAILJS_CUSTOMER_TEMPLATE_ID = "template_szv564o";
 
 const SHOP_URL = "https://sezonowe3d.pl";
 
@@ -149,7 +151,7 @@ Deno.serve(async (req) => {
   }
 
   // Potwierdzenie dla klienta (osobno; błąd tutaj nie cofa maila do pracowni)
-  const customerTemplate = Deno.env.get("EMAILJS_CUSTOMER_TEMPLATE_ID");
+  const customerTemplate = Deno.env.get("EMAILJS_CUSTOMER_TEMPLATE_ID") || EMAILJS_CUSTOMER_TEMPLATE_ID;
   let customer: string = "skipped";
   if (order.email && customerTemplate) {
     const { data: claimed } = await supabase
