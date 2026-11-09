@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="tailwind.css?v=c8c6427de2">
+  <link rel="stylesheet" href="tailwind.css?v=21f80004f6">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -70,19 +70,30 @@
     }
     body { background-color: var(--s-page); transition: background-color 0.3s; }
     /* Sklep czeka z pokazaniem treści, aż wczyta kolekcje z bazy (bez mignięcia jesieni) */
-    #client-app { transition: opacity 0.25s; position: relative; z-index: 1; }
+    #client-app { transition: opacity 0.25s; }
 
-    /* Ozdoby tła kolekcji (Zima: gałązki jodły w rogach), za treścią sklepu */
-    #season-decor { display: none; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    /* Ozdoby tła kolekcji (Zima: gałązki jodły). Komputer: za treścią, przy brzegach strony.
+       Telefon: małe gałązki z boków ekranu lekko wchodzą na brzegi kart (pod nagłówkiem, koszykiem i oknami). */
+    #season-decor { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
     [data-season="christmas"] #season-decor { display: block; }
     #season-decor img { position: absolute; width: clamp(170px, 26vw, 400px); height: auto; opacity: 0.9; user-select: none; }
     #season-decor .d1 { top: 56px; left: -50px; transform: rotate(10deg); }
     #season-decor .d2 { top: 20px; right: -60px; transform: scaleX(-1) rotate(14deg); }
     #season-decor .d3 { bottom: 20px; left: -70px; transform: rotate(-22deg); }
     #season-decor .d4 { bottom: 90px; right: -70px; transform: scaleX(-1) rotate(-6deg); }
+    #season-decor .m { display: none; }
     @media (max-width: 640px) {
-      #season-decor img { opacity: 0.75; }
-      #season-decor .d3, #season-decor .d4 { display: none; }
+      #season-decor { z-index: 20; }
+      #season-decor img { width: 150px; opacity: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15)); }
+      #season-decor .d1 { top: 60px; left: -104px; transform: rotate(14deg); }
+      #season-decor .d2 { top: 60px; right: -104px; transform: scaleX(-1) rotate(16deg); }
+      #season-decor .d3 { top: auto; bottom: 20%; left: -108px; transform: rotate(-8deg); }
+      #season-decor .d4 { top: auto; bottom: 44%; right: -108px; transform: scaleX(-1) rotate(-8deg); }
+      #season-decor .m { display: block; }
+      #season-decor .m1 { top: 32%; left: -106px; transform: rotate(4deg); }
+      #season-decor .m2 { bottom: 4%; right: -106px; transform: scaleX(-1) rotate(4deg); }
+      #season-decor .m3 { top: 18%; right: -110px; transform: scaleX(-1) rotate(-12deg); }
+      #season-decor .m4 { bottom: 40%; left: -110px; transform: rotate(-16deg); }
     }
     @media print { #season-decor { display: none !important; } }
     .banner-photo-fade {
@@ -126,6 +137,10 @@
     <img class="d2" src="tlo/galazka2.svg" alt="" decoding="async">
     <img class="d3" src="tlo/galazka2.svg" alt="" decoding="async">
     <img class="d4" src="tlo/galazka.svg" alt="" decoding="async">
+    <img class="m m1" src="tlo/galazka.svg" alt="" decoding="async">
+    <img class="m m2" src="tlo/galazka2.svg" alt="" decoding="async">
+    <img class="m m3" src="tlo/galazka.svg" alt="" decoding="async">
+    <img class="m m4" src="tlo/galazka2.svg" alt="" decoding="async">
   </div>
   <div id="client-loading" class="fixed inset-0 items-center justify-center pointer-events-none" aria-hidden="true">
     <div class="w-8 h-8 rounded-full border-2 border-stone-300 animate-spin" style="border-top-color: var(--s-accent)"></div>
