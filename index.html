@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="tailwind.css?v=21f80004f6">
+  <link rel="stylesheet" href="tailwind.css?v=9b6dd46840">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -72,25 +72,23 @@
     /* Sklep czeka z pokazaniem treści, aż wczyta kolekcje z bazy (bez mignięcia jesieni) */
     #client-app { transition: opacity 0.25s; }
 
-    /* Ozdoby tła kolekcji (Zima: gałązki jodły). Komputer: za treścią, przy brzegach strony.
-       Telefon: małe gałązki z boków ekranu lekko wchodzą na brzegi kart (pod nagłówkiem, koszykiem i oknami). */
-    #season-decor { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    /* Ozdoby kolekcji (Zima: pionowe łańcuchy lampek po bokach ekranu, lekko migoczące) */
+    #season-decor { display: none; position: fixed; inset: 0; z-index: 20; pointer-events: none; overflow: hidden; }
     [data-season="christmas"] #season-decor { display: block; }
-    #season-decor img { position: absolute; width: clamp(170px, 26vw, 400px); height: auto; opacity: 1; user-select: none; }
-    #season-decor .d1 { top: 56px; left: -50px; transform: rotate(10deg); }
-    #season-decor .d2 { top: 20px; right: -60px; transform: scaleX(-1) rotate(14deg); }
-    #season-decor .d3 { bottom: 20px; left: -70px; transform: rotate(-22deg); }
-    #season-decor .d4 { bottom: 90px; right: -70px; transform: scaleX(-1) rotate(-6deg); }
-    #season-decor .m { display: none; }
-    @media (max-width: 640px) {
-      /* Telefon: stroiki (gałązki, szyszki, bombki, śnieg) przy brzegach ekranu */
-      #season-decor { z-index: 20; }
-      #season-decor .d { display: none; }
-      #season-decor .m { display: block; width: 104px; opacity: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18)); }
-      #season-decor .m1 { top: 70px; left: -40px; transform: rotate(-8deg); }
-      #season-decor .m2 { top: 36%; right: -40px; transform: scaleX(-1) rotate(6deg); }
-      #season-decor .m3 { top: 62%; left: -42px; transform: rotate(10deg); }
-      #season-decor .m4 { bottom: 70px; right: -42px; transform: scaleX(-1) rotate(-10deg); }
+    #season-decor .chain { position: absolute; top: 0; bottom: 0; width: 44px; background-repeat: repeat-y; }
+    #season-decor .left { left: -6px; }
+    #season-decor .right { right: -6px; transform: scaleX(-1); background-position-y: 88px; }
+    #season-decor .wire { background-image: url("tlo/lampki.svg"); }
+    #season-decor .glow-a { background-image: url("tlo/lampki-blask-a.svg"); animation: lampki 2.6s ease-in-out infinite; }
+    #season-decor .glow-b { background-image: url("tlo/lampki-blask-b.svg"); animation: lampki 2.6s ease-in-out 1.3s infinite; }
+    @keyframes lampki { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+    @media (min-width: 900px) {
+      #season-decor .chain { width: 62px; background-size: 62px auto; }
+      #season-decor .left { left: 12px; }
+      #season-decor .right { right: 12px; background-position-y: 124px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #season-decor .glow-a, #season-decor .glow-b { animation: none; opacity: 0.7; }
     }
     @media print { #season-decor { display: none !important; } }
     .banner-photo-fade {
@@ -130,14 +128,8 @@
 </head>
 <body class="text-stone-800 pb-28">
   <div id="season-decor" aria-hidden="true">
-    <img class="d d1" src="tlo/galazka.svg" alt="" decoding="async">
-    <img class="d d2" src="tlo/galazka2.svg" alt="" decoding="async">
-    <img class="d d3" src="tlo/galazka2.svg" alt="" decoding="async">
-    <img class="d d4" src="tlo/galazka.svg" alt="" decoding="async">
-    <img class="m m1" src="tlo/stroik-a.svg" alt="" decoding="async">
-    <img class="m m2" src="tlo/stroik-b.svg" alt="" decoding="async">
-    <img class="m m3" src="tlo/stroik-b.svg" alt="" decoding="async">
-    <img class="m m4" src="tlo/stroik-a.svg" alt="" decoding="async">
+    <div class="chain left wire"></div><div class="chain left glow-a"></div><div class="chain left glow-b"></div>
+    <div class="chain right wire"></div><div class="chain right glow-a"></div><div class="chain right glow-b"></div>
   </div>
   <div id="client-loading" class="fixed inset-0 items-center justify-center pointer-events-none" aria-hidden="true">
     <div class="w-8 h-8 rounded-full border-2 border-stone-300 animate-spin" style="border-top-color: var(--s-accent)"></div>
