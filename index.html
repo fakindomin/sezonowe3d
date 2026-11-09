@@ -2960,6 +2960,7 @@
                   ${order.urgent && ordersActiveCategory === 'pending' ? '<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-extrabold uppercase">🚩 Pilne</span>' : ''}
                   ${isRecent ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-stone-950 text-[10px] font-extrabold uppercase">Nowe</span>' : ''}
                 </div>
+                <span class="text-[11px] text-stone-500 block">📅 ${escapeHtml(formatOrderDate(order.created_at))}</span>
                 <span class="font-semibold text-stone-800 text-xs">${escapeHtml(order.customer)}</span>
                 <span class="text-xs text-stone-500 block">${escapeHtml(order.contact)}</span>
               </div>
@@ -3649,6 +3650,17 @@
         });
       }
       return shelf;
+    }
+
+    // Data złożenia zamówienia, np. „9.11.2026, 21:15 · wczoraj”
+    function formatOrderDate(iso) {
+      if (!iso) return 'brak daty';
+      const d = new Date(iso);
+      if (isNaN(d)) return 'brak daty';
+      const text = `${d.toLocaleDateString('pl-PL')}, ${d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`;
+      const days = Math.round((new Date(new Date().toDateString()) - new Date(d.toDateString())) / 86400000);
+      const ago = days === 0 ? 'dziś' : days === 1 ? 'wczoraj' : days > 1 ? `${days} dni temu` : '';
+      return ago ? `${text} · ${ago}` : text;
     }
 
     function formatJobTime(date) {
