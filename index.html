@@ -1919,7 +1919,8 @@
         }
         document.getElementById('custom-price').textContent = `${est.price.toFixed(2)} zł`;
         document.getElementById('custom-est').textContent =
-          `ok. ${formatMm(est.grams)} g filamentu, druk ok. ${formatMm(est.hours)} godz.${est.pieces > 1 ? ` · ${est.pieces} części` : ''}`;
+          // Gramy i czas druku zostają tylko w panelu (planer, statystyki), klient ich nie widzi
+          est.pieces > 1 ? `Model składa się z ${est.pieces} części.` : '';
         document.getElementById('custom-add').disabled = false;
       } catch (err) {
         document.getElementById('custom-est').textContent = 'Nie udało się zbudować modelu w tych wymiarach. Zmień któryś wymiar.';
