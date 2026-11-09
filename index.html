@@ -69,6 +69,11 @@
       --s-page: #f5f5f4; --s-bar: #1c1917; --s-bar-accent: #e7e5e4;
     }
     body { background-color: var(--s-page); transition: background-color 0.3s; }
+    /* Sklep czeka z pokazaniem treści, aż wczyta kolekcje z bazy (bez mignięcia jesieni) */
+    #client-app { transition: opacity 0.25s; }
+    #client-app.is-loading { opacity: 0; pointer-events: none; }
+    #client-loading { display: none; }
+    html.shop-loading #client-loading { display: flex; }
     .s-gradient { background-image: linear-gradient(to bottom right, var(--s-from), var(--s-to)); }
     .s-btn { background-color: var(--s-accent); color: #fff; }
     .s-btn:hover { background-color: var(--s-accent-hover); }
@@ -83,13 +88,27 @@
     .s-bar-btn { background-color: var(--s-soft); color: var(--s-ink); }
     .s-bar-btn:hover { background-color: #fff; }
   </style>
+  <script>
+    // Kolory ostatnio oglądanej kolekcji od razu, zanim strona wczyta dane
+    (function () {
+      if (location.hash === '#admin') return;
+      document.documentElement.classList.add('shop-loading');
+      try {
+        var last = localStorage.getItem('sezonowe3d_season');
+        if (/^(easter|summer|autumn|christmas|custom)$/.test(last || '')) document.documentElement.dataset.season = last;
+      } catch (e) { /* brak dostępu do pamięci przeglądarki */ }
+    })();
+  </script>
 </head>
 <body class="text-stone-800 pb-28">
+  <div id="client-loading" class="fixed inset-0 items-center justify-center pointer-events-none" aria-hidden="true">
+    <div class="w-8 h-8 rounded-full border-2 border-stone-300 animate-spin" style="border-top-color: var(--s-accent)"></div>
+  </div>
 
   <!-- ========================================== -->
   <!-- 1. SKLEP DLA KLIENTA                      -->
   <!-- ========================================== -->
-  <div id="client-app">
+  <div id="client-app" class="is-loading">
     <header class="bg-white/90 backdrop-blur-md border-b border-stone-200 sticky top-0 z-30 px-4 py-3 shadow-xs">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -1966,6 +1985,8 @@
 
       const currentConfig = CATALOG[activeSeasonKey];
       document.body.dataset.season = activeSeasonKey;
+      document.documentElement.dataset.season = activeSeasonKey;
+      try { localStorage.setItem('sezonowe3d_season', activeSeasonKey); } catch (e) { /* brak pamięci */ }
       document.getElementById('banner-title').textContent = currentConfig.title;
       document.getElementById('banner-desc').textContent = currentConfig.desc;
       
@@ -2348,6 +2369,8 @@
         document.getElementById("client-app").classList.add("hidden");
         // Panel admina zawsze w neutralnych kolorach, niezależnie od kolekcji
         delete document.body.dataset.season;
+        delete document.documentElement.dataset.season;
+        document.documentElement.classList.remove('shop-loading');
         if (isAuth) {
           document.getElementById("admin-login").classList.add("hidden");
           document.getElementById("admin-app").classList.remove("hidden");
@@ -2366,8 +2389,16 @@
         document.getElementById("admin-login").classList.add("hidden");
         document.getElementById("admin-app").classList.add("hidden");
         document.getElementById("client-app").classList.remove("hidden");
+        // Gdyby baza długo nie odpowiadała, po 4 s pokaż sklep z katalogiem z kodu
+        const showShop = () => {
+          document.getElementById("client-app").classList.remove("is-loading");
+          document.documentElement.classList.remove('shop-loading');
+        };
+        const safety = setTimeout(() => { renderSeasonSelector(); showShop(); }, 4000);
         await Promise.all([loadAppState(['seasons']), loadCatalog()]);
+        clearTimeout(safety);
         renderSeasonSelector();
+        showShop();
       }
     }
 
