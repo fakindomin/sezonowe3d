@@ -70,7 +70,21 @@
     }
     body { background-color: var(--s-page); transition: background-color 0.3s; }
     /* Sklep czeka z pokazaniem treści, aż wczyta kolekcje z bazy (bez mignięcia jesieni) */
-    #client-app { transition: opacity 0.25s; }
+    #client-app { transition: opacity 0.25s; position: relative; z-index: 1; }
+
+    /* Ozdoby tła kolekcji (Zima: gałązki jodły w rogach), za treścią sklepu */
+    #season-decor { display: none; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    [data-season="christmas"] #season-decor { display: block; }
+    #season-decor img { position: absolute; width: clamp(170px, 26vw, 400px); height: auto; opacity: 0.9; user-select: none; }
+    #season-decor .d1 { top: 56px; left: -50px; transform: rotate(10deg); }
+    #season-decor .d2 { top: 20px; right: -60px; transform: scaleX(-1) rotate(14deg); }
+    #season-decor .d3 { bottom: 20px; left: -70px; transform: rotate(-22deg); }
+    #season-decor .d4 { bottom: 90px; right: -70px; transform: scaleX(-1) rotate(-6deg); }
+    @media (max-width: 640px) {
+      #season-decor img { opacity: 0.75; }
+      #season-decor .d3, #season-decor .d4 { display: none; }
+    }
+    @media print { #season-decor { display: none !important; } }
     .banner-photo-fade {
       -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 30%, #000 55%);
       mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 30%, #000 55%);
@@ -107,6 +121,12 @@
   </script>
 </head>
 <body class="text-stone-800 pb-28">
+  <div id="season-decor" aria-hidden="true">
+    <img class="d1" src="tlo/galazka.svg" alt="" decoding="async">
+    <img class="d2" src="tlo/galazka2.svg" alt="" decoding="async">
+    <img class="d3" src="tlo/galazka2.svg" alt="" decoding="async">
+    <img class="d4" src="tlo/galazka.svg" alt="" decoding="async">
+  </div>
   <div id="client-loading" class="fixed inset-0 items-center justify-center pointer-events-none" aria-hidden="true">
     <div class="w-8 h-8 rounded-full border-2 border-stone-300 animate-spin" style="border-top-color: var(--s-accent)"></div>
   </div>
