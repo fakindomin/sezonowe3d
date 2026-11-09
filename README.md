@@ -4,6 +4,8 @@ Strona do obsługi zamówień na wydruki 3d: sklep dla klientów i panel warszta
 ## Pliki
 - `index.html` – sklep i panel admina (cały kod strony)
 - `polityka-prywatnosci.html` – polityka prywatności
+- `regulamin.html` – regulamin sklepu (sprzedawca, zamówienia, odbiór osobisty, zwroty, reklamacje)
+- `formularz-odstapienia.html` – wzór formularza odstąpienia od umowy (do druku)
 - `tailwind.css` – zbudowane style (nie edytować ręcznie, patrz niżej)
 - `supabase/migrations/` – historia zmian w bazie Supabase
 - `*.webp`, `og-image.jpg`, `favicon.svg` – zdjęcia produktów, podgląd linku, ikona

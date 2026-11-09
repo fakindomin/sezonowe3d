@@ -3,7 +3,7 @@
 const fs = require('fs');
 const crypto = require('crypto');
 const hash = crypto.createHash('sha1').update(fs.readFileSync('tailwind.css')).digest('hex').slice(0, 10);
-for (const file of ['index.html', 'polityka-prywatnosci.html']) {
+for (const file of ['index.html', 'polityka-prywatnosci.html', 'regulamin.html', 'formularz-odstapienia.html']) {
   const html = fs.readFileSync(file, 'utf8');
   const next = html.replace(/href="tailwind\.css(\?v=[^"]*)?"/, `href="tailwind.css?v=${hash}"`);
   if (next !== html) fs.writeFileSync(file, next);

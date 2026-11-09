@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="tailwind.css?v=0d42395bae">
+  <link rel="stylesheet" href="tailwind.css?v=c8c6427de2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -180,6 +180,13 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="products-grid"></div>
 
+      <!-- Informacje o produkcie (bezpieczeństwo produktów, GPSR) -->
+      <p class="mt-5 text-[11px] leading-relaxed text-stone-500 text-center max-w-2xl mx-auto">
+        Producent: Natalia Chróścik, ul. Husarska 1D/5, Kruszewnia, sezonowe3d@gmail.com.
+        Dekoracje i akcesoria drukowane w 3D z PLA/PETG – <strong>to nie są zabawki</strong>; zawierają małe elementy, przechowywać poza zasięgiem dzieci poniżej 3 lat.
+        Chronić przed wysoką temperaturą i ogniem. Odbiór osobisty, bez wysyłki.
+      </p>
+
       <!-- SEKCJA KONTAKTOWA W POMARAŃCZOWYM KAFELKU -->
       <footer class="mt-12 p-6 sm:p-8 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300">
         <div class="relative z-10 text-center max-w-lg mx-auto space-y-3">
@@ -195,7 +202,10 @@
               <span>✉️</span> <span>Napisz: <strong>sezonowe3d@gmail.com</strong></span>
             </a>
           </div>
-          <p class="text-[10px] text-white/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D · <a href="polityka-prywatnosci.html" class="underline hover:text-white">Polityka prywatności</a></p>
+          <p class="text-[10px] text-white/60 pt-3">© sezonowe3d.pl — Pracownia Druku 3D · Natalia Chróścik, ul. Husarska 1D/5, Kruszewnia<br>
+            <a href="regulamin.html" class="underline hover:text-white">Regulamin</a> ·
+            <a href="formularz-odstapienia.html" class="underline hover:text-white">Formularz odstąpienia</a> ·
+            <a href="polityka-prywatnosci.html" class="underline hover:text-white">Polityka prywatności</a></p>
         </div>
       </footer>
     </main>
@@ -240,8 +250,13 @@
             <input id="form-notes" type="text" placeholder="np. odbiór w piątek po południu" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
           </div>
 
+          <label class="flex items-start gap-2 text-[11px] text-stone-600 leading-snug pt-1">
+            <input id="form-terms" type="checkbox" required class="w-4 h-4 mt-0.5 shrink-0">
+            <span>Akceptuję <a href="regulamin.html" target="_blank" class="underline font-semibold">Regulamin</a> sklepu. *
+              <span class="block text-[10px] text-stone-500 mt-0.5">Odbiór osobisty w Kruszewni, płatność przy odbiorze. Produkty na wymiar nie podlegają zwrotowi.</span></span>
+          </label>
           <button id="submit-btn" type="submit" class="w-full mt-3 s-btn font-bold py-3.5 rounded-2xl text-xs transition active:scale-[0.99]">
-            Złóż zamówienie
+            Zamawiam z obowiązkiem zapłaty
           </button>
           <p class="text-[10px] text-stone-500 text-center leading-relaxed">
             Dane z formularza wykorzystamy wyłącznie do realizacji zamówienia i kontaktu w jego sprawie.
@@ -300,6 +315,7 @@
       <div>
         <h2 class="font-heading text-xl font-bold text-stone-900">Zamówienie przyjęte!</h2>
         <p class="text-xs text-stone-600 mt-1">Numer Twojego zlecenia: #ZAM-<span id="order-id" class="font-bold"></span></p>
+        <p class="text-xs text-stone-600 mt-2">Skontaktujemy się z Tobą, żeby potwierdzić zamówienie i ustalić termin odbioru.</p>
       </div>
       <button onclick="location.reload()" class="w-full py-3 bg-stone-200 hover:bg-stone-300 font-semibold rounded-2xl text-xs transition">
         ← Wróć do sklepu
@@ -2424,7 +2440,7 @@
       } catch (err) {
         alert("Błąd składania zamówienia: " + err.message);
         btn.disabled = false;
-        btn.textContent = "Złóż zamówienie";
+        btn.textContent = "Zamawiam z obowiązkiem zapłaty";
       }
     }
 
