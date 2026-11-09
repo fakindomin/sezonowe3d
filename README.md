@@ -51,6 +51,8 @@ zapamiętuje dzień startu (w `app_state.costs.statsSince`) i od tej pory liczy 
 „Pokaż wszystko” cofa zerowanie. Zamówienia i płatności nie są usuwane.
 
 ## Zdjęcia
+Zdjęcie w banerze kolekcji (po prawej, płynnie przechodzi w kolor banera): pole `bannerImg` kolekcji w `CATALOG`
+w `index.html`, np. `baner_zima.webp` (ok. 1400 px szerokości).
 Zdjęcia produktów mają 800×800 px (WebP). Edytor produktów zmniejsza je sam.
 
 ## Baza (Supabase)

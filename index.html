@@ -71,6 +71,12 @@
     body { background-color: var(--s-page); transition: background-color 0.3s; }
     /* Sklep czeka z pokazaniem treści, aż wczyta kolekcje z bazy (bez mignięcia jesieni) */
     #client-app { transition: opacity 0.25s; }
+    .banner-photo-fade {
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 30%, #000 55%);
+      mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 30%, #000 55%);
+      object-position: 60% 55%;
+    }
+    #banner-text h2, #banner-text p { text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25); }
     #client-app.is-loading { opacity: 0; pointer-events: none; }
     #client-loading { display: none; }
     html.shop-loading #client-loading { display: flex; }
@@ -161,7 +167,11 @@
       </div>
 
       <div id="season-banner" class="p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300">
-        <div class="relative z-10 max-w-md">
+        <!-- Zdjęcie kolekcji po prawej, płynnie przechodzące w kolor banera -->
+        <div id="banner-photo" class="hidden absolute inset-y-0 right-0 w-[60%] sm:w-[62%] pointer-events-none" aria-hidden="true">
+          <img id="banner-photo-img" src="" alt="" decoding="async" class="w-full h-full object-cover banner-photo-fade">
+        </div>
+        <div id="banner-text" class="relative z-10 max-w-md">
           <span class="text-xs uppercase font-extrabold tracking-widest s-eyebrow block mb-1">Limitowana Seria</span>
           <h2 class="text-2xl sm:text-3xl font-heading font-bold" id="banner-title">Kolekcja Jesienna 🍂</h2>
           <p class="text-xs sm:text-sm s-sub mt-1" id="banner-desc">Ręcznie konfekcjonowane dekoracje i geometryczne figurki drukowane w technologii FDM.</p>
@@ -1089,6 +1099,7 @@
         icon: '❄️',
         title: 'Kolekcja Zimowa ❄️',
         desc: 'Renifery, śnieżki i choinkowe miseczki w bieli, zieleni i czerwieni.',
+        bannerImg: 'baner_zima.webp',
         themeClass: 'from-red-800 to-emerald-900',
         btnClass: 'bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-800 hover:to-rose-800 text-white shadow-sm',
         products: [
@@ -2014,7 +2025,14 @@
       document.getElementById('banner-desc').textContent = currentConfig.desc;
       
       const banner = document.getElementById('season-banner');
-      banner.className = 'p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300';
+      const photo = currentConfig.bannerImg;
+      banner.className = `p-6 rounded-3xl s-gradient text-white shadow-md relative overflow-hidden transition-all duration-300${photo ? ' min-h-[170px] sm:min-h-[230px] flex items-center' : ''}`;
+      document.getElementById('banner-photo').classList.toggle('hidden', !photo);
+      document.getElementById('banner-text').className = `relative z-10 ${photo ? 'max-w-[58%] sm:max-w-[42%]' : 'max-w-md'}`;
+      if (photo) {
+        const img = document.getElementById('banner-photo-img');
+        if (img.getAttribute('src') !== photo) img.setAttribute('src', photo);
+      }
 
       renderProductsGrid();
     }
