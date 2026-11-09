@@ -697,6 +697,13 @@
           <div id="fil-balance" class="text-base font-bold text-amber-200 mt-0.5">0,00 zł</div>
         </div>
       </div>
+      <div class="flex items-center justify-between gap-2 -mt-2 px-1 text-[10px] text-stone-500">
+        <span id="fil-since-label">Od początku</span>
+        <span class="flex gap-1.5">
+          <button id="fil-undo-reset" onclick="undoFilamentReset()" class="hidden px-2 py-1 rounded-lg border border-stone-300 bg-white font-semibold">Pokaż wszystko</button>
+          <button onclick="resetFilamentLedger()" class="px-2 py-1 rounded-lg border border-stone-300 bg-white font-semibold">🔄 Zeruj</button>
+        </span>
+      </div>
 
       <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
         <h3 class="font-bold text-sm text-stone-900">Zakupione filamenty</h3>
@@ -2681,6 +2688,7 @@
       if (isVisible('admin-tab-shelf')) renderShelfView();
       if (isVisible('admin-tab-spools')) renderSpoolsView();
       if (isVisible('packing-modal')) renderPackingChecklist();
+      if (isVisible('admin-tab-filaments')) fetchFilamentLedger();
       // Ustawień nie odświeżamy, żeby nie nadpisać pól w trakcie edycji
     }
 
@@ -3332,9 +3340,35 @@
         alert('Błąd pobierania rozliczenia: ' + (purchases.error || payments.error).message);
         return;
       }
-      filamentPurchases = purchases.data || [];
-      filamentPayments = payments.data || [];
+      // Po „Zeruj” liczą się tylko wpisy dodane od tej chwili (starsze zostają w bazie)
+      const since = getCosts().filamentSince ? new Date(getCosts().filamentSince) : null;
+      const fresh = row => !since || new Date(row.created_at) >= since;
+      filamentPurchases = (purchases.data || []).filter(fresh);
+      filamentPayments = (payments.data || []).filter(fresh);
+      document.getElementById('fil-since-label').textContent = since
+        ? `Od ${since.toLocaleDateString('pl-PL')} (nowy okres)`
+        : 'Od początku';
+      document.getElementById('fil-undo-reset').classList.toggle('hidden', !since);
       renderFilamentsView();
+    }
+
+    function resetFilamentLedger() {
+      const bought = filamentPurchases.reduce((sum, p) => sum + Number(p.spools) * Number(p.unit_price), 0);
+      const paid = filamentPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const balance = Math.round((bought - paid) * 100) / 100;
+      const note = balance > 0 ? `\n\nUwaga: zostało ${formatPLN(balance)} do spłaty – po wyzerowaniu ta kwota nie będzie liczona.`
+        : balance < 0 ? `\n\nUwaga: jest ${formatPLN(-balance)} nadpłaty – po wyzerowaniu nie będzie liczona.` : '';
+      if (!confirm(`Wyzerować rozliczenie filamentów?\n\nOd teraz liczą się tylko nowe zakupy i wpłaty. Dotychczasowe wpisy zostają zapisane, a zerowanie można cofnąć przyciskiem „Pokaż wszystko”.${note}`)) return;
+      saveCosts({ ...getCosts(), filamentSince: new Date().toISOString() });
+      fetchFilamentLedger();
+    }
+
+    function undoFilamentReset() {
+      if (!confirm('Cofnąć zerowanie i znowu pokazać wszystkie zakupy i wpłaty?')) return;
+      const costs = getCosts();
+      delete costs.filamentSince;
+      saveCosts(costs);
+      fetchFilamentLedger();
     }
 
     function renderFilamentsView() {
