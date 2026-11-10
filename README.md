@@ -88,3 +88,6 @@ Po zamówieniu klienta funkcja `place_order()` wywołuje funkcję Edge `order-no
   kwota „Do zapłaty” zawiera wysyłkę, przychód w statystykach – nie
 - klient płaci BLIKiem z góry w 3 dni (dane w mailu i na ekranie po zamówieniu); paczkę nadajesz w aplikacji InPost,
   kopiując kod Paczkomatu, telefon, e-mail i imię z karty zamówienia; nieopłacone zamówienia usuwasz ręcznie
+- podpowiedzi przy wpisywaniu (miejscowości i kody Paczkomatów, także bez polskich znaków) korzystają ze spisu
+  `public-data/inpost/index.json` w Supabase Storage; buduje go funkcja `inpost-index` co poniedziałek o 3:17
+  (pg_cron `inpost-index-weekly`); bez spisu wyszukiwarka działa jak wcześniej

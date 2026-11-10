@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="tailwind.css?v=dfff3e6fe3">
+  <link rel="stylesheet" href="tailwind.css?v=05f6506e4f">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -289,7 +289,10 @@
             <div id="locker-search">
               <label class="block text-xs font-semibold text-stone-700 mb-1">Wybierz Paczkomat *</label>
               <div class="flex gap-2">
-                <input id="locker-query" type="search" autocomplete="off" placeholder="Miejscowość, ulica lub kod (np. POZ08M)" oninput="onLockerQuery()" onkeydown="if (event.key === 'Enter') { event.preventDefault(); searchLockers(); }" class="flex-1 min-w-0 text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+                <div class="relative flex-1 min-w-0">
+                  <input id="locker-query" type="search" autocomplete="off" placeholder="Miejscowość, ulica lub kod (np. POZ08M)" oninput="onLockerQuery()" onfocus="loadLockerIndex()" onblur="setTimeout(hideSuggestions, 150)" onkeydown="onLockerKey(event)" class="w-full text-xs bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5">
+                  <div id="locker-suggest" class="hidden absolute left-0 right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden"></div>
+                </div>
                 <button type="button" onclick="findNearbyLockers()" title="Paczkomaty w pobliżu" class="px-3 rounded-xl border border-stone-300 bg-white text-xs font-semibold shrink-0">📍 Blisko</button>
               </div>
               <p id="locker-status" class="text-[10px] text-stone-500 mt-1">Wpisz co najmniej 3 znaki, np. „Swarzędz”, „Swarzędz Poznańska” albo kod Paczkomatu.</p>
@@ -2573,9 +2576,106 @@
 
     let lockerTimer = null;
     let lockerRequest = 0;
+
+    // Spis miejscowości i kodów Paczkomatów do podpowiedzi (budowany co tydzień z bazy InPost, plik w Supabase Storage)
+    const LOCKER_INDEX_URL = `${SUPABASE_URL}/storage/v1/object/public/public-data/inpost/index.json`;
+    let lockerIndex = null;          // { cities: [[nazwa, liczba, klucz]], codes: [[kod, miejscowość]] }
+    let lockerIndexPromise = null;
+    let suggestItems = [];
+    let suggestActive = -1;
+
+    function plain(text) {
+      return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
+    }
+
+    function loadLockerIndex() {
+      if (!lockerIndexPromise) {
+        lockerIndexPromise = fetch(LOCKER_INDEX_URL)
+          .then(r => r.ok ? r.json() : Promise.reject(new Error('brak spisu')))
+          .then(data => {
+            const cities = data.cities.map(([name, count]) => [name, count, plain(name)]);
+            lockerIndex = { cities, codes: data.lockers.map(([code, idx]) => [code, cities[idx] ? cities[idx][0] : '']) };
+            const q = document.getElementById('locker-query');
+            if (document.activeElement === q) renderSuggestions();
+          })
+          .catch(() => { lockerIndex = null; });
+      }
+      return lockerIndexPromise;
+    }
+
     function onLockerQuery() {
       clearTimeout(lockerTimer);
-      lockerTimer = setTimeout(searchLockers, 450);
+      if (lockerIndex) {
+        renderSuggestions();
+      } else {
+        loadLockerIndex();
+        lockerTimer = setTimeout(searchLockers, 450);   // bez spisu: wyszukiwanie jak dotąd
+      }
+    }
+
+    // Podpowiedzi od pierwszych liter: miejscowości (najwięcej Paczkomatów na górze) i kody Paczkomatów
+    function renderSuggestions() {
+      const box = document.getElementById('locker-suggest');
+      const raw = document.getElementById('locker-query').value.trim();
+      const q = plain(raw);
+      suggestItems = [];
+      suggestActive = -1;
+      if (q.length >= 2 && lockerIndex) {
+        const starts = lockerIndex.cities.filter(c => c[2].startsWith(q));
+        const inside = q.length >= 3 ? lockerIndex.cities.filter(c => !c[2].startsWith(q) && c[2].includes(' ' + q)) : [];
+        const cities = [...starts, ...inside].sort((a, b) => (b[2].startsWith(q) - a[2].startsWith(q)) || b[1] - a[1]).slice(0, 6);
+        const upper = raw.toUpperCase().replace(/\s+/g, '');
+        const codes = /^[A-Z]{2,3}\d*[A-Z]*$/.test(upper) && upper.length >= 3
+          ? lockerIndex.codes.filter(([code]) => code.startsWith(upper)).slice(0, cities.length ? 4 : 8)
+          : [];
+        suggestItems = [
+          ...cities.map(([name, count]) => ({ type: 'city', value: name, label: name, sub: `${count} ${count === 1 ? 'Paczkomat' : count < 5 ? 'Paczkomaty' : 'Paczkomatów'}` })),
+          ...codes.map(([code, city]) => ({ type: 'code', value: code, label: code, sub: city }))
+        ];
+      }
+      if (!suggestItems.length) {
+        box.classList.add('hidden');
+        box.innerHTML = '';
+        return;
+      }
+      box.innerHTML = suggestItems.map((it, i) => `
+        <button type="button" onmousedown="event.preventDefault()" onclick="pickSuggestion(${i})" data-i="${i}"
+          class="w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-xs hover:bg-stone-50 border-b border-stone-100 last:border-0">
+          <span>${it.type === 'city' ? '📍' : '📦'} <strong class="text-stone-900">${escapeHtml(it.label)}</strong></span>
+          <span class="text-[10px] text-stone-500 shrink-0">${escapeHtml(it.sub)}</span>
+        </button>`).join('');
+      box.classList.remove('hidden');
+    }
+
+    function hideSuggestions() {
+      const box = document.getElementById('locker-suggest');
+      box.classList.add('hidden');
+      suggestItems = [];
+    }
+
+    function pickSuggestion(i) {
+      const it = suggestItems[i];
+      if (!it) return;
+      document.getElementById('locker-query').value = it.value;
+      hideSuggestions();
+      searchLockers();
+    }
+
+    function onLockerKey(e) {
+      const box = document.getElementById('locker-suggest');
+      const open = !box.classList.contains('hidden') && suggestItems.length;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!open) return;
+        e.preventDefault();
+        suggestActive = (suggestActive + (e.key === 'ArrowDown' ? 1 : -1) + suggestItems.length) % suggestItems.length;
+        box.querySelectorAll('button').forEach((b, i) => b.classList.toggle('bg-stone-100', i === suggestActive));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (open && suggestActive >= 0) pickSuggestion(suggestActive);
+        else { hideSuggestions(); searchLockers(); }
+      } else if (e.key === 'Escape') {
+        hideSuggestions();
+      }
     }
 
     function lockerStatus(text) {
@@ -2608,7 +2708,10 @@
         } else if (/^\d{2}-?\d{3}$/.test(query)) {
           items = await fetchLockers({ post_code: query.replace(/^(\d{2})-?(\d{3})$/, '$1-$2') });
         } else {
-          // najpierw cała fraza jako miejscowość, potem pierwsze słowa jako miejscowość, a reszta jako ulica
+          // miejscowość wybrana z podpowiedzi: dokładna nazwa ze spisu (np. „Nowe Miasto nad Pilicą”)
+          const exact = lockerIndex && lockerIndex.cities.find(c => c[0] === query);
+          if (exact) items = await fetchLockers({ city: exact[0] });
+          // dalej: cała fraza jako miejscowość, potem pierwsze słowa jako miejscowość, a reszta jako ulica
           const words = query.split(/\s+/);
           for (let n = words.length; n >= 1 && !items.length; n--) {
             const city = titleCase(words.slice(0, n).join(' '));
