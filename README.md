@@ -77,3 +77,14 @@ Po zamówieniu klienta funkcja `place_order()` wywołuje funkcję Edge `order-no
   EmailJS `template_szv564o` (stała w kodzie funkcji; sekret `EMAILJS_CUSTOMER_TEMPLATE_ID` może ją nadpisać; szablon: To Email `{{to_email}}`,
   Subject `{{subject}}`, Reply To `{{reply_to}}`, treść `{{{message_html}}}`); `orders.customer_notified_at`
   zapisuje, kiedy wyszedł
+
+## Wysyłka do Paczkomatu InPost
+- klient wybiera w koszyku „Odbiór osobisty” albo „Paczkomat InPost”; Paczkomat szuka po miejscowości (z ulicą),
+  kodzie pocztowym, kodzie Paczkomatu albo „📍 Blisko” (publiczna baza punktów `api-pl-points.easypack24.net`,
+  bez konta); gdy wyszukiwarka nie działa, można użyć wpisanego kodu Paczkomatu
+- ustawienia (włącz/wyłącz, cena, telefon do BLIK): panel → Produkty w sklepie → Wysyłka do Paczkomatu
+  (tabela `shop_shipping`); koszt wysyłki dolicza baza w `place_order`, nie przeglądarka
+- zamówienie ma pola `delivery` (`pickup`/`inpost`), `locker_code`, `locker_address`, `shipping_cost`;
+  kwota „Do zapłaty” zawiera wysyłkę, przychód w statystykach – nie
+- klient płaci BLIKiem z góry w 3 dni (dane w mailu i na ekranie po zamówieniu); paczkę nadajesz w aplikacji InPost,
+  kopiując kod Paczkomatu, telefon, e-mail i imię z karty zamówienia; nieopłacone zamówienia usuwasz ręcznie

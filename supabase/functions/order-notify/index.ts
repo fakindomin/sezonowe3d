@@ -13,6 +13,11 @@ const EMAILJS_CUSTOMER_TEMPLATE_ID = "template_szv564o";
 
 const SHOP_URL = "https://sezonowe3d.pl";
 
+type Order = {
+  id: string; customer: string; contact: string; email: string | null; notes: string | null; created_at: string;
+  delivery: string; locker_code: string | null; locker_address: string | null; shipping_cost: number | string;
+};
+
 type OrderItem = { title?: string; color?: string | null; qty?: number; unitPrice?: number; custom?: unknown };
 
 function escapeHtml(value: unknown) {
@@ -39,7 +44,9 @@ async function sendEmailJs(templateId: string, privateKey: string, templateParam
 }
 
 // Potwierdzenie dla klienta: podsumowanie, odbiór, płatność, prawo odstąpienia, dane sprzedawcy
-function customerEmail(order: { id: string; customer: string; contact: string; notes: string | null; created_at: string }, items: OrderItem[], total: number | null) {
+function customerEmail(order: Order, items: OrderItem[], total: number | null, blikPhone: string | null) {
+  const inpost = order.delivery === "inpost";
+  const shipping = Number(order.shipping_cost) || 0;
   const date = new Date(order.created_at).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", dateStyle: "long", timeStyle: "short" });
   const hasCustom = items.some((i) => i.custom);
   const rows = items.map((i) => {
@@ -47,20 +54,34 @@ function customerEmail(order: { id: string; customer: string; contact: string; n
     return `<tr><td style="padding:6px 0;border-bottom:1px solid #e7e5e4">${escapeHtml(i.qty)} × ${escapeHtml(formatItemName(i))}</td>` +
       `<td style="padding:6px 0;border-bottom:1px solid #e7e5e4;text-align:right;white-space:nowrap">${price}</td></tr>`;
   }).join("");
-  const totalText = total === null ? "—" : pln(total);
+  const totalText = total === null ? "—" : pln(total + shipping);
+  const shippingRow = inpost
+    ? `<tr><td style="padding:6px 0;border-bottom:1px solid #e7e5e4">Wysyłka do Paczkomatu InPost</td><td style="padding:6px 0;border-bottom:1px solid #e7e5e4;text-align:right;white-space:nowrap">${pln(shipping)}</td></tr>`
+    : "";
+  const deliveryHtml = inpost
+    ? `<p><strong>Dostawa:</strong> Paczkomat InPost <strong>${escapeHtml(order.locker_code)}</strong>${order.locker_address ? `, ${escapeHtml(order.locker_address)}` : ""}.
+  Paczkę wyślemy w ciągu 5 dni roboczych od zaksięgowania wpłaty. Kod odbioru przyjdzie od InPost SMS-em i e-mailem.</p>
+  <div style="margin:12px 0;padding:12px;border:2px solid #b91c1c;border-radius:10px;background:#fef2f2">
+    <p style="margin:0 0 6px"><strong>Płatność BLIK na telefon – w ciągu 3 dni</strong></p>
+    <p style="margin:0">Kwota: <strong>${totalText}</strong><br>
+    Numer telefonu: <strong>${escapeHtml(blikPhone || "prześlemy SMS-em")}</strong><br>
+    Tytuł: <strong>ZAM-${escapeHtml(order.id)}</strong></p>
+    <p style="margin:6px 0 0;font-size:12px;color:#57534e">Zamówienia nieopłacone w ciągu 3 dni są anulowane.</p>
+  </div>`
+    : `<p><strong>Odbiór:</strong> osobisty w Kruszewni, ul. Husarska 1D/5. Skontaktujemy się z Tobą
+  (${escapeHtml(order.contact)}), żeby potwierdzić zamówienie i ustalić termin odbioru – zwykle do 14 dni.</p>
+  <p><strong>Płatność:</strong> przy odbiorze – gotówką, BLIKiem lub przelewem.</p>`;
   const html = `
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#1c1917;max-width:560px">
   <p>Dzień dobry ${escapeHtml(order.customer)},</p>
   <p>dziękujemy za zamówienie w pracowni <strong>sezonowe3d.pl</strong>! Poniżej jego podsumowanie.</p>
   <p style="margin:16px 0 4px"><strong>Zamówienie #ZAM-${escapeHtml(order.id)}</strong><br><span style="color:#78716c">złożone ${escapeHtml(date)}</span></p>
-  <table style="width:100%;border-collapse:collapse">${rows}
+  <table style="width:100%;border-collapse:collapse">${rows}${shippingRow}
     <tr><td style="padding:8px 0;font-weight:bold">Razem do zapłaty</td><td style="padding:8px 0;text-align:right;font-weight:bold;white-space:nowrap">${totalText}</td></tr>
   </table>
   ${order.notes ? `<p><strong>Twoje uwagi:</strong> ${escapeHtml(order.notes)}</p>` : ""}
-  <p><strong>Odbiór:</strong> osobisty w Kruszewni, ul. Husarska 1D/5 (bez wysyłki). Skontaktujemy się z Tobą
-  (${escapeHtml(order.contact)}), żeby potwierdzić zamówienie i ustalić termin odbioru – zwykle do 14 dni.</p>
-  <p><strong>Płatność:</strong> przy odbiorze – gotówką, BLIKiem lub przelewem.</p>
-  <p style="font-size:12px;color:#57534e">Możesz odstąpić od umowy bez podania przyczyny w ciągu 14 dni od odbioru
+  ${deliveryHtml}
+  <p style="font-size:12px;color:#57534e">Możesz odstąpić od umowy bez podania przyczyny w ciągu 14 dni od otrzymania produktów
   (<a href="${SHOP_URL}/formularz-odstapienia.html">formularz odstąpienia</a>)${hasCustom ? "; nie dotyczy to produktów wykonanych na wymiar" : ""}.
   Szczegóły w <a href="${SHOP_URL}/regulamin.html">regulaminie sklepu</a>.</p>
   <p style="font-size:12px;color:#57534e">Sprzedawca: Natalia Chróścik, ul. Husarska 1D/5, Kruszewnia ·
@@ -69,8 +90,12 @@ function customerEmail(order: { id: string; customer: string; contact: string; n
   const text =
     `Dzień dobry ${order.customer},\n\ndziękujemy za zamówienie #ZAM-${order.id} (${date}).\n\n` +
     items.map((i) => `• ${i.qty}x ${formatItemName(i)}`).join("\n") +
-    `\n\nRazem do zapłaty: ${totalText}\nOdbiór osobisty w Kruszewni, ul. Husarska 1D/5 – skontaktujemy się, żeby ustalić termin.\n` +
-    `Płatność przy odbiorze. Regulamin: ${SHOP_URL}/regulamin.html\n\nsezonowe3d.pl · tel. 665 532 647`;
+    (inpost ? `\nWysyłka do Paczkomatu: ${pln(shipping)}` : "") +
+    `\n\nRazem do zapłaty: ${totalText}\n` +
+    (inpost
+      ? `Paczkomat: ${order.locker_code}${order.locker_address ? `, ${order.locker_address}` : ""}\nPłatność BLIK na telefon ${blikPhone || "(numer prześlemy SMS-em)"}, tytuł ZAM-${order.id}, w ciągu 3 dni. Wysyłka do 5 dni roboczych od wpłaty.\n`
+      : `Odbiór osobisty w Kruszewni, ul. Husarska 1D/5 – skontaktujemy się, żeby ustalić termin. Płatność przy odbiorze.\n`) +
+    `Regulamin: ${SHOP_URL}/regulamin.html\n\nsezonowe3d.pl · tel. 665 532 647`;
   return { html, text };
 }
 
@@ -112,7 +137,7 @@ Deno.serve(async (req) => {
     .update({ notified_at: new Date().toISOString() })
     .eq("id", orderId)
     .is("notified_at", null)
-    .select("id, customer, contact, email, notes, items, created_at")
+    .select("id, customer, contact, email, notes, items, created_at, delivery, locker_code, locker_address, shipping_cost")
     .maybeSingle();
 
   if (error) return json({ error: error.message }, 500);
@@ -125,6 +150,12 @@ Deno.serve(async (req) => {
     ? items.reduce((sum, i) => sum + (i.unitPrice as number) * (i.qty ?? 0), 0).toFixed(2)
     : "—";
   const notes = order.notes || "";
+  const inpost = order.delivery === "inpost";
+  const shipping = Number(order.shipping_cost) || 0;
+  const grandTotal = hasPrices ? (Number(total) + shipping).toFixed(2) : "—";
+  const deliveryText = inpost
+    ? `Dostawa: Paczkomat ${order.locker_code}${order.locker_address ? ` (${order.locker_address})` : ""}, wysyłka ${shipping.toFixed(2)} zł – płatność BLIK z góry`
+    : "Dostawa: odbiór osobisty";
 
   const templateParams = {
     order_id: order.id,
@@ -132,12 +163,12 @@ Deno.serve(async (req) => {
     customer_contact: order.email ? `${order.contact}, ${order.email}` : order.contact,
     order_items: itemsText,
     customer_notes: notes || "(brak uwag)",
-    order_total: total,
+    order_total: grandTotal,
     to_name: "Pracownia",
     name: `${order.customer} (${order.contact})`,
     message:
       `Wpadło nowe zamówienie #ZAM-${order.id}!\n\nKlient: ${order.customer}\nKontakt: ${order.contact}${order.email ? `, ${order.email}` : ""}\n` +
-      `Do zapłaty: ${total} zł\n\nZamówione pozycje:\n${itemsText}\n\nUwagi:\n${notes || "Brak"}`,
+      `Do zapłaty: ${grandTotal} zł\n${deliveryText}\n\nZamówione pozycje:\n${itemsText}\n\nUwagi:\n${notes || "Brak"}`,
   };
 
   const res = await sendEmailJs(EMAILJS_TEMPLATE_ID, privateKey, templateParams);
@@ -162,12 +193,15 @@ Deno.serve(async (req) => {
       .select("id")
       .maybeSingle();
     if (claimed) {
-      const { html, text } = customerEmail(order, items, hasPrices ? Number(total) : null);
+      const { data: ship } = await supabase.from("shop_shipping").select("blik_phone").maybeSingle();
+      const { html, text } = customerEmail(order as Order, items, hasPrices ? Number(total) : null, ship?.blik_phone ?? null);
       const r = await sendEmailJs(customerTemplate, privateKey, {
         to_email: order.email,
         to_name: order.customer,
         reply_to: "sezonowe3d@gmail.com",
-        subject: `Potwierdzenie zamówienia #ZAM-${order.id} – sezonowe3d.pl`,
+        subject: inpost
+          ? `Zamówienie #ZAM-${order.id} – dane do płatności BLIK – sezonowe3d.pl`
+          : `Potwierdzenie zamówienia #ZAM-${order.id} – sezonowe3d.pl`,
         order_id: order.id,
         message_html: html,
         message: text,
