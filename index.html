@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="pl_PL">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="tailwind.css?v=05f6506e4f">
+  <link rel="stylesheet" href="tailwind.css?v=5d21e81514">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -680,8 +680,9 @@
         <!-- RĘCZNE DODAWANIE DO PÓŁKI -->
         <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2 text-xs">
           <label class="block font-bold text-stone-700">+ Dodaj element na półkę ręcznie:</label>
+          <div id="shelf-add-seasons" class="flex gap-1 overflow-x-auto pb-0.5"></div>
           <div class="grid grid-cols-12 gap-1.5">
-            <select id="shelf-add-title" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
+            <select id="shelf-add-title" onchange="updateShelfColorSelect()" class="col-span-6 bg-white border border-stone-300 rounded-lg p-1.5 font-semibold"></select>
             <select id="shelf-add-color" class="col-span-4 bg-white border border-stone-300 rounded-lg p-1.5"></select>
             <button type="button" onclick="addItemDirectlyToShelf()" class="col-span-2 bg-stone-900 text-white rounded-lg font-bold text-xs hover:bg-stone-800">Dodaj</button>
           </div>
@@ -4797,17 +4798,24 @@
       const container = document.getElementById('shelf-items-list');
       container.innerHTML = '';
 
-      const titleSelect = document.getElementById('shelf-add-title');
-      if (titleSelect) {
-        titleSelect.innerHTML = Object.keys(DEFAULT_SPECS).map(t => `<option value="${t}">${t}</option>`).join('');
-      }
+      // Dodawanie: najpierw sezon (jak w sklepie), potem jego modele w kolejności ze sklepu, potem kolory modelu
+      const groups = shelfModelGroups();
+      if (!groups.some(g => g.key === shelfAddSeason)) shelfAddSeason = groups.length ? groups[0].key : null;
+      document.getElementById('shelf-add-seasons').innerHTML = groups.map(g => `
+        <button type="button" onclick="setShelfAddSeason(${jsArg(g.key)})"
+          class="px-2.5 py-1 rounded-full border font-bold whitespace-nowrap ${g.key === shelfAddSeason ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-stone-300'}">${escapeHtml(g.label)}</button>`).join('');
+      fillShelfModelSelect(groups);
 
-      const colorSelect = document.getElementById('shelf-add-color');
-      if (colorSelect) {
-        colorSelect.innerHTML = Object.keys(DEFAULT_SPOOLS).map(c => `<option value="${c}">${c}</option>`).join('');
-      }
-
-      const activeKeys = Object.keys(shelf).filter(k => (shelf[k] || 0) > 0);
+      // Lista na półce: kolekcjami, w kolejności jak w sklepie, kolory według palety
+      const order = new Map();
+      groups.forEach((g, gi) => g.models.forEach((m, mi) => order.set(m, gi * 1000 + mi)));
+      const colorOrder = shopPalette.map(c => c.name);
+      const colorRank = c => { const i = colorOrder.indexOf(c); return i < 0 ? 999 : i; };
+      const activeKeys = Object.keys(shelf).filter(k => (shelf[k] || 0) > 0).sort((a, b) => {
+        const [ta, ca] = a.split(':::'); const [tb, cb] = b.split(':::');
+        const oa = order.has(ta) ? order.get(ta) : 999999, ob = order.has(tb) ? order.get(tb) : 999999;
+        return oa - ob || ta.localeCompare(tb, 'pl') || colorRank(ca) - colorRank(cb) || ca.localeCompare(cb, 'pl');
+      });
 
       if (activeKeys.length === 0) {
         container.innerHTML = `
@@ -4818,9 +4826,18 @@
         return;
       }
 
+      let lastGroup = null;
       activeKeys.forEach(key => {
         const [title, color] = key.split(':::');
         const count = shelf[key] || 0;
+        const group = (groups.find(g => g.models.includes(title)) || { label: 'Inne' }).label;
+        if (group !== lastGroup) {
+          lastGroup = group;
+          const head = document.createElement('div');
+          head.className = 'pt-2 text-[10px] font-bold uppercase tracking-wider text-stone-400';
+          head.textContent = group;
+          container.appendChild(head);
+        }
 
         const row = document.createElement('div');
         row.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center";
@@ -4840,6 +4857,48 @@
         `;
         container.appendChild(row);
       });
+    }
+
+    let shelfAddSeason = null;
+
+    function setShelfAddSeason(key) {
+      shelfAddSeason = key;
+      renderShelfView();
+    }
+
+    function fillShelfModelSelect(groups) {
+      const titleSelect = document.getElementById('shelf-add-title');
+      const group = groups.find(g => g.key === shelfAddSeason) || { models: [] };
+      const prev = titleSelect.value;
+      titleSelect.innerHTML = group.models.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      if (prev && group.models.includes(prev)) titleSelect.value = prev;
+      updateShelfColorSelect();
+    }
+
+    // Modele do półki pogrupowane kolekcjami (bez produktów na wymiar – robione pod zamówienie)
+    function shelfModelGroups() {
+      const groups = [];
+      const used = new Set();
+      SEASON_ORDER.filter(k => k !== 'custom' && CATALOG[k]).forEach(key => {
+        const models = [];
+        catalogRows.filter(r => r.collection === key && r.kind === 'simple')
+          .forEach(r => rowModelNames(r).forEach(m => { if (!used.has(m)) { used.add(m); models.push(m); } }));
+        if (key === 'autumn') ['Taca', 'Ogonek dyni'].forEach(m => { if (!used.has(m)) { used.add(m); models.push(m); } });
+        if (models.length) groups.push({ key, label: `${CATALOG[key].icon} ${CATALOG[key].name}`, models });
+      });
+      const rest = Object.keys(DEFAULT_SPECS).filter(m => !used.has(m)).sort((a, b) => a.localeCompare(b, 'pl'));
+      if (rest.length) groups.push({ key: 'other', label: 'Inne', models: rest });
+      return groups;
+    }
+
+    // Kolory tylko te, w których dany model jest w sklepie
+    function updateShelfColorSelect() {
+      const title = document.getElementById('shelf-add-title').value;
+      const select = document.getElementById('shelf-add-color');
+      const prev = select.value;
+      const colors = getModelColors(title).filter(c => c !== MIX_COLOR);
+      select.innerHTML = colors.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (colors.includes(prev)) select.value = prev;
     }
 
     function addItemDirectlyToShelf() {
