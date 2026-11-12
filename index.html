@@ -871,6 +871,12 @@
               <input id="pricing-min" type="number" min="0" step="1" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5 font-bold"></label>
           </div>
           <button onclick="savePricing()" class="w-full py-2 bg-stone-900 text-white rounded-lg font-bold">Zapisz cennik</button>
+          <div class="pt-3 mt-1 border-t border-stone-200">
+            <div class="font-bold text-stone-800">Znak „f” na modelach</div>
+            <p class="text-[11px] text-stone-500 mb-2">Gdzie wygrawerować znak sklepu w każdym modelu. „Podgląd” otwiera model z tym ustawieniem.</p>
+            <div id="marks-editor" class="space-y-1.5 text-stone-500">Wczytuję modele…</div>
+            <button onclick="saveMarks()" class="w-full mt-2 py-2 bg-stone-900 text-white rounded-lg font-bold">Zapisz miejsca znaku</button>
+          </div>
         </div>
       </div>
 
@@ -1569,6 +1575,7 @@
     // ==========================================
     // Cena za sztukę: gramy × stawka + godziny druku × stawka, zaokrąglona w górę do pełnych złotych
     const CUSTOM_PRICING = { perGram: 0.2, perHour: 1.5, min: 8 };
+    const CUSTOM_MARKS = {};   // miejsce znaku „f” na modelu: { idModelu: wartość z Model3D.model(id).marks }
 
     const CUSTOM_COLORS = [
       { name: 'Biały', hex: '#f5f5f4' },
@@ -1715,6 +1722,7 @@
         CUSTOM_COLORS.splice(0, CUSTOM_COLORS.length, ...shopPalette.map(c => ({ ...c })));
       }
       if (settings.pricing) Object.assign(CUSTOM_PRICING, settings.pricing);
+      if (settings.marks && typeof settings.marks === 'object') Object.assign(CUSTOM_MARKS, settings.marks);
       if (!rows || rows.length === 0) return;   // brak katalogu w bazie: zostaje katalog z kodu
 
       catalogRows = [...rows].sort((a, b) => a.position - b.position);
@@ -1864,7 +1872,7 @@
         if (customizer.id !== id) return;
         if (!M3.model(id).accent) customizer.accent = null;
         renderCustomColors();
-        customizer.values = M3.clean(id, {});
+        customizer.values = M3.clean(id, { mark: CUSTOM_MARKS[id] });
         if (!customizer.viewer) customizer.viewer = M3.viewer(document.getElementById('custom-view'));
         document.getElementById('custom-view-status').classList.add('hidden');
         renderCustomDims();
@@ -5280,6 +5288,7 @@
         document.getElementById('pricing-per-gram').value = CUSTOM_PRICING.perGram;
         document.getElementById('pricing-per-hour').value = CUSTOM_PRICING.perHour;
         document.getElementById('pricing-min').value = CUSTOM_PRICING.min;
+        renderMarksEditor();
       }
       renderPaletteEditor();
       document.getElementById('ship-enabled').checked = !!shopShipping.enabled;
@@ -5370,6 +5379,41 @@
       if (error) return alert('Błąd zapisu cennika: ' + error.message);
       await refreshCatalogAfterChange();
       alert('Zapisano cennik akcesoriów.');
+    }
+
+    async function renderMarksEditor() {
+      const box = document.getElementById('marks-editor');
+      let M3;
+      try { M3 = await loadModel3D(); } catch (e) { box.textContent = 'Nie udało się wczytać modeli.'; return; }
+      box.innerHTML = CUSTOM_PRODUCT_DEFS.filter(p => M3.models.some(m => m.id === p.id)).map(p => {
+        const opts = M3.model(p.id).marks || [];
+        const cur = opts.some(o => o.value === CUSTOM_MARKS[p.id]) ? CUSTOM_MARKS[p.id] : (opts[0] || {}).value;
+        return `<div class="flex items-center gap-2">
+          <span class="flex-1 min-w-0 truncate font-semibold text-stone-800">${escapeHtml(p.title)}</span>
+          <select data-mark-model="${escapeHtml(p.id)}" onchange="CUSTOM_MARKS[this.dataset.markModel] = this.value"
+            class="w-40 bg-white border border-stone-300 rounded-lg px-2 py-1.5 text-stone-800">
+            ${opts.map(o => `<option value="${escapeHtml(o.value)}" ${o.value === cur ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('')}
+          </select>
+          <button onclick="previewMark(${jsArg(p.id)})" class="px-2 py-1.5 rounded-lg border border-stone-300 bg-white font-semibold text-stone-700">Podgląd</button>
+        </div>`;
+      }).join('');
+    }
+
+    function previewMark(id) {
+      // Okno modelu leży w widoku sklepu, ukrytym w panelu: przenosimy je do <body>, żeby było widać je i tu.
+      const modal = document.getElementById('custom-modal');
+      if (modal.parentElement !== document.body) document.body.appendChild(modal);
+      openCustomizer(id);
+    }
+
+    async function saveMarks() {
+      const value = {};
+      document.querySelectorAll('#marks-editor select[data-mark-model]').forEach(s => { value[s.dataset.markModel] = s.value; });
+      const { error } = await supabaseClient.from('shop_settings').upsert({ key: 'marks', value, updated_at: new Date().toISOString() });
+      if (error) return alert('Błąd zapisu miejsc znaku: ' + error.message);
+      Object.assign(CUSTOM_MARKS, value);
+      await refreshCatalogAfterChange();
+      alert('Zapisano miejsca znaku.');
     }
 
     // ---------- Paleta kolorów ----------
