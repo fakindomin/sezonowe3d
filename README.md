@@ -22,9 +22,9 @@ npm run build:css
 i zatwierdzić zmieniony `tailwind.css` oraz pliki HTML: polecenie dopisuje do linku stylów wersję (`tailwind.css?v=...`),
 żeby przeglądarki nie trzymały starych stylów w pamięci.
 
-## Na wymiar (`na-wymiar/`)
-Zakładka z modelami w wymiarach klienta: haczyki, uchwyty, doniczka, tabliczka. Jest domyślnie włączona;
-wyłącza się ją w panelu: Ustawienia → Dostępność Kolekcji → „Na wymiar”.
+## Dom – na wymiar (`na-wymiar/`)
+Zakładka „🏠 Dom” (w kodzie kolekcja `custom`) z modelami w wymiarach klienta: haczyki, uchwyty, doniczka, tabliczka
+(kolejne: pojemnik na rolkę papieru). Włącza się i wyłącza w panelu: Ustawienia → Dostępność Kolekcji → „Dom”.
 - `na-wymiar/model3d.js` – podgląd 3D, waga, czas druku i plik 3MF; budowany w repozytorium
   modelowanie3d poleceniem `npm run build:lite` (plik `dist-lite/model3d.js`), nie edytować ręcznie
 - `na-wymiar/*.webp` – zdjęcia na kafelki

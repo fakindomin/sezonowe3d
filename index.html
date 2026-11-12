@@ -861,7 +861,7 @@
         <div id="catalog-list" class="space-y-2 text-xs"></div>
         <button id="catalog-add-btn" onclick="openProductEditor(null)" class="w-full py-2.5 bg-stone-900 text-white rounded-xl text-xs font-bold">+ Dodaj produkt</button>
         <div id="catalog-pricing" class="hidden p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2 text-xs">
-          <div class="font-bold text-stone-800">Cena akcesoriów na wymiar (za sztukę)</div>
+          <div class="font-bold text-stone-800">Cena produktów „Dom” na wymiar (za sztukę)</div>
           <div class="grid grid-cols-3 gap-2">
             <label class="block"><span class="block text-[10px] text-stone-500 mb-0.5">zł za gram</span>
               <input id="pricing-per-gram" type="number" min="0" step="0.01" class="w-full bg-white border border-stone-300 rounded-lg px-2 py-1.5 font-bold"></label>
@@ -1599,10 +1599,10 @@
     }
 
     CATALOG.custom = {
-      name: 'Akcesoria',
-      icon: '📐',
-      title: 'Akcesoria na wymiar 📐',
-      desc: 'Haczyki, uchwyty i doniczki dopasowane do Twojego domu: ustaw wymiary, a wydrukujemy dokładnie taki model.',
+      name: 'Dom',
+      icon: '🏠',
+      title: 'Dom – na wymiar 🏠',
+      desc: 'Praktyczne rzeczy do domu w wymiarach, które sam ustawiasz: pojemniki, organizery, uchwyty i doniczki.',
       themeClass: 'from-stone-700 to-stone-900',
       btnClass: 'bg-stone-900 hover:bg-stone-800 text-white shadow-sm',
       isCustom: true,
@@ -5369,7 +5369,7 @@
       const { error } = await supabaseClient.from('shop_settings').upsert({ key: 'pricing', value, updated_at: new Date().toISOString() });
       if (error) return alert('Błąd zapisu cennika: ' + error.message);
       await refreshCatalogAfterChange();
-      alert('Zapisano cennik akcesoriów.');
+      alert('Zapisano cennik produktów na wymiar.');
     }
 
     // ---------- Paleta kolorów ----------
