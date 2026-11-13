@@ -3490,7 +3490,7 @@
             <div>
               <span class="font-bold text-xs ${isFullyDone ? 'text-emerald-950' : 'text-stone-900'}">${escapeHtml(item.title)}</span>
               <span class="text-[11px] text-stone-500 ml-1">(${escapeHtml(item.color)})</span>
-              ${item.fromBundle ? '<span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded ml-1 font-semibold">Zestaw</span>' : ''}
+              ${item.fromBundle && item.title !== 'Choinka-miseczka' ? '<span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded ml-1 font-semibold">Zestaw</span>' : ''}
               <span class="text-[10px] ml-2 px-1.5 py-0.5 rounded ${onShelf > 0 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-stone-200 text-stone-600'}">Półka: ${onShelf} szt.</span>
             </div>
             ${buttonHtml}
