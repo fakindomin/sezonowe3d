@@ -3171,7 +3171,7 @@
       const rawItems = getOrderItems(order);
       const expanded = [];
 
-      rawItems.forEach(item => {
+      rawItems.forEach((item, rawIdx) => {
         if (item.title && item.title.startsWith('Zestaw Jesienny')) {
           const isFox = item.title.includes('lis') || (item.variant && item.variant.includes('lis'));
           const animalName = isFox ? 'Lisek' : 'Wiewiórka';
@@ -3191,7 +3191,7 @@
           const sets = Math.max(0, parseInt(item.qty) || 0);
           const colorOf = mixColorPicker(order, item, set.piece);
           for (let q = 0; q < sets * set.count; q++) {
-            expanded.push({ title: set.piece, color: colorOf(q), qty: 1, fromBundle: true });
+            expanded.push({ title: set.piece, color: colorOf(q), qty: 1, fromBundle: true, setName: item.title, setRef: `${rawIdx}:${Math.floor(q / set.count)}` });
           }
         } else {
           // Każda sztuka to osobna pozycja na checkliście pakowania
@@ -3431,7 +3431,35 @@
       let totalPieces = 0;
       let totalChecked = 0;
 
+      const doneSets = new Set();
       expandedItems.forEach((item, itemIdx) => {
+        // Komplety pakowane jako całość: jeden wiersz na komplet
+        if (PACK_AS_SETS.includes(item.setName)) {
+          totalPieces += item.qty;
+          totalChecked += Math.min(item.qty, progress[`${currentPackingOrder.id}:::${itemIdx}`] || 0);
+          if (doneSets.has(item.setRef)) return;
+          doneSets.add(item.setRef);
+          const idxs = expandedItems.map((it, i) => it.setRef === item.setRef ? i : -1).filter(i => i >= 0);
+          const allDone = idxs.every(i => (progress[`${currentPackingOrder.id}:::${i}`] || 0) >= 1);
+          const colors = [...new Set(idxs.map(i => expandedItems[i].color))];
+          const onShelfSets = Math.min(...colors.map(c => Math.floor((shelf[`${item.title}:::${c}`] || 0) / idxs.filter(i => expandedItems[i].color === c).length)));
+          const row = document.createElement('div');
+          row.className = `p-3 rounded-2xl border transition ${allDone ? 'bg-emerald-50 border-emerald-300' : 'bg-stone-50 border-stone-200'}`;
+          row.innerHTML = `
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="font-bold text-xs ${allDone ? 'text-emerald-950' : 'text-stone-900'}">${escapeHtml(item.setName)} (kpl)</span>
+                <span class="text-[11px] text-stone-500 ml-1">(${escapeHtml(colors.join(', '))})</span>
+                <span class="text-[10px] ml-2 px-1.5 py-0.5 rounded ${onShelfSets > 0 ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-stone-200 text-stone-600'}">Półka: ${onShelfSets} kpl</span>
+              </div>
+              <button type="button" onclick="togglePackingSet(${jsArg(idxs.join(','))})"
+                class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition ${allDone ? 'bg-emerald-600 text-white shadow-xs' : (onShelfSets > 0 ? 'bg-white border-2 border-emerald-400 text-emerald-800 hover:bg-emerald-50 cursor-pointer' : 'bg-stone-200 border border-stone-300 text-stone-400 opacity-60')}">
+                ${allDone ? '✓' : 1}
+              </button>
+            </div>`;
+          container.appendChild(row);
+          return;
+        }
         totalPieces += item.qty;
         const key = `${currentPackingOrder.id}:::${itemIdx}`;
         const currentChecked = progress[key] || 0;
@@ -3483,6 +3511,48 @@
         fulfillBtn.className = "w-full py-3.5 rounded-2xl font-bold text-xs bg-stone-200 text-stone-400 cursor-not-allowed";
         fulfillBtn.textContent = `Wydaj zamówienie (Spakowano: ${totalChecked}/${totalPieces})`;
       }
+    }
+
+    // Komplety, które w pakowaniu są jednym wierszem (na półce leżą jako sztuki)
+    const PACK_AS_SETS = ['Reniferki'];
+
+    // Pakowanie całego kompletu: zaznacza wszystkie jego sztuki (zdejmuje z półki) albo odznacza (odkłada)
+    function togglePackingSet(idxCsv) {
+      if (!currentPackingOrder) return;
+      const idxs = String(idxCsv).split(',').map(Number);
+      const progress = getPackingProgress();
+      const shelf = getShelf();
+      const items = getExpandedOrderItems(currentPackingOrder);
+      const pkey = i => `${currentPackingOrder.id}:::${i}`;
+      const allDone = idxs.every(i => (progress[pkey(i)] || 0) >= 1);
+      if (allDone) {
+        idxs.forEach(i => {
+          progress[pkey(i)] = 0;
+          const sk = `${items[i].title}:::${items[i].color}`;
+          shelf[sk] = (shelf[sk] || 0) + 1;
+        });
+      } else {
+        const need = {};
+        idxs.filter(i => !(progress[pkey(i)] >= 1)).forEach(i => {
+          const sk = `${items[i].title}:::${items[i].color}`;
+          need[sk] = (need[sk] || 0) + 1;
+        });
+        const missing = Object.keys(need).find(sk => (shelf[sk] || 0) < need[sk]);
+        if (missing) {
+          alert(`Brak całego kompletu na półce: ${missing.replace(':::', ' (')})!`);
+          return;
+        }
+        idxs.filter(i => !(progress[pkey(i)] >= 1)).forEach(i => {
+          progress[pkey(i)] = 1;
+          const sk = `${items[i].title}:::${items[i].color}`;
+          shelf[sk] -= 1;
+          if (shelf[sk] <= 0) delete shelf[sk];
+        });
+      }
+      saveShelf(shelf);
+      savePackingProgress(progress);
+      renderPackingChecklist();
+      updateHubStats();
     }
 
     function alertMissingOnShelf(itemIdx) {
