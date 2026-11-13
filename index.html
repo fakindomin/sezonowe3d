@@ -4882,7 +4882,11 @@
     let shelfAddSeason = null;
 
     // Komplet, do którego należy sztuka (np. „Śnieżka” → Śnieżki po 5 szt.); półka liczy sztuki
+    // Na półce w sztukach (nie w kompletach)
+    const SHELF_AS_PIECES = ['Choinka-miseczka'];
+
     function setOfPiece(piece) {
+      if (SHELF_AS_PIECES.includes(piece)) return null;
       const name = Object.keys(SET_PIECES).find(k => SET_PIECES[k].piece === piece);
       return name ? { name, count: SET_PIECES[name].count } : null;
     }
