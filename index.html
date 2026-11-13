@@ -4839,8 +4839,32 @@
           container.appendChild(head);
         }
 
+        const set = setOfPiece(title);
         const row = document.createElement('div');
-        row.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center";
+        row.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center gap-2";
+        if (set) {
+          // Komplet: pokazuj komplety i sztuki luzem; +/− dodaje lub zabiera cały komplet, ±1 szt. do poprawek
+          row.innerHTML = `
+            <div class="min-w-0">
+              <span class="font-bold text-xs text-stone-900">${escapeHtml(set.name)}</span>
+              <span class="text-[11px] text-stone-500 ml-1">(${escapeHtml(color)})</span>
+              <span class="block text-[11px] font-semibold text-stone-800">${escapeHtml(formatSetStock(count, set.count))}</span>
+              <span class="block text-[10px] text-stone-500">komplet = ${set.count} szt. · razem ${count} szt. ·
+                <button onclick="changeShelfQty(${jsArg(key)}, -1)" class="underline">−1 szt.</button>
+                <button onclick="changeShelfQty(${jsArg(key)}, 1)" class="underline">+1 szt.</button></span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="flex items-center border border-stone-300 rounded-lg bg-white px-1">
+                <button onclick="changeShelfQty(${jsArg(key)}, -${set.count})" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700" title="Zabierz komplet">-</button>
+                <span class="w-8 text-center text-xs font-bold text-stone-900" title="Pełne komplety">${Math.floor(count / set.count)}</span>
+                <button onclick="changeShelfQty(${jsArg(key)}, ${set.count})" class="w-6 h-6 flex items-center justify-center font-bold text-stone-700" title="Dodaj komplet">+</button>
+              </div>
+              <button onclick="removeShelfItem(${jsArg(key)})" class="text-rose-600 hover:text-rose-800 font-bold p-1">✕</button>
+            </div>
+          `;
+          container.appendChild(row);
+          return;
+        }
         row.innerHTML = `
           <div>
             <span class="font-bold text-xs text-stone-900">${escapeHtml(title)}</span>
@@ -4861,6 +4885,21 @@
 
     let shelfAddSeason = null;
 
+    // Komplet, do którego należy sztuka (np. „Śnieżka” → Śnieżki po 5 szt.); półka liczy sztuki
+    function setOfPiece(piece) {
+      const name = Object.keys(SET_PIECES).find(k => SET_PIECES[k].piece === piece);
+      return name ? { name, count: SET_PIECES[name].count } : null;
+    }
+
+    function formatSetStock(pieces, count) {
+      const sets = Math.floor(pieces / count);
+      const rest = pieces % count;
+      const parts = [];
+      if (sets) parts.push(`${sets} ${sets === 1 ? 'komplet' : sets < 5 ? 'komplety' : 'kompletów'}`);
+      if (rest) parts.push(`${rest} szt. luzem`);
+      return parts.join(' + ') || '0';
+    }
+
     function setShelfAddSeason(key) {
       shelfAddSeason = key;
       renderShelfView();
@@ -4870,7 +4909,10 @@
       const titleSelect = document.getElementById('shelf-add-title');
       const group = groups.find(g => g.key === shelfAddSeason) || { models: [] };
       const prev = titleSelect.value;
-      titleSelect.innerHTML = group.models.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      titleSelect.innerHTML = group.models.map(t => {
+        const set = setOfPiece(t);
+        return `<option value="${escapeHtml(t)}">${escapeHtml(set ? `${set.name} (komplet ${set.count} szt.)` : t)}</option>`;
+      }).join('');
       if (prev && group.models.includes(prev)) titleSelect.value = prev;
       updateShelfColorSelect();
     }
@@ -4906,8 +4948,9 @@
       const color = document.getElementById('shelf-add-color').value;
       const key = `${title}:::${color}`;
 
+      const set = setOfPiece(title);
       const shelf = getShelf();
-      shelf[key] = (shelf[key] || 0) + 1;
+      shelf[key] = (shelf[key] || 0) + (set ? set.count : 1);   // komplet = wszystkie jego sztuki
       saveShelf(shelf);
 
       updateHubStats();
