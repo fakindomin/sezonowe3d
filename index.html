@@ -3226,21 +3226,25 @@
 
       currentList.forEach(order => {
         const expandedItems = getExpandedOrderItems(order);
-        const totalPieces = expandedItems.reduce((sum, i) => sum + i.qty, 0);
 
-        let packedCount = 0;
-        let readyOnShelfCount = 0;
-
+        // Liczymy w jednostkach sprzedaży: komplet = 1 (gotowy, gdy gotowe są wszystkie jego sztuki), reszta = sztuki
+        const avail = {};
+        const units = new Map();
         expandedItems.forEach((item, idx) => {
-          const key = `${order.id}:::${idx}`;
-          const currentPacked = (progress[key] || 0);
-          packedCount += currentPacked;
-
+          const packed = (progress[`${order.id}:::${idx}`] || 0) >= item.qty;
           const shelfKey = `${item.title}:::${item.color}`;
-          const onShelf = shelf[shelfKey] || 0;
-          const neededMore = Math.max(0, item.qty - currentPacked);
-          readyOnShelfCount += (currentPacked + Math.min(onShelf, neededMore));
+          if (avail[shelfKey] === undefined) avail[shelfKey] = shelf[shelfKey] || 0;
+          let ready = packed;
+          if (!ready && avail[shelfKey] >= item.qty) { avail[shelfKey] -= item.qty; ready = true; }
+          const unitKey = item.setRef ? `set:${item.setRef}` : `piece:${idx}`;
+          const u = units.get(unitKey) || { packed: true, ready: true };
+          u.packed = u.packed && packed;
+          u.ready = u.ready && ready;
+          units.set(unitKey, u);
         });
+        const totalPieces = units.size;
+        const packedCount = [...units.values()].filter(u => u.packed).length;
+        const readyOnShelfCount = [...units.values()].filter(u => u.ready).length;
 
         const isFullyPacked = packedCount >= totalPieces && totalPieces > 0;
         const canBeFullyPackedFromShelf = readyOnShelfCount >= totalPieces && totalPieces > 0;
@@ -3260,7 +3264,7 @@
             badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300">🟢 Możliwe do skompletowania (${totalPieces}/${totalPieces})</span>`;
             cardBorderClass = 'border-emerald-200 bg-white';
           } else if (hasSomeOnShelf || packedCount > 0) {
-            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">🟡 Częściowo na półce: ${readyOnShelfCount} z ${totalPieces} szt.</span>`;
+            badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">🟡 Częściowo na półce: ${readyOnShelfCount} z ${totalPieces}</span>`;
             cardBorderClass = 'border-amber-200 bg-white';
           } else {
             badgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200">⚪ Brak na stanie (0/${totalPieces})</span>`;
